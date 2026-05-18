@@ -47,16 +47,7 @@
   	)
   </insert>
   
-  <insert id="follow" parameterType="FollowDTO" useGeneratedKeys="true" keyProperty="followNo">
-  	INSERT INTO "FOLLOW"
-  	VALUES (
-  		default,
-  		#{userFollower},
-  		#{followDate},
-  		#{userFollowing}
-  	)
   
-  </insert>
   
   <select id="detail" parameterType="MemberDTO" resultMap="detailResult">
   	SELECT u.*,ui.*,r.*
@@ -67,7 +58,6 @@
   		USING ("USER_NO")
   		LEFT JOIN "ROLE" r
   		USING("ROLE_NO")
-  		LEFT JOIN "FOLLOW" f ON f."USER_FOLLOWING" = u."USER_NO"
   	WHERE u."USER_ID"=#{username}
   </select>
   
@@ -93,12 +83,7 @@
   		<id column="ROLE_NO" property="roleNo"/>
   		<result column="ROLE_NAME" property="roleName"/>
   	</collection>
-  	<collection property="followDTO" javaType="java.util.List" ofType="FollowDTO">
-  		<id column="FOLLOW_NO" property="followNo"/>
-  		<result column="USER_FOLLOWER" property="userFollower"/>
-  		<result column="FOLLOW_DATE" property="followDate"/>
-  		<result column="USER_FOLLOWING" property="userFollowing"/>
-  	</collection>
+  	
   </resultMap>
   
  <select id="myList" parameterType="MemberDTO" ></select>
