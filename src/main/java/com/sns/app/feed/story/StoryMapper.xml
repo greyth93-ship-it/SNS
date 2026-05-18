@@ -5,52 +5,72 @@
 <mapper namespace="com.sns.app.feed.story.StoryMapper">
 	<select id="getCount" resultType="Long" parameterType="Pager">
 		SELECT
-		COUNT(DISTINCT "USER_NO") FROM "STORY"
+		COUNT(DISTINCT S."USER_NO")
+		FROM "STORY" S
+		WHERE S."USER_NO" = #{currentUserNo}
+		OR EXISTS (
+			SELECT 1
+			FROM "FOLLOW" F
+			WHERE F."USER_FOLLOWER" = #{currentUserNo}
+			AND F."USER_FOLLOWING" = S."USER_NO"
+		)
 	</select>
 
 	<select id="list" resultMap="detailResult" parameterType="Pager">
-		WITH
-		LATEST_STORY AS (
-		SELECT DISTINCT ON (S."USER_NO")
-		S."FEED_NO",
-		S."FEED_DATE",
-		S."USER_NO",
-		S."FEED_THUMB"
-		FROM "STORY" S
-		ORDER BY
-		S."USER_NO", S."FEED_DATE" DESC, S."FEED_NO" DESC
-		)
-		SELECT
-		LS.*,
-		SI."FILE_NO",
-		SI."FILE_NAME",
-		SI."ORI_NAME",
-		U."USER_NICKNAME",
-		UIP."FILE_NO" AS "PROFILE_FILE_NO",
-		UIP."FILE_NAME" AS
-		"PROFILE_FILE_NAME",
-		UIP."ORI_NAME" AS "PROFILE_ORI_NAME"
-		FROM
-		LATEST_STORY LS
-		LEFT JOIN "STORY_IMG" SI
-		ON LS."FEED_NO" = SI."FEED_NO"
-		LEFT JOIN "USER" U
-		ON LS."USER_NO" = U."USER_NO"
-		LEFT JOIN LATERAL (
-		SELECT
-		UI."FILE_NO",
-		UI."FILE_NAME",
-		UI."ORI_NAME"
-		FROM "USER_IMG" UI
-		WHERE UI."USER_NO" = LS."USER_NO"
-		ORDER BY UI."FILE_NO" DESC
-		LIMIT 1
-		)
-		UIP ON TRUE
-		ORDER BY LS."FEED_DATE" DESC
-		LIMIT #{perPage} OFFSET
-		#{startNum}
-	</select>
+    WITH
+    TARGET_USER AS (
+        SELECT #{currentUserNo} AS "USER_NO"
+        UNION
+        SELECT F."USER_FOLLOWING" AS "USER_NO"
+        FROM "FOLLOW" F
+        WHERE F."USER_FOLLOWER" = #{currentUserNo}
+    ),
+    LATEST_STORY AS (
+        SELECT DISTINCT ON (S."USER_NO")
+            S."FEED_NO",
+            S."FEED_DATE",
+            S."USER_NO",
+            S."FEED_THUMB"
+        FROM "STORY" S
+        INNER JOIN TARGET_USER TU ON TU."USER_NO" = S."USER_NO"
+        ORDER BY S."USER_NO", S."FEED_DATE" DESC, S."FEED_NO" DESC
+    ),
+    PAGED_STORY AS (
+        SELECT *
+        FROM LATEST_STORY LS
+        ORDER BY
+            CASE WHEN LS."USER_NO" = #{currentUserNo} THEN 0 ELSE 1 END,
+            LS."FEED_DATE" DESC,
+            LS."FEED_NO" DESC
+        LIMIT #{perPage} OFFSET #{startNum}
+    )
+    SELECT
+        PS.*,
+        SI."FILE_NO",
+        SI."FILE_NAME",
+        SI."ORI_NAME",
+        U."USER_NICKNAME",
+        UIP."FILE_NO" AS "PROFILE_FILE_NO",
+        UIP."FILE_NAME" AS "PROFILE_FILE_NAME",
+        UIP."ORI_NAME" AS "PROFILE_ORI_NAME"
+    FROM PAGED_STORY PS
+    LEFT JOIN "STORY_IMG" SI ON PS."FEED_NO" = SI."FEED_NO"
+    LEFT JOIN "USER" U ON PS."USER_NO" = U."USER_NO"
+    LEFT JOIN LATERAL (
+        SELECT
+            UI."FILE_NO",
+            UI."FILE_NAME",
+            UI."ORI_NAME"
+        FROM "USER_IMG" UI
+        WHERE UI."USER_NO" = PS."USER_NO"
+        ORDER BY UI."FILE_NO" DESC
+        LIMIT 1
+    ) UIP ON TRUE
+    ORDER BY
+        CASE WHEN PS."USER_NO" = #{currentUserNo} THEN 0 ELSE 1 END,
+        PS."FEED_DATE" DESC,
+        PS."FEED_NO" DESC
+</select>
 
 	<select id="detail" parameterType="StoryDTO"
 		resultMap="detailResult">
@@ -121,6 +141,15 @@
 		) UIP ON TRUE
 		WHERE
 		S."USER_NO" = #{userNo}
+		AND (
+			#{currentUserNo} = #{userNo}
+			OR EXISTS (
+				SELECT 1
+				FROM "FOLLOW" F
+				WHERE F."USER_FOLLOWER" = #{currentUserNo}
+				AND F."USER_FOLLOWING" = S."USER_NO"
+			)
+		)
 		ORDER BY S."FEED_DATE" DESC, S."FEED_NO" DESC,
 		SI."FILE_NO" ASC
 	</select>

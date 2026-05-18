@@ -665,6 +665,24 @@ async function renderPost(feedNo) {
         getCommentList(feedNo);
         bindCommentEvents(feedNo);
 
+        // 모달 내부의 팔로우 버튼 처리: 메인 팝업의 팔로우 버튼과 동일하게 /follow/follow로 POST
+        const modalFollowBtn = mInfoArea.querySelector('.follow-btn');
+        if (modalFollowBtn) {
+            modalFollowBtn.onclick = (e) => {
+                e.stopPropagation();
+                const targetUserNo = modalFollowBtn.dataset.userNo;
+                const fd = new FormData();
+                fd.append('userFollowing', targetUserNo);
+                fd.append('feedNo', feedNo);
+                fetch('/follow/follow', { method: 'POST', credentials: 'same-origin', body: fd })
+                    .then(resp => {
+                        if (resp.redirected) { window.location = resp.url; return; }
+                        return resp.text().then(() => { window.location.reload(); });
+                    })
+                    .catch(err => console.error('follow error', err));
+            };
+        }
+
     } catch (e) {
         console.error("포스트 로드 실패:", e);
         closeModal();
@@ -778,7 +796,8 @@ window.onclick = (e) => {
         if (e.target === m || m.contains(e.target)) return;
         m.style.display = 'none';
     });
-    if (e.target == detailModal) closeModal();
+    // 공유 모달은 외부 클릭으로 닫되, 상세 모달(detailModal)은 빈 공간 클릭으로 닫지 않음
+    if (e.target == shareModal) closeShareModal();
 };
 
 document.onkeydown = (e) => { if (e.key === 'Escape') closeModal(); };

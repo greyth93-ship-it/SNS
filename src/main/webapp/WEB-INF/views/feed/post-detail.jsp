@@ -19,6 +19,13 @@
 			<div id="content"></div>
 		</div>
 	</div>
+		
+		<!-- Follow form: feed 상세에서 팔로우 요청 전송 -->
+		<form action="/follow/follow" method="post" style="display:none; margin-top:8px;">
+			<input type="hidden" name="feedNo" value="${post.feedNo}" />
+			<input type="hidden" name="memberDTO.userNo" value="${post.userNo}" />
+			<button type="submit" class="btn btn-primary">팔로우</button>
+		</form>
 									<div class="text-muted small post-location"><i class="fas fa-location-dot"></i> <span>${post.feedLocation}</span></div>
 	<!-- 메인에서 쓰는 팝업 그대로 -->
 	<div id="detailModal">
