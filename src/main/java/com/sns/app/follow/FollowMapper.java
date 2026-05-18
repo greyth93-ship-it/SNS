@@ -12,5 +12,7 @@ public interface FollowMapper {
 	public int follow(FollowDTO followDTO) throws Exception;
 	
 	public FollowDTO detail(FollowDTO followDTO) throws Exception;
+	
+	public int delete(FollowDTO followDTO) throws Exception;
 
 }

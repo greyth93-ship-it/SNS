@@ -16,5 +16,9 @@ public class FollowService {
 	public int follow(FollowDTO followDTO) throws Exception {
 		return followMapper.follow(followDTO);
 	}
+	
+	public int delete(FollowDTO followDTO) throws Exception {
+		return followMapper.delete(followDTO);
+	}
 
 }

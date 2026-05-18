@@ -15,8 +15,14 @@
 	</sql>
 
 	<select id="getCount" resultType="Long" parameterType="Pager">
-		SELECT COUNT("FEED_NO") FROM "POST"
-		<!-- <include refid="search_sql"></include> -->
+		SELECT COUNT("FEED_NO")
+		FROM "POST" P0
+		WHERE EXISTS (
+			SELECT 1
+			FROM "FOLLOW" F
+			WHERE F."USER_FOLLOWER" = #{currentUserNo}
+			AND F."USER_FOLLOWING" = P0."USER_NO"
+		)
 	</select>
 
 	<select id="searchList" resultMap="detailResult"
@@ -88,59 +94,37 @@
 	</select>
 
 	<select id="list" resultMap="detailResult" parameterType="Pager">
-		SELECT
-		P.*,
-		PI."FILE_NO", PI."FILE_NAME", PI."ORI_NAME",
-		UI."FILE_NO" AS
-		"PROFILE_FILE_NO",
-		UI."FILE_NAME" AS "PROFILE_FILE_NAME",
-		UI."ORI_NAME"
-		AS "PROFILE_ORI_NAME",
-		CASE WHEN PL."USER_NO"
-		IS NULL THEN
-		FALSE
-		ELSE
-		TRUE
-		END AS "LIKED_BY_ME",
-		S."USER_NICKNAME",
-		UR."ROLE_NO",
-		R."ROLE_NAME"
-		FROM
-		(
-		SELECT P0.*
-		FROM "POST" P0
-		ORDER BY
-		P0."FEED_DATE" DESC
-		LIMIT #{perPage}
-		OFFSET #{startNum}
-		) P
-		LEFT JOIN
-		"POST_IMG" PI ON
-		P."FEED_NO" =
-		PI."FEED_NO"
-		LEFT JOIN "POST_LIKE" PL ON
-		P."FEED_NO" =
-		PL."FEED_NO"
-		AND
-		PL."USER_NO" = #{currentUserNo}
-		LEFT JOIN
-		"USER" S ON
-		P."USER_NO" =
-		S."USER_NO"
-		LEFT JOIN "USER_IMG" UI ON S."USER_NO" =
-		UI."USER_NO"
-		LEFT
-		JOIN "USER_ROLE" UR ON
-		S."USER_NO" =
-		UR."USER_NO"
-		LEFT
-		JOIN "ROLE" R ON
-		UR."ROLE_NO" =
-		R."ROLE_NO"
-		ORDER BY
-		P."FEED_DATE" DESC,
-		PI."FILE_NO" ASC
-	</select>
+    SELECT
+        P0.*,
+        PI."FILE_NO", PI."FILE_NAME", PI."ORI_NAME",
+        UI."FILE_NO" AS "PROFILE_FILE_NO",
+        UI."FILE_NAME" AS "PROFILE_FILE_NAME",
+        UI."ORI_NAME" AS "PROFILE_ORI_NAME",
+        CASE WHEN PL."USER_NO" IS NULL THEN FALSE ELSE TRUE END AS "LIKED_BY_ME",
+        S."USER_NICKNAME",
+        UR."ROLE_NO",
+        R."ROLE_NAME"
+    FROM (
+        SELECT P_SUB."FEED_NO"
+        FROM "POST" P_SUB
+        WHERE EXISTS (
+            SELECT 1
+            FROM "FOLLOW" F
+            WHERE F."USER_FOLLOWER" = #{currentUserNo}
+            AND F."USER_FOLLOWING" = P_SUB."USER_NO"
+        )
+        ORDER BY P_SUB."FEED_DATE" DESC
+        LIMIT #{perPage} OFFSET #{startNum}
+    ) PAGE
+    JOIN "POST" P0 ON PAGE."FEED_NO" = P0."FEED_NO"
+    LEFT JOIN "POST_IMG" PI ON P0."FEED_NO" = PI."FEED_NO"
+    LEFT JOIN "POST_LIKE" PL ON P0."FEED_NO" = PL."FEED_NO" AND PL."USER_NO" = #{currentUserNo}
+    LEFT JOIN "USER" S ON P0."USER_NO" = S."USER_NO"
+    LEFT JOIN "USER_IMG" UI ON S."USER_NO" = UI."USER_NO"
+    LEFT JOIN "USER_ROLE" UR ON S."USER_NO" = UR."USER_NO"
+    LEFT JOIN "ROLE" R ON UR."ROLE_NO" = R."ROLE_NO"
+    ORDER BY P0."FEED_DATE" DESC, PI."FILE_NO" ASC
+</select>
 
 	<select id="detail" parameterType="PostDTO"
 		resultMap="detailResult">

@@ -14,6 +14,8 @@ import lombok.ToString;
 public class FollowDTO {
     
 	private MemberDTO memberDTO;
+	
+	private Long followNo;
 
 	private Long userFollower;
 
@@ -22,5 +24,7 @@ public class FollowDTO {
 	private Date followDate;
 
 	private String username;
+
+	private Long feedNo;
 
 }

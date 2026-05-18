@@ -1,15 +1,16 @@
 package com.sns.app.follow;
 
-import java.util.Date;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
-@RestController
+import com.sns.app.member.MemberDTO;
+
+@Controller
 @RequestMapping("/follow/*")
 public class FollowController {
 
@@ -17,15 +18,31 @@ public class FollowController {
 	private FollowService followService;
 
 	@PostMapping("follow")
-	public int follow(@RequestParam Long userFollower,
-			@RequestParam Long userFollowing) throws Exception {
+	public String follow(FollowDTO followDTO, @AuthenticationPrincipal MemberDTO memberDTO) throws Exception {
 
-		FollowDTO followDTO = new FollowDTO();
-		followDTO.setUserFollower(userFollower);
-		followDTO.setUserFollowing(userFollowing);
-		followDTO.setFollowDate(new Date());
+	    followDTO.setUserFollower(memberDTO.getUserNo());
 
-		return followService.follow(followDTO);
+	    if (followDTO.getMemberDTO() != null && followDTO.getUserFollowing() == null) {
+	        followDTO.setUserFollowing(followDTO.getMemberDTO().getUserNo());
+	    }
+	    
+	    followService.follow(followDTO);
+
+	    if (followDTO.getFeedNo() != null) {
+	        return "redirect:/feed/detail/post/" + followDTO.getFeedNo();
+	    }
+
+	    if (followDTO.getMemberDTO() != null && followDTO.getMemberDTO().getUserNo() != null) {
+	        Long userNo = followDTO.getMemberDTO().getUserNo();
+	        
+	        if (userNo.equals(memberDTO.getUserNo())) {
+	            return "redirect:/member/mypage";
+	        }
+
+	        return "redirect:/feed/mypage?userNo=" + userNo;
+	    }
+
+	    return "redirect:/member/mypage";
 	}
 
 	@GetMapping("detail")
@@ -33,6 +50,16 @@ public class FollowController {
 		FollowDTO followDTO = new FollowDTO();
 		followDTO.setUsername(username);
 		return followService.detail(followDTO);
+	}
+
+	@PostMapping("delete")
+	public int delete(@RequestParam Long userFollower, @RequestParam Long userFollowing) throws Exception {
+
+		FollowDTO followDTO = new FollowDTO();
+		followDTO.setUserFollower(userFollower);
+		followDTO.setUserFollowing(userFollowing);
+
+		return followService.delete(followDTO);
 	}
 
 }

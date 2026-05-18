@@ -9,6 +9,8 @@ import lombok.ToString;
 @ToString
 public class Pager {
 
+	private Long totalCount;
+	
 	private String search = "";
 
 	private String kind; // v1:title, v2:contents, v3:writer

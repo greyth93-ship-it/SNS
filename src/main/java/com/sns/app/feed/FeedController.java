@@ -38,7 +38,9 @@ public class FeedController {
 			pager.setCurrentUserNo(memberDTO.getUserNo());
 		}
 
-		List<FeedDTO> storyList = storyService.list(new Pager());
+		Pager storyPager = new Pager();
+		storyPager.setCurrentUserNo(pager.getCurrentUserNo());
+		List<FeedDTO> storyList = storyService.list(storyPager);
 		// 현재 사용자가 있다면, 해당 사용자의 스토리를 리스트 맨 앞으로 이동
 		if (memberDTO != null && storyList != null) {
 			for (int i = 0; i < storyList.size(); i++) {
