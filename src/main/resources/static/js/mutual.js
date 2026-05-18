@@ -2,7 +2,7 @@
 // 채팅 버튼 클릭을 가로채서 mutual 파라미터를 추가해 서버에 fetch 호출 후
 // 서버가 리다이렉트하면 그 최종 URL로 이동합니다.
 document.addEventListener('click', function(e) {
-	const link = e.target.closest('a[href^="/chat/detail"]');
+	const link = e.target.closest('a[href^="/chat/create"]');
 	if (!link) return;
 
 	e.preventDefault();
