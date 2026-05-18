@@ -18,6 +18,4 @@ public interface MemberService {
 	
 	public MemberDTO idCheck(MemberDTO memberDTO) throws Exception;
 
-	public List<MemberDTO> search(String keyword) throws Exception;
-
 }
