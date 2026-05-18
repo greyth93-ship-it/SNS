@@ -29,4 +29,5 @@ public class FollowDTO {
 	
 	private Long userNo;
 
+	private boolean mutual;
 }
