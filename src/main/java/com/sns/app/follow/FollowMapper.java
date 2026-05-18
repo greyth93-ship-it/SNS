@@ -1,15 +1,19 @@
 package com.sns.app.follow;
 
-import org.apache.ibatis.annotations.Mapper;
 import java.util.List;
-import com.sns.app.member.MemberDTO;
+
+import org.apache.ibatis.annotations.Mapper;
 
 import com.sns.app.pager.Pager;
 
 @Mapper
 public interface FollowMapper {
 	
-	public Long getCount(Pager pager)throws Exception;
+	public Long followingCount(Pager pager)throws Exception;
+
+	public Long followerCount(Pager pager)throws Exception;
+
+	public Long mutualCount(Pager pager)throws Exception;
 	
 	public int follow(FollowDTO followDTO) throws Exception;
 	
@@ -17,10 +21,8 @@ public interface FollowMapper {
 	
 	public int delete(FollowDTO followDTO) throws Exception;
 
-	public List<MemberDTO> followingList(Long userNo) throws Exception;
+	public List<FollowDTO> followingList(Pager pager) throws Exception;
 
-	public List<MemberDTO> followerList(Long userNo) throws Exception;
-
-	public List<MemberDTO> mutualList(Long userNo) throws Exception;
+	public List<FollowDTO> followerList(Pager pager) throws Exception;
 
 }

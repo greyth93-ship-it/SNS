@@ -5,7 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.sns.app.member.MemberDTO;
+import com.sns.app.pager.Pager;
 
 @Service
 public class FollowService {
@@ -20,21 +20,23 @@ public class FollowService {
 	public int follow(FollowDTO followDTO) throws Exception {
 		return followMapper.follow(followDTO);
 	}
-	
+
 	public int delete(FollowDTO followDTO) throws Exception {
 		return followMapper.delete(followDTO);
 	}
 
-	public List<MemberDTO> followingList(Long userNo) throws Exception {
-		return followMapper.followingList(userNo);
+	public List<FollowDTO> followingList(Pager pager) throws Exception {
+		pager.makePageNum(followMapper.followingCount(pager));
+
+		pager.makeStartNum();
+		return followMapper.followingList(pager);
 	}
 
-	public List<MemberDTO> followerList(Long userNo) throws Exception {
-		return followMapper.followerList(userNo);
+	public List<FollowDTO> followerList(Pager pager) throws Exception {
+		pager.makePageNum(followMapper.followerCount(pager));
+		pager.makeStartNum();
+		return followMapper.followerList(pager);
 	}
 
-	public List<MemberDTO> mutualList(Long userNo) throws Exception {
-		return followMapper.mutualList(userNo);
-	}
- 
+
 }

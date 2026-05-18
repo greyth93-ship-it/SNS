@@ -45,6 +45,7 @@
 		<result column="FOLLOW_DATE" property="followDate" />
 		<result column="USER_FOLLOWING" property="userFollowing" />
 		<result column="FEED_NO" property="feedNo" />
+		<result column="MUTUAL" property="mutual" />
 
 		<association property="memberDTO" javaType="MemberDTO">
 			<result column="USER_NO" property="userNo" />
@@ -65,41 +66,71 @@
 		FOLLOW_NO = #{followNo}
 	</delete>
 
-	<select id="followingList" parameterType="long"
+	<select id="followingCount" parameterType="com.sns.app.pager.Pager" resultType="long">
+		SELECT COUNT(*)
+		FROM "FOLLOW" f
+		WHERE f."USER_FOLLOWER" = #{userNo}
+	</select>
+
+	<select id="followerCount" parameterType="com.sns.app.pager.Pager" resultType="long">
+		SELECT COUNT(*)
+		FROM "FOLLOW" f
+		WHERE f."USER_FOLLOWING" = #{userNo}
+	</select>
+
+	<select id="followingList" parameterType="com.sns.app.pager.Pager"
 		resultMap="detailResult">
 		SELECT u.*, ui."FILE_NO" AS "PROFILE_FILE_NO",
 		ui."FILE_NAME" AS "PROFILE_FILE_NAME",
 		ui."ORI_NAME" AS "PROFILE_ORI_NAME",
-		r.*
+		r.*,
+		EXISTS (
+			SELECT 1 FROM "FOLLOW" f
+			WHERE f."USER_FOLLOWER" = u."USER_NO"
+			AND f."USER_FOLLOWING" = #{userNo}
+		) AS "MUTUAL"
 		FROM "FOLLOW" f
 		INNER JOIN "USER" u ON u."USER_NO" = f."USER_FOLLOWING"
 		LEFT JOIN "USER_IMG" ui USING ("USER_NO")
 		LEFT JOIN "USER_ROLE" USING
 		("USER_NO")
 		LEFT JOIN "ROLE" r USING ("ROLE_NO")
-		WHERE f."USER_FOLLOWER"
-		= #{userNo}
+		WHERE f."USER_FOLLOWER" = #{userNo}
+		ORDER BY u."USER_NO"
+		LIMIT #{perPage} OFFSET #{startNum}
 	</select>
 
-	<select id="followerList" parameterType="long"
-	resultMap="detailResult">
-	SELECT u.*, ui."FILE_NO" AS "PROFILE_FILE_NO",
-		ui."FILE_NAME" AS "PROFILE_FILE_NAME",
-		ui."ORI_NAME" AS "PROFILE_ORI_NAME",
-		r.*
-	FROM "FOLLOW" f
-	INNER JOIN "USER" u ON u."USER_NO" = f."USER_FOLLOWER"
-	LEFT JOIN "USER_IMG" ui USING ("USER_NO")
-	LEFT JOIN "USER_ROLE" USING ("USER_NO")
-	LEFT JOIN "ROLE" r USING ("ROLE_NO")
-	WHERE f."USER_FOLLOWING" = #{userNo}
-</select>
+		<select id="followerList" parameterType="com.sns.app.pager.Pager"
+		resultMap="detailResult">
+		SELECT u.*, ui."FILE_NO" AS "PROFILE_FILE_NO",
+			ui."FILE_NAME" AS "PROFILE_FILE_NAME",
+			ui."ORI_NAME" AS "PROFILE_ORI_NAME",
+			r.*,
+			EXISTS (
+				SELECT 1 FROM "FOLLOW" f
+				WHERE f."USER_FOLLOWER" = #{userNo}
+				AND f."USER_FOLLOWING" = u."USER_NO"
+			) AS "MUTUAL"
+		FROM "FOLLOW" f
+		INNER JOIN "USER" u ON u."USER_NO" = f."USER_FOLLOWER"
+		LEFT JOIN "USER_IMG" ui USING ("USER_NO")
+		LEFT JOIN "USER_ROLE" USING ("USER_NO")
+		LEFT JOIN "ROLE" r USING ("ROLE_NO")
+		WHERE f."USER_FOLLOWING" = #{userNo}
+		ORDER BY u."USER_NO"
+		LIMIT #{perPage} OFFSET #{startNum}
+	</select>
 
-	<select id="mutualList" parameterType="long" resultMap="detailResult">
+	<select id="mutualList" parameterType="com.sns.app.pager.Pager" resultMap="detailResult">
 	SELECT u.*, ui."FILE_NO" AS "PROFILE_FILE_NO",
 		ui."FILE_NAME" AS "PROFILE_FILE_NAME",
 		ui."ORI_NAME" AS "PROFILE_ORI_NAME",
-		r.*
+		r.*,
+		EXISTS (
+			SELECT 1 FROM "FOLLOW" f2
+			WHERE f2."USER_FOLLOWER" = f."USER_FOLLOWING"
+			AND f2."USER_FOLLOWING" = #{userNo}
+		) AS "MUTUAL"
 	FROM "FOLLOW" f
 	INNER JOIN "USER" u ON u."USER_NO" = f."USER_FOLLOWING"
 	LEFT JOIN "USER_IMG" ui USING ("USER_NO")
@@ -111,6 +142,8 @@
 		WHERE f2."USER_FOLLOWER" = f."USER_FOLLOWING"
 		AND f2."USER_FOLLOWING" = #{userNo}
 	)
+	ORDER BY u."USER_NO"
+	LIMIT #{perPage} OFFSET #{startNum}
 	</select>
 
 

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.sns.app.member.MemberDTO;
+import com.sns.app.pager.Pager;
 
 @Controller
 @RequestMapping("/follow/*")
@@ -66,37 +67,30 @@ public class FollowController {
 	}
 
 	@GetMapping("following")
-	public String following(@AuthenticationPrincipal MemberDTO memberDTO, Model model) throws Exception {
+	public String following(@AuthenticationPrincipal MemberDTO memberDTO, Model model, Pager pager) throws Exception {
 		if(memberDTO == null) {
 			return "redirect:/member/login";
 		}
-		Long userNo = memberDTO.getUserNo();
-		List<MemberDTO> list = followService.followingList(userNo);
-		model.addAttribute("followingList", list);
+
+		pager.setUserNo(memberDTO.getUserNo());
+		List<FollowDTO> list = followService.followingList(pager);
+ 		model.addAttribute("followingList", list);
+ 		model.addAttribute("currentUserNo", memberDTO.getUserNo());
+
 		return "follow/following";
 	}
 
 	@GetMapping("follower")
-	public String follower(@AuthenticationPrincipal MemberDTO memberDTO, Model model) throws Exception {
-		if(memberDTO == null) {
-			return "redirect:/member/login";
-		}
-		Long userNo = memberDTO.getUserNo();
-		List<MemberDTO> list = followService.followerList(userNo);
+	public String follower(@AuthenticationPrincipal MemberDTO memberDTO, Model model, Pager pager) throws Exception {
+        if(memberDTO == null) {
+            return "redirect:/member/login";
+        }
+		
+		pager.setUserNo(memberDTO.getUserNo());
+		List<FollowDTO> list = followService.followerList(pager);
 		model.addAttribute("followerList", list);
+		model.addAttribute("currentUserNo", memberDTO.getUserNo());
 		return "follow/follower";
 	}
-
-	@GetMapping("mutual")
-	public String mutualFollow(@AuthenticationPrincipal MemberDTO memberDTO, Model model) throws Exception {
-		if(memberDTO == null) {
-			return "redirect:/member/login";
-		}
-		Long userNo = memberDTO.getUserNo();
-		List<MemberDTO> list = followService.mutualList(userNo);
-		model.addAttribute("mutualList", list);
-		return "follow/mutualFollow";
-	}	
-
 
 }
