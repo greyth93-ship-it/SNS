@@ -573,6 +573,7 @@ async function renderPost(feedNo) {
         const response = await fetch(`/feed/api/post/${feedNo}`);
         const data = await response.json();
         const ownerName = data.memberDTO?.userNickname || data.memberDTO?.userNo || '';
+        const showFollowButton = !!data.currentUserNo && data.followedByMe === false;
 
         const postProfileFileName = data.memberDTO?.profileDTO?.fileName
             || data.profileDTO?.fileName
@@ -616,7 +617,7 @@ async function renderPost(feedNo) {
                     </div>
                 </div>
                 <div class="d-flex align-items-center">
-                    <button type="button" class="btn btn-sm btn-light fw-bold text-primary flex-shrink-0 ms-auto follow-btn" data-user-no="${data.memberDTO?.userNo}" style="white-space: nowrap;">팔로우</button>
+                    ${showFollowButton ? `<button type="button" class="btn btn-sm btn-light fw-bold text-primary flex-shrink-0 ms-auto follow-btn" data-user-no="${data.memberDTO?.userNo}" style="white-space: nowrap;">팔로우</button>` : ''}
                     <div class="dropdown-container ms-2">
                         <button type="button" class="btn btn-sm btn-light dropdown-toggle-dot" onclick="togglePostMenu(event, 'modal', '${feedNo}')">⋯</button>
                         <div class="dropdown-menu-custom modal-menu" id="post-menu-modal-${feedNo}" style="display:none;">

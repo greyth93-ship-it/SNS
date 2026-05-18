@@ -43,6 +43,15 @@
 		ELSE
 		TRUE
 		END AS "LIKED_BY_ME",
+		CASE WHEN P."USER_NO" = #{currentUserNo} THEN TRUE
+		WHEN EXISTS (
+			SELECT 1
+			FROM "FOLLOW" F
+			WHERE F."USER_FOLLOWER" = #{currentUserNo}
+			AND F."USER_FOLLOWING" = P."USER_NO"
+		) THEN TRUE
+		ELSE FALSE END AS "FOLLOWED_BY_ME",
+		#{currentUserNo} AS "CURRENT_USER_NO",
 		S."USER_NICKNAME",
 		UR."ROLE_NO",
 		R."ROLE_NAME"
@@ -101,6 +110,15 @@
         UI."FILE_NAME" AS "PROFILE_FILE_NAME",
         UI."ORI_NAME" AS "PROFILE_ORI_NAME",
         CASE WHEN PL."USER_NO" IS NULL THEN FALSE ELSE TRUE END AS "LIKED_BY_ME",
+		CASE WHEN P0."USER_NO" = #{currentUserNo} THEN TRUE
+		WHEN EXISTS (
+			SELECT 1
+			FROM "FOLLOW" F
+			WHERE F."USER_FOLLOWER" = #{currentUserNo}
+			AND F."USER_FOLLOWING" = P0."USER_NO"
+		) THEN TRUE
+		ELSE FALSE END AS "FOLLOWED_BY_ME",
+		#{currentUserNo} AS "CURRENT_USER_NO",
         S."USER_NICKNAME",
         UR."ROLE_NO",
         R."ROLE_NAME"
@@ -138,6 +156,15 @@
 		CASE
 		WHEN
 		PL."USER_NO" IS NULL THEN FALSE ELSE TRUE END AS "LIKED_BY_ME",
+		CASE WHEN P0."USER_NO" = #{currentUserNo} THEN TRUE
+		WHEN EXISTS (
+			SELECT 1
+			FROM "FOLLOW" F
+			WHERE F."USER_FOLLOWER" = #{currentUserNo}
+			AND F."USER_FOLLOWING" = P0."USER_NO"
+		) THEN TRUE
+		ELSE FALSE END AS "FOLLOWED_BY_ME",
+		#{currentUserNo} AS "CURRENT_USER_NO",
 		S."USER_NICKNAME",
 		UR."ROLE_NO",
 		R."ROLE_NAME"
@@ -190,6 +217,15 @@
 		CASE WHEN
 		PL."USER_NO" IS NULL THEN FALSE ELSE
 		TRUE END AS "LIKED_BY_ME",
+		CASE WHEN P."USER_NO" = #{currentUserNo} THEN TRUE
+		WHEN EXISTS (
+			SELECT 1
+			FROM "FOLLOW" F
+			WHERE F."USER_FOLLOWER" = #{currentUserNo}
+			AND F."USER_FOLLOWING" = P."USER_NO"
+		) THEN TRUE
+		ELSE FALSE END AS "FOLLOWED_BY_ME",
+		#{currentUserNo} AS "CURRENT_USER_NO",
 		S."USER_NICKNAME",
 		UR."ROLE_NO",
 		R."ROLE_NAME"
@@ -239,6 +275,8 @@
 		<result column="FEED_CONTENT" property="feedContent" />
 		<result column="FEED_THUMB" property="feedThumb" />
 		<result column="LIKED_BY_ME" property="likedByMe" />
+		<result column="FOLLOWED_BY_ME" property="followedByMe" />
+		<result column="CURRENT_USER_NO" property="currentUserNo" />
 		<result column="USER_NO" property="userNo" />
 
 		<association property="memberDTO" javaType="MemberDTO">

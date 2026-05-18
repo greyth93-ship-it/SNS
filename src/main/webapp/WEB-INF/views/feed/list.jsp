@@ -67,8 +67,10 @@
 
 											<!-- 팔로우 버튼 + 옵션 드롭다운 -->
 											<div class="post-action-group ms-auto flex-shrink-0 d-flex align-items-center" style="gap:6px;">
-												<button type="button" class="btn btn-sm btn-light fw-bold text-primary follow-btn"
-													data-user-no="${p.memberDTO.userNo}" style="white-space: nowrap;">팔로우</button>
+												<c:if test="${not empty p.currentUserNo and not p.followedByMe}">
+													<button type="button" class="btn btn-sm btn-light fw-bold text-primary follow-btn"
+														data-user-no="${p.memberDTO.userNo}" style="white-space: nowrap;">팔로우</button>
+												</c:if>
 												<div class="dropdown-container position-relative">
 													<button type="button" class="btn btn-sm btn-light dropdown-toggle-dot" onclick="togglePostMenu(event, 'list', '${p.feedNo}')">⋯</button>
 													<div class="dropdown-menu-custom list-menu" id="post-menu-list-${p.feedNo}" style="display:none;">

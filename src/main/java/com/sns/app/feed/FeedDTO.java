@@ -20,6 +20,7 @@ public class FeedDTO {
 	private Long userNo;
 	private Long feedThumb;
 	private Boolean likedByMe;
+	private Boolean followedByMe;
 	private Long currentUserNo;
 	
 	private MemberDTO memberDTO;

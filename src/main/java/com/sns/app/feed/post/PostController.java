@@ -42,6 +42,7 @@ public class PostController {
 		return this.name;
 	}
 
+
 	// 피드 상세 조회
 	@GetMapping("detail")
 	public String detail(PostDTO postDTO, Model model, @AuthenticationPrincipal MemberDTO memberDTO) throws Exception {
