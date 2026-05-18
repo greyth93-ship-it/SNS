@@ -35,7 +35,15 @@ public class MemberServiceImpl implements MemberService, UserDetailsService{
 	@Autowired
 	private PasswordEncoder encoder;
 	
-	
+	@Override
+	public List<MemberDTO> search(String keyword) throws Exception {
+		
+		if (keyword == null || keyword.trim().isEmpty()) {
+			return Collections.emptyList();
+		}
+		
+		return memberMapper.search(keyword);
+	}
 	
 	
 	@Override
