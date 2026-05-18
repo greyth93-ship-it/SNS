@@ -55,7 +55,7 @@ public class MemberDTO implements UserDetails{
 	
 	private FeedDTO feedDTO;
 	
-	private List<FollowDTO> followDTO;
+	
 	
 	private List<RoleDTO> roles;
 	
