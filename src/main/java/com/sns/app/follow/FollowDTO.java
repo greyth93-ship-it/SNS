@@ -26,5 +26,7 @@ public class FollowDTO {
 	private String username;
 
 	private Long feedNo;
+	
+	private Long userNo;
 
 }

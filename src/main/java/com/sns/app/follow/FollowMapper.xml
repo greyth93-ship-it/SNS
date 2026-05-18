@@ -19,18 +19,22 @@
 
 	<select id="detail" parameterType="FollowDTO"
 		resultMap="detailResult">
-		SELECT u.*,ui.*,r.*,f.*,p."FEED_NO",p."USER_NO" AS "POST_USER_NO"
+		SELECT u.*,ui.*,r.*,f.*,p."FEED_NO",p."USER_NO" AS
+		"POST_USER_NO"
 		FROM "FOLLOW" f
 		INNER JOIN "USER" u ON
-		u."USER_NO" = f."USER_FOLLOWING"
+		u."USER_NO" =
+		f."USER_FOLLOWING"
 		LEFT JOIN "USER_IMG" ui
 		USING
 		("USER_NO")
-		LEFT JOIN "USER_ROLE"
+		LEFT JOIN
+		"USER_ROLE"
 		USING ("USER_NO")
 		LEFT JOIN "ROLE" r
 		USING ("ROLE_NO")
-		LEFT JOIN "POST" p
+		LEFT
+		JOIN "POST" p
 		ON p."USER_NO" = u."USER_NO"
 		WHERE u."USER_ID"=#{username}
 	</select>
@@ -61,6 +65,53 @@
 		FOLLOW_NO = #{followNo}
 	</delete>
 
+	<select id="followingList" parameterType="long"
+		resultMap="detailResult">
+		SELECT u.*, ui."FILE_NO" AS "PROFILE_FILE_NO",
+		ui."FILE_NAME" AS "PROFILE_FILE_NAME",
+		ui."ORI_NAME" AS "PROFILE_ORI_NAME",
+		r.*
+		FROM "FOLLOW" f
+		INNER JOIN "USER" u ON u."USER_NO" = f."USER_FOLLOWING"
+		LEFT JOIN "USER_IMG" ui USING ("USER_NO")
+		LEFT JOIN "USER_ROLE" USING
+		("USER_NO")
+		LEFT JOIN "ROLE" r USING ("ROLE_NO")
+		WHERE f."USER_FOLLOWER"
+		= #{userNo}
+	</select>
+
+	<select id="followerList" parameterType="long"
+	resultMap="detailResult">
+	SELECT u.*, ui."FILE_NO" AS "PROFILE_FILE_NO",
+		ui."FILE_NAME" AS "PROFILE_FILE_NAME",
+		ui."ORI_NAME" AS "PROFILE_ORI_NAME",
+		r.*
+	FROM "FOLLOW" f
+	INNER JOIN "USER" u ON u."USER_NO" = f."USER_FOLLOWER"
+	LEFT JOIN "USER_IMG" ui USING ("USER_NO")
+	LEFT JOIN "USER_ROLE" USING ("USER_NO")
+	LEFT JOIN "ROLE" r USING ("ROLE_NO")
+	WHERE f."USER_FOLLOWING" = #{userNo}
+</select>
+
+	<select id="mutualList" parameterType="long" resultMap="detailResult">
+	SELECT u.*, ui."FILE_NO" AS "PROFILE_FILE_NO",
+		ui."FILE_NAME" AS "PROFILE_FILE_NAME",
+		ui."ORI_NAME" AS "PROFILE_ORI_NAME",
+		r.*
+	FROM "FOLLOW" f
+	INNER JOIN "USER" u ON u."USER_NO" = f."USER_FOLLOWING"
+	LEFT JOIN "USER_IMG" ui USING ("USER_NO")
+	LEFT JOIN "USER_ROLE" USING ("USER_NO")
+	LEFT JOIN "ROLE" r USING ("ROLE_NO")
+	WHERE f."USER_FOLLOWER" = #{userNo}
+	AND EXISTS (
+		SELECT 1 FROM "FOLLOW" f2
+		WHERE f2."USER_FOLLOWER" = f."USER_FOLLOWING"
+		AND f2."USER_FOLLOWING" = #{userNo}
+	)
+	</select>
 
 
 

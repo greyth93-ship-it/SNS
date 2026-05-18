@@ -1,8 +1,11 @@
 package com.sns.app.follow;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -61,5 +64,39 @@ public class FollowController {
 
 		return followService.delete(followDTO);
 	}
+
+	@GetMapping("following")
+	public String following(@AuthenticationPrincipal MemberDTO memberDTO, Model model) throws Exception {
+		if(memberDTO == null) {
+			return "redirect:/member/login";
+		}
+		Long userNo = memberDTO.getUserNo();
+		List<MemberDTO> list = followService.followingList(userNo);
+		model.addAttribute("followingList", list);
+		return "follow/following";
+	}
+
+	@GetMapping("follower")
+	public String follower(@AuthenticationPrincipal MemberDTO memberDTO, Model model) throws Exception {
+		if(memberDTO == null) {
+			return "redirect:/member/login";
+		}
+		Long userNo = memberDTO.getUserNo();
+		List<MemberDTO> list = followService.followerList(userNo);
+		model.addAttribute("followerList", list);
+		return "follow/follower";
+	}
+
+	@GetMapping("mutual")
+	public String mutualFollow(@AuthenticationPrincipal MemberDTO memberDTO, Model model) throws Exception {
+		if(memberDTO == null) {
+			return "redirect:/member/login";
+		}
+		Long userNo = memberDTO.getUserNo();
+		List<MemberDTO> list = followService.mutualList(userNo);
+		model.addAttribute("mutualList", list);
+		return "follow/mutualFollow";
+	}	
+
 
 }
