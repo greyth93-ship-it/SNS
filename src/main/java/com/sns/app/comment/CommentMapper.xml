@@ -5,134 +5,162 @@
 
 <mapper namespace="com.sns.app.comment.CommentMapper">
 
-    <!-- 댓글 리스트 -->
-    <select id="getCommentList" parameterType="CommentDTO" resultMap="commentResult">
-        SELECT
-            C.*,
-            CASE WHEN CL."USER_NO" IS NULL THEN FALSE ELSE TRUE END AS "LIKED_BY_ME",
-            U."USER_NO",
-            U."USER_NICKNAME"
-        FROM "COMMENT" C
-        LEFT JOIN "USER" U
-            ON C."USER_NO" = U."USER_NO"
-        LEFT JOIN "COMMENT_LIKE" CL
-            ON C."COMMENT_NO" = CL."COMMENT_NO"
-            AND CL."USER_NO" = #{currentUserNo}
-        WHERE C."FEED_NO" = #{feedNo}
-        ORDER BY C."COMMENT_NO" ASC
-    </select>
+	<!-- 댓글 리스트 -->
+	<select id="getCommentList" parameterType="CommentDTO"
+		resultMap="commentResult">
+		SELECT
+		C.*,
+		CASE WHEN CL."USER_NO" IS NULL THEN FALSE ELSE TRUE END AS "LIKED_BY_ME",
+		U."USER_NO",
+		U."USER_NICKNAME",
+		UIP."FILE_NO" AS "PROFILE_FILE_NO",
+		UIP."FILE_NAME" AS "PROFILE_FILE_NAME",
+		UIP."ORI_NAME" AS "PROFILE_ORI_NAME"
+		FROM "COMMENT" C
+		LEFT JOIN "USER" U
+		ON C."USER_NO" = U."USER_NO"
+		LEFT JOIN "COMMENT_LIKE" CL
+		ON C."COMMENT_NO" = CL."COMMENT_NO"
+		AND CL."USER_NO" = #{currentUserNo}
+		LEFT JOIN LATERAL (
+			SELECT UI."FILE_NO", UI."FILE_NAME", UI."ORI_NAME"
+			FROM "USER_IMG" UI
+			WHERE UI."USER_NO" = U."USER_NO"
+			ORDER BY UI."FILE_NO" DESC
+			LIMIT 1
+		) UIP ON TRUE
+		WHERE C."FEED_NO" = #{feedNo}
+		ORDER BY C."COMMENT_NO" ASC
+	</select>
 
-    <select id="getCommentDetail" parameterType="CommentDTO" resultMap="commentResult">
-        SELECT
-            C.*,
-            CASE WHEN CL."USER_NO" IS NULL THEN FALSE ELSE TRUE END AS "LIKED_BY_ME",
-            U."USER_NO",
-            U."USER_NICKNAME"
-        FROM "COMMENT" C
-        LEFT JOIN "USER" U
-            ON C."USER_NO" = U."USER_NO"
-        LEFT JOIN "COMMENT_LIKE" CL
-            ON C."COMMENT_NO" = CL."COMMENT_NO"
-            AND CL."USER_NO" = #{currentUserNo}
-        WHERE C."COMMENT_NO" = #{commentNo}
-    </select>
+	<select id="getCommentDetail" parameterType="CommentDTO"
+		resultMap="commentResult">
+		SELECT
+		C.*,
+		CASE WHEN CL."USER_NO" IS NULL THEN FALSE ELSE TRUE END AS "LIKED_BY_ME",
+		U."USER_NO",
+		U."USER_NICKNAME",
+		UIP."FILE_NO" AS "PROFILE_FILE_NO",
+		UIP."FILE_NAME" AS "PROFILE_FILE_NAME",
+		UIP."ORI_NAME" AS "PROFILE_ORI_NAME"
+		FROM "COMMENT" C
+		LEFT JOIN "USER" U
+		ON C."USER_NO" = U."USER_NO"
+		LEFT JOIN "COMMENT_LIKE" CL
+		ON C."COMMENT_NO" = CL."COMMENT_NO"
+		AND CL."USER_NO" = #{currentUserNo}
+		LEFT JOIN LATERAL (
+			SELECT UI."FILE_NO", UI."FILE_NAME", UI."ORI_NAME"
+			FROM "USER_IMG" UI
+			WHERE UI."USER_NO" = U."USER_NO"
+			ORDER BY UI."FILE_NO" DESC
+			LIMIT 1
+		) UIP ON TRUE
+		WHERE C."COMMENT_NO" = #{commentNo}
+	</select>
 
-    <!-- resultMap -->
-    <resultMap type="CommentDTO" id="commentResult">
+	<!-- resultMap -->
+	<resultMap type="CommentDTO" id="commentResult">
 
-        <id column="COMMENT_NO" property="commentNo" />
+		<id column="COMMENT_NO" property="commentNo" />
 
-        <result column="FEED_NO" property="feedNo" />
-        <result column="USER_NO" property="userNo" />
-        <result column="COMMENT_CONTENT" property="commentContent" />
-        <result column="COMMENT_THUMB" property="commentThumb" />
-        <result column="COMMENT_DATE" property="commentDate" />
-        <result column="COMMENT_REF" property="commentRef" />
-        <result column="COMMENT_STEP" property="commentStep" />
-        <result column="COMMENT_DEPTH" property="commentDepth" />
-        <result column="LIKED_BY_ME" property="likedByMe" />
+		<result column="FEED_NO" property="feedNo" />
+		<result column="USER_NO" property="userNo" />
+		<result column="COMMENT_CONTENT" property="commentContent" />
+		<result column="COMMENT_THUMB" property="commentThumb" />
+		<result column="COMMENT_DATE" property="commentDate" />
+		<result column="COMMENT_REF" property="commentRef" />
+		<result column="COMMENT_STEP" property="commentStep" />
+		<result column="COMMENT_DEPTH" property="commentDepth" />
+		<result column="LIKED_BY_ME" property="likedByMe" />
 
-        <!-- 작성자 정보 -->
-        <association property="memberDTO" javaType="com.sns.app.member.MemberDTO">
+		<association property="memberDTO" javaType="MemberDTO">
+			<result column="USER_NO" property="userNo" />
+			<result column="USER_NICKNAME" property="userNickname" />
+			<association property="profileDTO" javaType="ProfileDTO">
+				<id column="PROFILE_FILE_NO" property="fileNo" />
+				<result column="PROFILE_FILE_NAME" property="fileName" />
+				<result column="PROFILE_ORI_NAME" property="oriName" />
+			</association>
+			<collection property="roles" javaType="java.util.List"
+				ofType="RoleDTO">
+				<id column="ROLE_NO" property="roleNo" />
+				<result column="ROLE_NAME" property="roleName" />
+			</collection>
+		</association>
 
-            <id column="USER_NO" property="userNo" />
-            <result column="USER_NICKNAME" property="userNickname" />
+	</resultMap>
 
-        </association>
+	<!-- 댓글 생성 -->
+	<insert id="setCommentCreate" parameterType="CommentDTO"
+		useGeneratedKeys="true" keyProperty="commentNo">
 
-    </resultMap>
+		INSERT INTO "COMMENT"
+		(
+		"FEED_NO",
+		"USER_NO",
+		"COMMENT_CONTENT",
+		"COMMENT_THUMB",
+		"COMMENT_DATE",
+		"COMMENT_REF",
+		"COMMENT_STEP",
+		"COMMENT_DEPTH"
+		)
+		VALUES
+		(
+		#{feedNo},
+		#{userNo},
+		#{commentContent},
+		#{commentThumb},
+		NOW(),
+		#{commentRef},
+		#{commentStep},
+		#{commentDepth}
+		)
 
-    <!-- 댓글 생성 -->
-    <insert id="setCommentCreate"
-            parameterType="CommentDTO"
-            useGeneratedKeys="true"
-            keyProperty="commentNo">
+	</insert>
 
-        INSERT INTO "COMMENT"
-        (
-            "FEED_NO",
-            "USER_NO",
-            "COMMENT_CONTENT",
-            "COMMENT_THUMB",
-            "COMMENT_DATE",
-            "COMMENT_REF",
-            "COMMENT_STEP",
-            "COMMENT_DEPTH"
-        )
-        VALUES
-        (
-            #{feedNo},
-            #{userNo},
-            #{commentContent},
-            #{commentThumb},
-            NOW(),
-            #{commentRef},
-            #{commentStep},
-            #{commentDepth}
-        )
+	<!-- 댓글 삭제 -->
+	<delete id="deleteComment" parameterType="CommentDTO">
+		DELETE FROM "COMMENT"
+		WHERE "COMMENT_NO" = #{commentNo}
+	</delete>
 
-    </insert>
+	<!-- 댓글 수정 -->
+	<update id="updateComment" parameterType="CommentDTO">
+		UPDATE "COMMENT"
+		SET
+		"COMMENT_CONTENT" = #{commentContent}
+		WHERE "COMMENT_NO" = #{commentNo}
+	</update>
 
-    <!-- 댓글 삭제 -->
-    <delete id="deleteComment" parameterType="CommentDTO">
-        DELETE FROM "COMMENT"
-        WHERE "COMMENT_NO" = #{commentNo}
-    </delete>
+	<select id="countThumbByUser" parameterType="CommentDTO"
+		resultType="Long">
+		SELECT COUNT(*)
+		FROM "COMMENT_LIKE"
+		WHERE "COMMENT_NO" = #{commentNo}
+		AND "USER_NO" = #{currentUserNo}
+	</select>
 
-    <!-- 댓글 수정 -->
-    <update id="updateComment" parameterType="CommentDTO">
-        UPDATE "COMMENT"
-        SET
-            "COMMENT_CONTENT" = #{commentContent}
-        WHERE "COMMENT_NO" = #{commentNo}
-    </update>
+	<insert id="insertThumb" parameterType="CommentDTO">
+		INSERT INTO "COMMENT_LIKE" ("COMMENT_NO", "USER_NO", "LIKE_DATE")
+		VALUES (#{commentNo}, #{currentUserNo}, NOW())
+	</insert>
 
-    <select id="countThumbByUser" parameterType="CommentDTO" resultType="Long">
-        SELECT COUNT(*)
-        FROM "COMMENT_LIKE"
-        WHERE "COMMENT_NO" = #{commentNo}
-        AND "USER_NO" = #{currentUserNo}
-    </select>
+	<delete id="deleteThumb" parameterType="CommentDTO">
+		DELETE FROM "COMMENT_LIKE"
+		WHERE "COMMENT_NO" = #{commentNo}
+		AND "USER_NO" = #{currentUserNo}
+	</delete>
 
-    <insert id="insertThumb" parameterType="CommentDTO">
-        INSERT INTO "COMMENT_LIKE" ("COMMENT_NO", "USER_NO", "LIKE_DATE")
-        VALUES (#{commentNo}, #{currentUserNo}, NOW())
-    </insert>
-
-    <delete id="deleteThumb" parameterType="CommentDTO">
-        DELETE FROM "COMMENT_LIKE"
-        WHERE "COMMENT_NO" = #{commentNo}
-        AND "USER_NO" = #{currentUserNo}
-    </delete>
-
-    <update id="syncThumbCount" parameterType="CommentDTO">
-        UPDATE "COMMENT"
-        SET "COMMENT_THUMB" = (
-            SELECT COUNT(*)
-            FROM "COMMENT_LIKE"
-            WHERE "COMMENT_NO" = #{commentNo}
-        )
-        WHERE "COMMENT_NO" = #{commentNo}
-    </update>
+	<update id="syncThumbCount" parameterType="CommentDTO">
+		UPDATE "COMMENT"
+		SET "COMMENT_THUMB" = (
+		SELECT COUNT(*)
+		FROM "COMMENT_LIKE"
+		WHERE "COMMENT_NO" = #{commentNo}
+		)
+		WHERE "COMMENT_NO" = #{commentNo}
+	</update>
 
 </mapper>

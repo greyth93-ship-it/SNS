@@ -48,24 +48,40 @@
 
 							<div class="post-container">
 								<c:forEach items="${postList}" var="p">
-									<article class="post-card">
+									<article class="post-card" data-feed-no="${p.feedNo}">
 										<div class="p-3 d-flex align-items-center gap-3">
-											<div class="profile-circle">
+											<!-- 프로필 이미지 -->
+											<div class="profile-circle flex-shrink-0">
 												<img
 													src="${not empty p.memberDTO.profileDTO and not empty p.memberDTO.profileDTO.fileName ? '/files/member/'.concat(p.memberDTO.profileDTO.fileName) : '/img/default_user.avif'}"
-													onerror="this.src='/img/default_user.avif'"> </img>
+													onerror="this.src='/img/default_user.avif'">
 											</div>
-											<div class="user-info">
+
+											<!-- 유저 정보 (flex-grow-1을 추가하여 남은 공간을 다 차지하게 함) -->
+											<div class="user-info flex-grow-1">
 												<strong class="d-block">${p.memberDTO.userNickname}</strong>
 												<div class="text-muted small">
 													<i class="fas fa-location-dot"></i> <span>${p.feedLocation}</span>
+												</div>
+											</div>
+
+											<!-- 팔로우 버튼 + 옵션 드롭다운 -->
+											<div class="post-action-group ms-auto flex-shrink-0 d-flex align-items-center" style="gap:6px;">
+												<button type="button" class="btn btn-sm btn-light fw-bold text-primary follow-btn"
+													data-user-no="${p.memberDTO.userNo}" style="white-space: nowrap;">팔로우</button>
+												<div class="dropdown-container position-relative">
+													<button type="button" class="btn btn-sm btn-light dropdown-toggle-dot" onclick="togglePostMenu(event, 'list', '${p.feedNo}')">⋯</button>
+													<div class="dropdown-menu-custom list-menu" id="post-menu-list-${p.feedNo}" style="display:none;">
+														<button type="button" class="dropdown-item" onclick="editPost(event, '${p.feedNo}')">수정</button>
+														<button type="button" class="dropdown-item text-danger" onclick="deletePost(event, '${p.feedNo}')">삭제</button>
+													</div>
 												</div>
 											</div>
 										</div>
 										<div class="post-img-wrapper"
 											onclick="openDetail('post', '${p.feedNo}')">
 											<img
-												src="${not empty p.list ? '/files/post/'.concat(p.list[0].fileName) : '/img/default_user.avif'}"
+												src="${not empty p.list ? p.list[0].fileName : '/img/default_user.avif'}"
 												class="post-img">
 										</div>
 
@@ -85,7 +101,11 @@
 											</div>
 										</div>
 										<div class="px-3 pb-3 pt-0">
-											<strong>${p.memberDTO.userNickname}</strong> ${p.feedContent}
+											<div class="post-content">
+												<strong class="post-author">${p.memberDTO.userNickname}</strong>
+												<span class="post-text">${p.feedContent}</span>
+												<button type="button" class="btn btn-link p-0 readmore-btn" style="display:none;">더보기</button>
+											</div>
 										</div>
 									</article>
 								</c:forEach>
@@ -138,6 +158,33 @@
 								<div id="mContent"></div>
 							</div>
 						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="shareModal" class="modal"
+		style="display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center;">
+		<div class="modal-dialog modal-sm modal-dialog-centered"
+			style="width: 300px; margin: auto;">
+			<div class="modal-content"
+				style="border-radius: 12px; overflow: hidden; border: none;">
+				<div class="modal-header border-0 pb-0 justify-content-center pt-3">
+					<h6 class="modal-title fw-bold">공유하기</h6>
+				</div>
+				<div class="modal-body p-0 pt-2">
+					<div class="list-group list-group-flush text-center">
+						<button type="button" id="shareChatBtn"
+							class="list-group-item list-group-item-action py-3 text-primary fw-bold">
+							<i class="far fa-comment-dots me-2"></i>채팅으로 공유하기
+						</button>
+						<button type="button" id="shareExternalBtn"
+							class="list-group-item list-group-item-action py-3">
+							<i class="far fa-copy me-2"></i>외부로 공유하기 (링크 복사)
+						</button>
+						<button type="button"
+							class="list-group-item list-group-item-action py-3 text-muted small"
+							onclick="closeShareModal()">취소</button>
 					</div>
 				</div>
 			</div>

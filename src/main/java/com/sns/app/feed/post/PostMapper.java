@@ -27,6 +27,8 @@ public interface PostMapper extends FeedMapper {
 	public Long getMyCount(Pager pager) throws Exception;
 	
 	public List<FeedDTO> myList(Pager pager) throws Exception;
+	
+	public List<FeedDTO> searchList(Pager pager) throws Exception;
 
 	
 }

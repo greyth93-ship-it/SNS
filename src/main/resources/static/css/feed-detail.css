@@ -60,6 +60,12 @@ body {
 	display: block;
 }
 
+/* 댓글/대댓글 전용 아바타 크기 */
+.comment-avatar { width: 30px; height: 30px; }
+.reply-avatar { width: 24px; height: 24px; }
+.avatar-md { width: 32px; height: 32px; }
+.avatar-xs { width: 25px; height: 25px; }
+
 .user-info strong {
     display: block;
     margin-bottom: 2px; /* 닉네임과 장소 사이의 세로 간격 */
@@ -216,6 +222,46 @@ body {
 	height: 100%;
 	object-fit: cover; 
 }
+
+/* 스토리 프레임: 프로필, 좋아요/공유 버튼 오버레이 */
+.story-frame {
+	position: relative;
+}
+.story-user-label {
+	position: absolute;
+	top: 15px;
+	left: 15px;
+	z-index: 10;
+	color: #fff;
+	font-weight: bold;
+	text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+}
+.story-controls {
+	position: absolute;
+	bottom: 12px;
+	left: 15px;
+	z-index: 11;
+	display: flex;
+	gap: 8px;
+}
+.btn-icon {
+	width: 38px;
+	height: 38px;
+	border-radius: 50%;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0,0,0,0.35);
+	color: #fff;
+	border: none;
+}
+.btn-icon i { font-size: 16px; }
+
+/* 좋아요 토글 색상 (스토리) */
+.story-like-btn i.fas.fa-heart { color: #ed4956; }
+.story-like-btn i.far.fa-heart { color: #ffffff; opacity: 0.9; }
+.story-like-btn { transition: transform 0.08s ease; }
+.story-like-btn:active { transform: scale(0.95); }
 
 #detailModal.story-mode .story-user-label {
 	position: absolute;
@@ -458,4 +504,227 @@ body {
 	flex-grow: 1;
 	overflow-y: auto;
 	font-size: 14px;
+}
+
+#detailModal.post-mode .post-location {
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	min-width: 0;
+	max-width: 100%;
+	overflow: hidden;
+}
+
+#detailModal.post-mode .post-location span {
+	display: block;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+/* post-mode modal: 고정 높이(뷰포트 기준)로 제한하여 댓글 증가 시 창이 늘어나지 않도록 함 */
+#detailModal.post-mode .modal-dialog {
+	width: auto !important;
+	max-width: 1100px !important;
+	height: 80vh !important;
+	max-height: 80vh !important;
+	margin: 0 auto !important;
+	display: flex;
+	align-items: stretch;
+}
+
+#detailModal.post-mode .modal-content {
+	height: 100% !important;
+	overflow: hidden;
+}
+
+#detailModal.post-mode .modal-body {
+	height: 100% !important;
+	padding: 0 !important;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+/* row 컨테이너가 전체 높이를 채우도록 보장 */
+#detailModal.post-mode .modal-body .row.h-100 {
+	height: 100%;
+	min-height: 0;
+}
+
+/* info-side는 고정된 영역을 가지며 내부에 스크롤을 둠 */
+#detailModal.post-mode .info-side {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	overflow: hidden;
+}
+
+/* 댓글 스크롤 영역은 내부에서 스크롤되도록 제한 */
+#detailModal.post-mode #comment_scroll_area {
+	flex: 1 1 auto;
+	overflow-y: auto;
+	min-height: 0; /* flexbox에서 올바른 스크롤을 위해 필요 */
+}
+
+/* 이미지 영역도 높이에 맞춰 overflow 처리 */
+#detailModal.post-mode .post-gallery, #detailModal.post-mode .story-frame {
+	height: 100%;
+	overflow: hidden;
+}
+
+/* 슬라이더 뷰포트가 높이를 채우도록 */
+#detailModal.post-mode .post-carousel-viewport {
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+#mLocation {
+    word-break: break-all;
+    display: block;
+}
+
+#mLocation i {
+    margin-right: 4px;
+}
+
+/* 카드 본문 한 줄 말줄임 및 더보기 버튼 */
+.post-content {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+}
+.post-author {
+	flex: 0 0 auto;
+	margin-right: 6px;
+	margin-top: 0; /* 줄 바꿈 시 닉네임이 위에 고정되도록 */
+}
+.post-text {
+	flex: 1 1 auto;
+	min-width: 0;
+	display: inline-block;
+	vertical-align: top;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	max-width: calc(100% - 60px);
+	box-sizing: border-box;
+	line-height: 1.2em; /* 줄 높이 기준 (확장시 2줄 계산에 사용) */
+}
+.readmore-btn {
+	font-size: 0.9rem;
+	color: #6c757d;
+	text-decoration: none;
+}
+.post-card.content-expanded .post-text {
+	/* 줄바꿈 보존하되 최대 2줄까지만 보이도록 제한 */
+	white-space: pre-wrap;
+	white-space: -moz-pre-wrap;
+	white-space: -pre-wrap;
+	white-space: -o-pre-wrap;
+	word-wrap: break-word;
+	max-height: calc(2 * 1.2em);
+	overflow: hidden;
+}
+
+/* 버튼을 본문 바로 뒤에 위치시키기 위한 스타일 */
+.post-content {
+	position: relative;
+}
+
+.post-card:not(.content-expanded):not(.has-newline) .post-text {
+	padding-right: 48px; /* 버튼 영역 확보 (줄바꿈이 있는 카드 제외) */
+}
+
+/* 긴 한 줄(줄바꿈이 자동으로 생긴 경우)에서는 버튼을 본문 끝에 붙여서 배치 */
+.post-card:not(.content-expanded):not(.has-newline) .readmore-btn {
+	position: static;
+	margin-left: 0;
+	padding: 0;
+	height: auto;
+	line-height: inherit;
+	flex: 0 0 auto;
+}
+
+.post-card:not(.content-expanded):not(.has-newline) .post-text {
+	padding-right: 0;
+}
+
+.post-card:not(.content-expanded):not(.has-newline) .post-content {
+	gap: 0;
+}
+
+.readmore-btn {
+	position: absolute;
+	right: 8px;
+	top: 0;
+	display: none; /* JS에서 필요시 보임 */
+	padding: 0 6px;
+	height: 1.4em;
+	line-height: 1.4em;
+}
+
+/* 줄바꿈이 있는 카드에서는 버튼을 텍스트 바로 뒤에 배치 */
+.post-card.has-newline .readmore-btn {
+	position: static;
+	margin-left: 3px;
+	height: auto;
+	line-height: inherit;
+}
+
+/* 닉네임/본문/버튼을 같은 기준선에 맞추기 */
+.post-content .post-author {
+	display: inline-block;
+	vertical-align: top;
+	margin-top: 0;
+	line-height: 1.2em;
+}
+.post-content .readmore-btn {
+	display: inline-block;
+	vertical-align: top;
+}
+
+/* 줄바꿈이 있는 카드 첫 줄 뒤의 점(...) 스타일 */
+.inline-ellipsis {
+	display: inline-block;
+	margin-left: 4px;
+	color: #6c757d;
+}
+
+.post-card.content-expanded .inline-ellipsis {
+	display: none;
+}
+
+.post-card.content-expanded .readmore-btn {
+	display: none !important;
+}
+
+/* 모달 본문(상세)에서 줄바꿈 보존 */
+#mContent .m-feed-text {
+	display: inline; /* 닉네임 바로 옆에서 시작하도록 인라인으로 변경 */
+	margin-left: 6px;
+	white-space: pre-wrap;
+	white-space: -moz-pre-wrap;
+	white-space: -pre-wrap;
+	white-space: -o-pre-wrap;
+	word-wrap: break-word;
+}
+
+/* 포스트 옵션 드롭다운 스타일 */
+.post-action-group .follow-btn { padding: 6px 10px; }
+.dropdown-container { position: relative; }
+.dropdown-toggle-dot { width: 36px; height: 36px; border-radius: 50%; padding: 0; display: inline-flex; align-items: center; justify-content: center; background: transparent; border: none; font-size: 18px; }
+.dropdown-menu-custom { position: absolute; background: #fff; border: 1px solid #e6e6e6; border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,0.08); min-width: 120px; z-index: 10010; overflow: hidden; }
+.dropdown-menu-custom.list-menu { position: absolute; top: 100%; right: 0; margin-top: 6px; }
+.dropdown-menu-custom.modal-menu { position: absolute; top: 44px; right: 12px; }
+.dropdown-menu-custom.story-menu { position: absolute; top: 44px; right: 12px; }
+.dropdown-menu-custom .dropdown-item { display: block; width: 100%; padding: 8px 12px; background: transparent; border: none; text-align: left; cursor: pointer; }
+.dropdown-menu-custom .dropdown-item:hover { background: #f7f7f7; }
+
+/* 모바일/작은 화면 대응: 드롭다운 위치 조금 아래로 */
+@media (max-width: 480px) {
+	.dropdown-menu-custom { right: -6px; }
 }

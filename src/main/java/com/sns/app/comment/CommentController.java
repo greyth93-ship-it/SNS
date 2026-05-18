@@ -1,7 +1,7 @@
 package com.sns.app.comment;
 
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ public class CommentController {
 
     // 댓글 리스트
     @GetMapping("list")
-    public void list(CommentDTO commentDTO, Model model, @AuthenticationPrincipal MemberDTO memberDTO) throws Exception {
+    public String list(CommentDTO commentDTO, Model model, @AuthenticationPrincipal MemberDTO memberDTO) throws Exception {
 
         if (memberDTO != null) {
             commentDTO.setCurrentUserNo(memberDTO.getUserNo());
@@ -35,6 +35,7 @@ public class CommentController {
         List<CommentDTO> ar = commentService.getCommentList(commentDTO);
 
         model.addAttribute("commentList", ar);
+        return "comment/list";
     }
 
     // 댓글 생성

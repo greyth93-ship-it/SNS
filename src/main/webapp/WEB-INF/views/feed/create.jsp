@@ -28,6 +28,7 @@
                     <div class="upload-container">
                         
                         <form id="uploadForm" action="/${name}/create" method="post" enctype="multipart/form-data" data-feed-type="${name}">
+                        <input type="hidden" name="base64String" id="base64String">
                             <input type="hidden" name="userNo" value="${userNo}">
                             <div class="card card-upload shadow-sm ${name eq 'story' ? 'theme-story' : 'theme-post'}">
                                 

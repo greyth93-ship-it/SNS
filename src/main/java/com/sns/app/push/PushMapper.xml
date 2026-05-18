@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sns.app.push.PushMapper">
+
+	<insert id="insertPush" parameterType="com.sns.app.push.PushDTO">
+		INSERT INTO "PUSH" (
+			"RECEIVER_NO",
+			"SENDER_NO",
+			"PUSH_TYPE",
+			"PUSH_MSG",
+			"IS_READ",
+			"PUSH_DATE"
+		) VALUES (
+			#{receiverNo},
+			#{senderNo},
+			#{pushType},
+			#{pushMsg},
+			false,
+			NOW()
+		)
+	</insert>
+
+	<select id="selectPushListByReceiver" parameterType="long"
+		resultType="com.sns.app.push.PushDTO">
+		SELECT
+			"PUSH_NO",
+			"RECEIVER_NO",
+			"SENDER_NO",
+			"PUSH_TYPE",
+			"PUSH_MSG",
+			"IS_READ",
+			"PUSH_DATE"
+		FROM "PUSH"
+		WHERE "RECEIVER_NO" = #{receiverNo}
+		ORDER BY "PUSH_DATE" DESC
+		LIMIT 5 
+	</select>
+
+	<update id="updateReadStatus" parameterType="long">
+		UPDATE "PUSH"
+		SET "IS_READ" = true
+		WHERE "PUSH_NO" = #{pushNo}
+	</update>
+
+</mapper>

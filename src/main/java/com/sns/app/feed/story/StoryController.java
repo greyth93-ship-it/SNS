@@ -1,14 +1,10 @@
 package com.sns.app.feed.story;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-
-import com.sns.app.member.MemberDTO;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -20,11 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.sns.app.feed.FeedDTO;
 import com.sns.app.file.FileDTO;
-import com.sns.app.pager.Pager;
+import com.sns.app.member.MemberDTO;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 @Controller
 @RequestMapping("/story/*")
 @CrossOrigin("*")
@@ -58,7 +51,7 @@ public class StoryController {
 			storyDTO.setUserNo(memberDTO.getUserNo());
 		}
 
-		int result = storyService.create(storyDTO, attach);
+		storyService.create(storyDTO, attach);
 
 		return "redirect:/feed/list";
 	}
@@ -71,10 +64,25 @@ public class StoryController {
 		return "feed/detail";
 	}
 
+	// 피드 수정 폼 이동
+	@GetMapping("update")
+	public String update(StoryDTO storyDTO, Model model) throws Exception {
+		FeedDTO feedDTO = storyService.detail(storyDTO);
+		model.addAttribute("dto", feedDTO);
+		return "feed/update";
+	}
+
+	// 피드 수정 처리
+	@PostMapping("update")
+	public String update(StoryDTO storyDTO, @RequestParam(value="attach", required = false) MultipartFile[] attach) throws Exception {
+		storyService.update(storyDTO, attach);
+		return "redirect:/feed/list";
+	}
+
 	// 5. 삭제 처리
 	@PostMapping("delete")
 	public String delete(StoryDTO storyDTO) throws Exception {
-		int result = storyService.delete(storyDTO);
+		storyService.delete(storyDTO);
 		return "redirect:/feed/list";
 	}
 
@@ -92,5 +100,31 @@ public class StoryController {
 	public FeedDTO getDetail(StoryDTO storyDTO) throws Exception {
 	    // 기존 detail 로직 재활용
 	    return storyService.detail(storyDTO); 
+	}
+
+	@PostMapping("thumb")
+	@ResponseBody
+	public java.util.Map<String, Object> thumb(FeedDTO feedDTO, @AuthenticationPrincipal MemberDTO memberDTO) throws Exception {
+		java.util.Map<String, Object> result = new java.util.HashMap<>();
+
+		if (memberDTO == null) {
+			result.put("result", -1);
+			return result;
+		}
+
+		feedDTO.setCurrentUserNo(memberDTO.getUserNo());
+
+		try {
+			FeedDTO updated = storyService.toggleThumb(feedDTO, memberDTO);
+			result.put("result", 1);
+			result.put("feedThumb", updated.getFeedThumb());
+			result.put("likedByMe", updated.getLikedByMe());
+		} catch (Exception e) {
+			System.err.println("StoryController.thumb - toggleThumb failed for feedNo=" + feedDTO.getFeedNo() + ": " + e.getMessage());
+			result.put("result", -2);
+			return result;
+		}
+		// done
+		return result;
 	}
 }

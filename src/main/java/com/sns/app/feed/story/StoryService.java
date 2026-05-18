@@ -1,5 +1,6 @@
 package com.sns.app.feed.story;
 
+import java.util.Base64;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +13,13 @@ import com.sns.app.feed.FeedDTO;
 import com.sns.app.feed.FeedService; // FeedService 인터페이스가 있다고 가정
 import com.sns.app.file.FileDTO;
 import com.sns.app.file.FileManager;
+import com.sns.app.member.MemberDTO;
 import com.sns.app.pager.Pager;
+import com.sns.app.push.PushDTO;
+import com.sns.app.push.PushService;
 
 @Service
-@Transactional(rollbackFor = Exception.class)
+@Transactional
 public class StoryService implements FeedService {
 
 	@Autowired
@@ -23,6 +27,9 @@ public class StoryService implements FeedService {
 
 	@Autowired
 	private FileManager fileManager;
+
+	@Autowired
+	private PushService pushService;
 
 	@Value("${app.feed.story}")
 	private String name;
@@ -49,19 +56,21 @@ public class StoryService implements FeedService {
 			return result;
 		}
 
-		// 2. 파일을 HDD에 저장
+		// 2. 첨부 파일을 Base64 문자열로 변환해서 DB에 저장
 		for (MultipartFile f : attach) {
 			if (f.isEmpty()) {
 				continue;
 			}
 
-			String fileName = fileManager.fileSave(name, f);
+			byte[] fileBytes = f.getBytes();
+			String base64String = "data:" + f.getContentType() + ";base64,"
+					+ Base64.getEncoder().encodeToString(fileBytes);
 
 			// 3. 파일의 정보들을 DB에 저장
 			StoryFileDTO fileDTO = new StoryFileDTO();
             fileDTO.setFeedNo(feedDTO.getFeedNo()); 
             fileDTO.setOriName(f.getOriginalFilename());
-            fileDTO.setFileName(fileName);
+			fileDTO.setFileName(base64String);
 
 			result = storyMapper.createFile(fileDTO);
 		}
@@ -74,10 +83,12 @@ public class StoryService implements FeedService {
 		// 1. 파일명 및 정보 조회를 위해 상세 정보 가져오기
 		feedDTO = storyMapper.detail(feedDTO);
 
-		// 2. HDD에서 관련 파일 삭제
+		// 2. 기존 HDD 저장 데이터만 삭제하고, Base64 데이터는 그대로 DB 삭제만 수행
 		if (feedDTO.getList() != null) {
 			for (FileDTO fileDTO : feedDTO.getList()) {
-				fileManager.fileDelete(name, fileDTO);
+				if (fileDTO.getFileName() != null && !fileDTO.getFileName().startsWith("data:")) {
+					fileManager.fileDelete(name, fileDTO);
+				}
 			}
 		}
 
@@ -96,16 +107,54 @@ public class StoryService implements FeedService {
 		return storyMapper.detail(feedDTO);
 	}
 
+	public FeedDTO toggleThumb(FeedDTO feedDTO, MemberDTO memberDTO) throws Exception {
+		FeedDTO originalStory = storyMapper.detail(feedDTO);
+		Long thumbCount = storyMapper.countThumbByUser(feedDTO);
+		if (thumbCount != null && thumbCount > 0) {
+			storyMapper.deleteThumb(feedDTO);
+		} else {
+			storyMapper.insertThumb(feedDTO);
+
+			try {
+				PushDTO push = new PushDTO();
+				push.setReceiverNo(originalStory.getUserNo());
+				push.setSenderNo(memberDTO.getUserNo());
+				push.setPushType("LIKE");
+				push.setPostNo(feedDTO.getFeedNo());
+
+				String senderName = memberDTO.getUserNickname();
+				push.setPushMsg(senderName + "님이 회원님의 스토리를 좋아합니다.");
+
+				if (originalStory.getUserNo() != null && !originalStory.getUserNo().equals(memberDTO.getUserNo())) {
+					pushService.sendPush(push);
+				}
+			} catch (Exception e) {
+				System.err.println("스토리 알림 처리 실패: " + e.getMessage());
+			}
+		}
+
+		storyMapper.syncThumbCount(feedDTO);
+		return storyMapper.detail(feedDTO);
+	}
+
 	public List<FeedDTO> listByUser(Long userNo) throws Exception {
 		FeedDTO feedDTO = new FeedDTO();
 		feedDTO.setUserNo(userNo);
 		return storyMapper.listByUser(feedDTO);
 	}
 
+	// Overload to accept currentUserNo so SQL can use currentUserNo for LIKED_BY_ME
+	public List<FeedDTO> listByUser(Long userNo, Long currentUserNo) throws Exception {
+		FeedDTO feedDTO = new FeedDTO();
+		feedDTO.setUserNo(userNo);
+		feedDTO.setCurrentUserNo(currentUserNo);
+		return storyMapper.listByUser(feedDTO);
+	}
+
 	@Override
 	public int update(FeedDTO feedDTO, MultipartFile[] attach) throws Exception {
-		// TODO Auto-generated method stub
-		return 0;
+		// 기본적으로 Mapper의 update 호출로 처리
+		return storyMapper.update(feedDTO);
 	}
 
 

@@ -1,6 +1,7 @@
 package com.sns.app.feed.post;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.sns.app.feed.FeedDTO;
 import com.sns.app.file.FileDTO;
 import com.sns.app.member.MemberDTO;
+import com.sns.app.pager.Pager;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -39,7 +41,6 @@ public class PostController {
 	public String getName() {
 		return this.name;
 	}
-	
 
 	// 피드 상세 조회
 	@GetMapping("detail")
@@ -50,6 +51,40 @@ public class PostController {
 		FeedDTO feedDTO = postService.detail(postDTO);
 		model.addAttribute("dto", feedDTO);
 		return "feed/detail";
+	}
+
+	@GetMapping("search")
+	public String search(Pager pager, Model model, @AuthenticationPrincipal MemberDTO memberDTO) throws Exception {
+
+		if (memberDTO != null) {
+			pager.setCurrentUserNo(memberDTO.getUserNo());
+		}
+
+		pager.setPerPage(1000L);
+
+		List<FeedDTO> postList = postService.searchList(pager);
+
+		model.addAttribute("postList", postList);
+		model.addAttribute("pager", pager);
+
+		return "feed/search";
+	}
+	
+	@GetMapping("userSearch")
+	public String userSearch(Pager pager, Model model, @AuthenticationPrincipal MemberDTO memberDTO) throws Exception {
+
+		if (memberDTO != null) {
+			pager.setCurrentUserNo(memberDTO.getUserNo());
+		}
+
+		pager.setPerPage(1000L);
+
+		List<FeedDTO> postList = postService.searchList(pager);
+
+		model.addAttribute("postList", postList);
+		model.addAttribute("pager", pager);
+
+		return "feed/search";
 	}
 
 	// 2. 등록 폼 이동
@@ -63,12 +98,15 @@ public class PostController {
 	                     @RequestParam("attach") MultipartFile[] attach,
 	                     @AuthenticationPrincipal MemberDTO memberDTO) throws Exception {
 
+	    // 현재 로그인한 사용자 번호 세팅
 	    postDTO.setUserNo(memberDTO.getUserNo());
 
+	    // 서비스 호출
 	    postService.create(postDTO, attach);
+
 	    return "redirect:/feed/list";
 	}
-
+	
 	// 피드 수정 폼 이동
 	@GetMapping("update")
 	public String update(PostDTO postDTO, Model model) throws Exception {
@@ -79,7 +117,7 @@ public class PostController {
 
 	// 피드 수정 처리
 	@PostMapping("update")
-	public String update(PostDTO postDTO, @RequestParam("attach") MultipartFile[] attach) throws Exception {
+	public String update(PostDTO postDTO, @RequestParam(value="attach", required=false) MultipartFile[] attach) throws Exception {
 		postService.update(postDTO, attach);
 		return "redirect:/feed/list";
 	}
@@ -120,9 +158,15 @@ public class PostController {
 		}
 
 		postDTO.setCurrentUserNo(memberDTO.getUserNo());
-		postDTO.setUserNo(memberDTO.getUserNo());
+		FeedDTO originalPost = postService.detail(postDTO);
+		
+		if(originalPost != null) {
+		    // FeedDTO(또는 상속받은 PostDTO)의 userNo 필드에 작성자 번호 주입
+		    postDTO.setUserNo(originalPost.getUserNo()); 
+		}
+		
 
-		FeedDTO feedDTO = postService.toggleThumb(postDTO);
+		FeedDTO feedDTO = postService.toggleThumb(postDTO,memberDTO);
 		result.put("result", 1);
 		result.put("feedThumb", feedDTO.getFeedThumb());
 		result.put("likedByMe", feedDTO.getLikedByMe());

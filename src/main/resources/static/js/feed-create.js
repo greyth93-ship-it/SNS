@@ -78,7 +78,7 @@ function loadPostSlide(index) {
         });
     };
     img.src = currentItem.objectUrl;
-    
+
     document.getElementById('postEditorCounter').innerText = `${index + 1} / ${postItems.length}`;
     preview.querySelector('.prev').disabled = (index === 0);
     preview.querySelector('.next').disabled = (index === postItems.length - 1);
@@ -107,18 +107,18 @@ fileInput.addEventListener('change', function(e) {
             img.src = ev.target.result;
             preview.innerHTML = '';
             preview.appendChild(img);
-            cropper = new Cropper(img, { aspectRatio: 9/16, viewMode: 1 });
+            cropper = new Cropper(img, { aspectRatio: 9 / 16, viewMode: 1 });
         };
         reader.readAsDataURL(files[0]);
     } else {
         revokePostUrls();
-		postItems = files.map(file => ({
-		    // UUID 대신 현재 시간과 랜덤값을 조합한 ID 사용
-		    id: Date.now() + Math.random().toString(36).substr(2, 9), 
-		    file,
-		    objectUrl: makePostObjectUrl(file),
-		    cropData: null
-		}));
+        postItems = files.map(file => ({
+            // UUID 대신 현재 시간과 랜덤값을 조합한 ID 사용
+            id: Date.now() + Math.random().toString(36).substr(2, 9),
+            file,
+            objectUrl: makePostObjectUrl(file),
+            cropData: null
+        }));
         postCurrentIndex = 0;
         renderPostPreview();
     }
@@ -127,7 +127,7 @@ fileInput.addEventListener('change', function(e) {
 // 4. 드래그 앤 드롭 순서 변경 (모달 로직)
 function openOrderModal() {
     saveCurrentPostCrop();
-    postOrderSnapshot = JSON.parse(JSON.stringify(postItems.map(item => ({...item, file: item.file})))); // 스냅샷 복사
+    postOrderSnapshot = JSON.parse(JSON.stringify(postItems.map(item => ({ ...item, file: item.file })))); // 스냅샷 복사
     renderOrderModal();
     orderModal.classList.remove('d-none');
     document.body.style.overflow = 'hidden';
@@ -214,18 +214,35 @@ form.addEventListener('submit', async function(e) {
         const dataTransfer = new DataTransfer();
         if (isPost) {
             saveCurrentPostCrop();
-            for (let i = 0; i < postItems.length; i++) {
+            for (let i = 0;i < postItems.length;i++) {
                 const canvas = await getCroppedCanvasPromise(postItems[i]);
                 const blob = await getBlobPromise(canvas);
                 const file = new File([blob], `image_${i}.jpg`, { type: 'image/jpeg' });
                 dataTransfer.items.add(file);
             }
         } else {
-            if (!cropper) return;
-            const canvas = cropper.getCroppedCanvas({ width: 720, height: 1280 });
+            if (!cropper) {
+                alert("이미지를 선택해주세요.");
+                submitBtn.disabled = false;
+                return;
+            }
+            const canvas = cropper.getCroppedCanvas({
+                width: 720,
+                height: 1280,
+                imageSmoothingEnabled: true,
+                imageSmoothingQuality: 'high'
+            });
+
+            // 2. 캔버스를 Blob으로 변환
             const blob = await getBlobPromise(canvas);
-            const file = new File([blob], 'story.jpg', { type: 'image/jpeg' });
+
+            // 3. Blob을 File 객체로 변환하여 DataTransfer에 추가
+            const file = new File([blob], 'story_upload.jpg', { type: 'image/jpeg' });
             dataTransfer.items.add(file);
+
+            // [주의] 만약 기존에 base64String hidden input에 값을 넣는 코드가 있었다면 제거하세요.
+            const base64Input = document.getElementById('base64String');
+            if (base64Input) base64Input.value = "";
         }
         fileInput.files = dataTransfer.files;
         form.submit();

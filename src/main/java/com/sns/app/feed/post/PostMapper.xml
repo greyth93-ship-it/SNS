@@ -4,9 +4,87 @@
   "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.sns.app.feed.post.PostMapper">
+
+	<sql id="search_sql">
+		WHERE
+		<choose>
+			<when test="kind == 'v2'">S."USER_NICKNAME"</when>
+			<otherwise>P0."FEED_CONTENT"</otherwise>
+		</choose>
+		ILIKE concat('%', #{search}, '%')
+	</sql>
+
 	<select id="getCount" resultType="Long" parameterType="Pager">
 		SELECT COUNT("FEED_NO") FROM "POST"
 		<!-- <include refid="search_sql"></include> -->
+	</select>
+
+	<select id="searchList" resultMap="detailResult"
+		parameterType="Pager">
+		SELECT
+		P.*,
+		PI."FILE_NO", PI."FILE_NAME", PI."ORI_NAME",
+		UI."FILE_NO" AS
+		"PROFILE_FILE_NO",
+		UI."FILE_NAME" AS
+		"PROFILE_FILE_NAME",
+		UI."ORI_NAME"
+		AS "PROFILE_ORI_NAME",
+		CASE WHEN
+		PL."USER_NO"
+		IS NULL THEN
+		FALSE
+		ELSE
+		TRUE
+		END AS "LIKED_BY_ME",
+		S."USER_NICKNAME",
+		UR."ROLE_NO",
+		R."ROLE_NAME"
+		FROM
+		(
+		SELECT P0.*
+		FROM
+		"POST" P0
+		LEFT JOIN "USER" S ON P0."USER_NO" =
+		S."USER_NO"
+		<include refid="search_sql"></include>
+		ORDER BY
+		P0."FEED_DATE" DESC
+		LIMIT #{perPage}
+		OFFSET #{startNum}
+		) P
+		LEFT
+		JOIN
+		"POST_IMG" PI ON
+		P."FEED_NO" =
+		PI."FEED_NO"
+		LEFT JOIN
+		"POST_LIKE" PL
+		ON
+		P."FEED_NO" =
+		PL."FEED_NO"
+		AND
+		PL."USER_NO" =
+		#{currentUserNo}
+		LEFT JOIN
+		"USER" S ON
+		P."USER_NO" =
+		S."USER_NO"
+		LEFT JOIN
+		"USER_IMG" UI ON
+		S."USER_NO" =
+		UI."USER_NO"
+		LEFT
+		JOIN "USER_ROLE" UR ON
+		S."USER_NO" =
+		UR."USER_NO"
+		LEFT
+		JOIN "ROLE" R ON
+		UR."ROLE_NO" =
+		R."ROLE_NO"
+		ORDER BY
+		P."FEED_DATE" DESC,
+		PI."FILE_NO" ASC
 	</select>
 
 	<select id="list" resultMap="detailResult" parameterType="Pager">
@@ -67,29 +145,49 @@
 	<select id="detail" parameterType="PostDTO"
 		resultMap="detailResult">
 		SELECT
-		P.*,
+		P0.*,
 		PI."FILE_NO", PI."FILE_NAME", PI."ORI_NAME",
+		UI."FILE_NO" AS "PROFILE_FILE_NO",
+		UI."FILE_NAME" AS
+		"PROFILE_FILE_NAME",
+		UI."ORI_NAME" AS "PROFILE_ORI_NAME",
 		CASE
-		WHEN PL."USER_NO" IS NULL THEN FALSE ELSE TRUE END AS "LIKED_BY_ME",
+		WHEN
+		PL."USER_NO" IS NULL THEN FALSE ELSE TRUE END AS "LIKED_BY_ME",
 		S."USER_NICKNAME",
 		UR."ROLE_NO",
 		R."ROLE_NAME"
-		FROM "POST" P
+		FROM "POST" P0
 		LEFT JOIN
-		"POST_IMG" PI ON P."FEED_NO" = PI."FEED_NO"
-		LEFT JOIN "POST_LIKE" PL ON
-		P."FEED_NO" = PL."FEED_NO"
+		"POST_IMG" PI ON P0."FEED_NO" = PI."FEED_NO"
+		LEFT JOIN "POST_LIKE" PL
+		ON
+		P0."FEED_NO" = PL."FEED_NO"
 		AND PL."USER_NO" = #{currentUserNo}
-		LEFT JOIN
+		LEFT
+		JOIN
 		"USER" S ON
-		P."USER_NO" = S."USER_NO"
+		P0."USER_NO" = S."USER_NO"
+		LEFT JOIN LATERAL (
+		SELECT
+		UI."FILE_NO",
+		UI."FILE_NAME",
+		UI."ORI_NAME"
+		FROM "USER_IMG" UI
+		WHERE
+		UI."USER_NO" = S."USER_NO"
+		ORDER BY UI."FILE_NO" DESC
+		LIMIT 1
+		) UI ON
+		TRUE
 		LEFT JOIN "USER_ROLE" UR ON
 		S."USER_NO" =
 		UR."USER_NO"
-		LEFT JOIN "ROLE" R ON UR."ROLE_NO" =
+		LEFT JOIN
+		"ROLE" R ON UR."ROLE_NO" =
 		R."ROLE_NO"
 		WHERE
-		P."FEED_NO" = #{feedNo}
+		P0."FEED_NO" = #{feedNo}
 		ORDER BY PI."FILE_NO" ASC
 	</select>
 
@@ -101,10 +199,12 @@
 		PI."FILE_NO", PI."FILE_NAME", PI."ORI_NAME",
 		UI."FILE_NO" AS
 		"PROFILE_FILE_NO",
-		UI."FILE_NAME" AS "PROFILE_FILE_NAME",
+		UI."FILE_NAME" AS
+		"PROFILE_FILE_NAME",
 		UI."ORI_NAME"
 		AS "PROFILE_ORI_NAME",
-		CASE WHEN PL."USER_NO" IS NULL THEN FALSE ELSE
+		CASE WHEN
+		PL."USER_NO" IS NULL THEN FALSE ELSE
 		TRUE END AS "LIKED_BY_ME",
 		S."USER_NICKNAME",
 		UR."ROLE_NO",
@@ -112,22 +212,28 @@
 		FROM
 		(
 		SELECT P0.*
-		FROM "POST" P0
+		FROM
+		"POST" P0
 		WHERE P0."USER_NO" =
 		#{userNo}
 		ORDER BY P0."FEED_DATE" DESC
 		LIMIT #{perPage} OFFSET #{startNum}
 		) P
-		LEFT JOIN "POST_IMG" PI ON P."FEED_NO" = PI."FEED_NO"
+		LEFT JOIN "POST_IMG" PI ON
+		P."FEED_NO" = PI."FEED_NO"
 		LEFT JOIN
-		"POST_LIKE" PL ON P."FEED_NO" = PL."FEED_NO" AND PL."USER_NO" =
+		"POST_LIKE" PL ON P."FEED_NO" =
+		PL."FEED_NO" AND PL."USER_NO" =
 		#{currentUserNo}
-		LEFT JOIN "USER" S ON P."USER_NO" = S."USER_NO"
+		LEFT JOIN "USER" S ON
+		P."USER_NO" = S."USER_NO"
 		LEFT
-		JOIN "USER_IMG" UI ON S."USER_NO" = UI."USER_NO"
+		JOIN "USER_IMG" UI ON S."USER_NO" =
+		UI."USER_NO"
 		LEFT JOIN "USER_ROLE"
 		UR ON S."USER_NO" = UR."USER_NO"
-		LEFT JOIN "ROLE" R ON UR."ROLE_NO" =
+		LEFT
+		JOIN "ROLE" R ON UR."ROLE_NO" =
 		R."ROLE_NO"
 		ORDER BY
 		P."FEED_DATE" DESC,
@@ -135,7 +241,8 @@
 	</select>
 
 	<select id="getMyCount" parameterType="Pager" resultType="Long">
-		SELECT COUNT("FEED_NO")
+		SELECT
+		COUNT("FEED_NO")
 		FROM "POST"
 		WHERE "USER_NO" = #{userNo}
 	</select>
@@ -209,10 +316,17 @@
 		)
 		WHERE "FEED_NO" = #{feedNo}
 	</update>
-	<insert id="createFile" parameterType="PostFileDTO">
-		INSERT INTO "POST_IMG"
-		VALUES (DEFAULT,#{fileName}, #{oriName}, #{feedNo})
+	<insert id="createFile" parameterType="FileDTO">
+		INSERT INTO "POST_IMG" ("FEED_NO", "FILE_NAME", "ORI_NAME")
+		VALUES (#{feedNo}, #{fileName}, #{oriName})
 	</insert>
+	<update id="update" parameterType="PostDTO">
+		UPDATE "POST"
+		SET
+		"FEED_LOCATION" = #{feedLocation},
+		"FEED_CONTENT" = #{feedContent}
+		WHERE "FEED_NO" = #{feedNo}
+	</update>
 	<delete id="delete" parameterType="PostDTO">
 		DELETE FROM "POST"
 		WHERE

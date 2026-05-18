@@ -33,13 +33,13 @@
 	<!-- Nav Item - Pages Collapse Menu -->
 	<li class="nav-item"><a class="nav-link collapsed" href="#"
 		data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true"
-		aria-controls="collapseTwo"> <i class="fas fa-fw fa-cog"></i> <span>Community</span>
+		aria-controls="collapseTwo"> <i class="fas fa-fw fa-cog"></i> <span>SEARCH</span>
 	</a>
 		<div id="collapseTwo" class="collapse" aria-labelledby="headingTwo"
 			data-parent="#accordionSidebar">
 			<div class="bg-white py-2 collapse-inner rounded">
-				<a class="collapse-item" href="/notice/list">공지사항</a> 
-				<a class="collapse-item" href="/product/list">상품목록</a>
+				<a class="collapse-item" href="/post/search">포스트 검색</a> 
+				<a class="collapse-item" href="/feed/userSearch">유저 검색</a>
 			</div>
 		</div></li>
 
@@ -88,8 +88,8 @@
 		</div></li>
 
 	<!-- Nav Item - Charts -->
-	<li class="nav-item"><a class="nav-link" href="charts.html"> <i
-			class="fas fa-fw fa-chart-area"></i> <span>Charts</span></a></li>
+	<li class="nav-item"><a class="nav-link" href="/feed/list"> <i
+			class="fas fa-fw fa-chart-area"></i> <span>LISTS</span></a></li>
 
 	<!-- Nav Item - Tables -->
 	<li class="nav-item"><a class="nav-link" href="tables.html"> <i
