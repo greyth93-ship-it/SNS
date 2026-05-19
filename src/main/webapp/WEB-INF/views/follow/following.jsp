@@ -29,6 +29,14 @@
 							<div class="search-hero">
 								<div class="search-title">팔로잉</div>
 								<div class="search-sub">내가 팔로우한 유저 목록입니다.</div>
+								<form method="get" action="/follow/following" class="mt-3">
+									<div class="input-group">
+										<input type="text" name="search" class="form-control" placeholder="유저이름으로 검색" value="${param.search}">
+										<div class="input-group-append">
+											<button class="btn btn-outline-secondary" type="submit">검색</button>
+										</div>
+									</div>
+								</form>
 							</div>
 
 							<c:choose>
