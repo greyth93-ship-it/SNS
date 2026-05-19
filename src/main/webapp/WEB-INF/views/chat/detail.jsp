@@ -39,7 +39,7 @@
 				
 							<c:if test="${!isMe}">
 								<div class="msg-profile-wrap">
-									<img class="img-profile rounded-circle" src="/files/member/${member.profileDTO.fileName}">
+									<img class="img-profile rounded-circle" src="/files/member/${profileDTO.fileName}">
 									<span class="msg-nickname">${you}</span>
 								</div>
 							
