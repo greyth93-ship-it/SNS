@@ -83,7 +83,7 @@
 										<div class="post-img-wrapper"
 											onclick="openDetail('post', '${p.feedNo}')">
 											<img
-												src="${not empty p.list ? p.list[0].fileName : '/img/default_user.avif'}"
+												src="${not empty p.list ? '/files/post/'.concat(p.list[0].fileName) : '/img/default_user.avif'}"
 												class="post-img">
 										</div>
 

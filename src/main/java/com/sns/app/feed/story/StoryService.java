@@ -1,6 +1,5 @@
 package com.sns.app.feed.story;
 
-import java.util.Base64;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,15 +61,13 @@ public class StoryService implements FeedService {
 				continue;
 			}
 
-			byte[] fileBytes = f.getBytes();
-			String base64String = "data:" + f.getContentType() + ";base64,"
-					+ Base64.getEncoder().encodeToString(fileBytes);
+			String fileName = fileManager.fileSave(name, f);
 
 			// 3. 파일의 정보들을 DB에 저장
 			StoryFileDTO fileDTO = new StoryFileDTO();
             fileDTO.setFeedNo(feedDTO.getFeedNo()); 
             fileDTO.setOriName(f.getOriginalFilename());
-			fileDTO.setFileName(base64String);
+            fileDTO.setFileName(fileName);
 
 			result = storyMapper.createFile(fileDTO);
 		}
@@ -83,19 +80,15 @@ public class StoryService implements FeedService {
 		// 1. 파일명 및 정보 조회를 위해 상세 정보 가져오기
 		feedDTO = storyMapper.detail(feedDTO);
 
-		// 2. 기존 HDD 저장 데이터만 삭제하고, Base64 데이터는 그대로 DB 삭제만 수행
 		if (feedDTO.getList() != null) {
 			for (FileDTO fileDTO : feedDTO.getList()) {
-				if (fileDTO.getFileName() != null && !fileDTO.getFileName().startsWith("data:")) {
-					fileManager.fileDelete(name, fileDTO);
+				fileManager.fileDelete(name, fileDTO);
 				}
 			}
-		}
-
-		// 3. DB에서 데이터 삭제 (Cascade 설정이 없다면 파일 DB 데이터도 함께 삭제 로직 필요)
 		int result = storyMapper.delete(feedDTO);
 		return result;
-	}
+		
+		}
 
 	@Override
 	public FileDTO fileDetail(FileDTO fileDTO) throws Exception {
@@ -157,6 +150,6 @@ public class StoryService implements FeedService {
 		return storyMapper.update(feedDTO);
 	}
 
-
+	
 
 }

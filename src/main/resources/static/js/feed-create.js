@@ -221,28 +221,12 @@ form.addEventListener('submit', async function(e) {
                 dataTransfer.items.add(file);
             }
         } else {
-            if (!cropper) {
-                alert("이미지를 선택해주세요.");
-                submitBtn.disabled = false;
-                return;
-            }
-            const canvas = cropper.getCroppedCanvas({
-                width: 720,
-                height: 1280,
-                imageSmoothingEnabled: true,
-                imageSmoothingQuality: 'high'
-            });
-
-            // 2. 캔버스를 Blob으로 변환
+            if (!cropper) return;
+            const canvas = cropper.getCroppedCanvas({ width: 720, height: 1280 });
             const blob = await getBlobPromise(canvas);
-
-            // 3. Blob을 File 객체로 변환하여 DataTransfer에 추가
-            const file = new File([blob], 'story_upload.jpg', { type: 'image/jpeg' });
+            const file = new File([blob], 'story.jpg', { type: 'image/jpeg' });
             dataTransfer.items.add(file);
 
-            // [주의] 만약 기존에 base64String hidden input에 값을 넣는 코드가 있었다면 제거하세요.
-            const base64Input = document.getElementById('base64String');
-            if (base64Input) base64Input.value = "";
         }
         fileInput.files = dataTransfer.files;
         form.submit();

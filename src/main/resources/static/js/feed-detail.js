@@ -250,7 +250,7 @@ async function loadStoryByUser(userNo, selectedFeedNo, stepDirection = 1) {
 
     const slides = stories.map((story) => {
         const imgPath = story.list?.[0]?.fileName
-            ? story.list[0].fileName // [수정] DB의 Base64 데이터를 그대로 사용
+            ? `/files/story/${story.list[0].fileName}`
             : '/img/default_user.avif';
 
         // [수정] 프로필 이미지 경로 생성 로직 개선
@@ -516,9 +516,7 @@ async function renderStory(feedNo, userNo) {
         const response = await fetch(`/feed/api/story/${feedNo}`);
         const data = await response.json();
 
-        const imgPath = data.list?.[0]?.fileName
-            ? data.list[0].fileName
-            : '/img/default_user.avif';
+        const imgPath = data.list?.[0]?.fileName ? `/files/story/${data.list[0].fileName}` : '/img/default_user.avif';
         const ownerName = data.memberDTO?.userNickname || data.memberDTO?.userNo || '';
 
         // 프로필 이미지 경로 안전하게 생성 (여러 구조에 대응)
@@ -584,9 +582,9 @@ async function renderPost(feedNo) {
 
         const images = data.list && data.list.length > 0
             ? data.list.map((fileDTO) => `
-		            <div class="post-carousel-slide">
-		                <img src="${fileDTO.fileName}" class="post-detail-img" onerror="this.src='/img/default_user.avif'">
-		            </div>
+			<div class="post-carousel-slide">
+			                    <img src="/files/post/${fileDTO.fileName}" class="post-detail-img" onerror="this.src='/img/default_user.avif'">
+			                </div>
             `).join('')
             : `<div class="post-carousel-slide"><img src="/img/default_user.avif" class="post-detail-img"></div>`;
 

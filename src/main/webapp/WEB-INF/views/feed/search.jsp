@@ -48,7 +48,7 @@
 											<a class="search-tile" href="/feed/detail/post/${p.feedNo}"
 												title="${p.memberDTO.userNickname}"> <c:choose>
 													<c:when test="${not empty p.list}">
-													<img src="${p.list[0].fileName}"
+													<img src="/files/post/${p.list[0].fileName}"
 															alt="post image"
 															onerror="this.src='/img/default_post.png'">
 													</c:when>
