@@ -49,6 +49,9 @@
                                 </div>
                                 <input type="file" name="attach" id="fileInput" class="d-none" accept="image/*" <c:if test="${name eq 'post'}">multiple</c:if> required>
                                 <c:if test="${name eq 'post'}">
+                                    <div class="px-3 pt-2 text-muted small">
+                                        최대 5장까지 첨부할 수 있습니다.
+                                    </div>
                                     <div class="px-3 pt-3 pb-0">
                                         <button type="button" id="orderToggleBtn" class="btn btn-outline-primary btn-sm w-100 d-none">
                                             순서 변경

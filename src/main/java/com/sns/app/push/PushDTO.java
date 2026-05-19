@@ -20,4 +20,5 @@ public class PushDTO {
     
     // 조인을 통해 가져올 데이터 (필요시)
     private String senderNickname;
+    private String senderProfileFileName;
 }

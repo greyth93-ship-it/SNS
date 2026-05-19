@@ -21,11 +21,7 @@ function initMutualChatButtons() {
             let targetUrl = '/chat/create';
             
             if (userNo && currentUserNo) {
-                targetUrl += '?userNo=' + userNo + '&currentUserNo=' + currentUserNo;
-            } else if (userNo) {
-                targetUrl += '?userNo=' + userNo;
-            } else if (currentUserNo) {
-                targetUrl += '?currentUserNo=' + currentUserNo;
+                targetUrl += '?targetUserNo=' + userNo
             }
             
             // 최종 조립된 주소로 이동

@@ -125,18 +125,30 @@ public class PostController {
 
 	// 피드 삭제 처리
 	@PostMapping("delete")
-	public String delete(PostDTO postDTO) throws Exception {
-		postService.delete(postDTO);
-		return "redirect:/feed/list";
-	}
+	@ResponseBody
+	public Map<String, Object> delete(PostDTO postDTO, @AuthenticationPrincipal MemberDTO memberDTO) throws Exception {
+		Map<String, Object> result = new HashMap<>();
 
-	// 파일 다운로드 (이미지/첨부파일)
-	@GetMapping("down")
-	public String fileDown(FileDTO fileDTO, Model model) throws Exception {
+		if (memberDTO == null) {
+			result.put("result", -1); // 로그인 필요
+			return result;
+		}
 
-		fileDTO = postService.fileDetail(fileDTO);
-		model.addAttribute("fileDTO", fileDTO);
-		return "fileDownView";
+		// 상세 조회하여 작성자 확인
+		FeedDTO existing = postService.detail(postDTO);
+		if (existing == null) {
+			result.put("result", 0); // 존재하지 않음
+			return result;
+		}
+
+		if (existing.getUserNo() == null || !existing.getUserNo().equals(memberDTO.getUserNo())) {
+			result.put("result", -2); // 권한 없음
+			return result;
+		}
+
+		int r = postService.delete(postDTO);
+		result.put("result", r > 0 ? 1 : 0);
+		return result;
 	}
 
 	@GetMapping("getDetail")

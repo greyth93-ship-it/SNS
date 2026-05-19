@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.sns.app.pager.Pager;
+
 @Service
 public class PushService {
 
@@ -34,6 +36,20 @@ public class PushService {
 
 	public List<PushDTO> getPushListByReceiver(Long receiverNo) {
 		return pushMapper.selectPushListByReceiver(receiverNo);
+	}
+
+	public int countUnreadByReceiver(Long receiverNo) {
+		return pushMapper.countUnreadByReceiver(receiverNo);
+	}
+
+	public List<PushDTO> getAllPushListByReceiver(Long receiverNo) {
+		return pushMapper.selectAllPushListByReceiver(receiverNo);
+	}
+
+	public List<PushDTO> getAllPushListByReceiver(Pager pager) {
+		pager.makePageNum(pushMapper.countAllPushByReceiverPager(pager));
+		pager.makeStartNum();
+		return pushMapper.selectAllPushListByReceiverPager(pager);
 	}
 
 	public void markAsRead(Long pushNo) {

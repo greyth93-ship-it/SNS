@@ -17,6 +17,7 @@ let postCropper = null;
 let postCurrentIndex = 0;
 let postOrderSnapshot = [];
 let postDragIndex = null;
+const MAX_POST_IMAGES = 5;
 
 // 1. 유틸리티 함수
 function makePostObjectUrl(file) { return URL.createObjectURL(file); }
@@ -94,6 +95,12 @@ function navigatePostEditor(dir) {
 fileInput.addEventListener('change', function(e) {
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
+
+    if (isPost && files.length > MAX_POST_IMAGES) {
+        alert(`포스트 사진은 최대 ${MAX_POST_IMAGES}장까지 첨부할 수 있습니다.`);
+        fileInput.value = '';
+        return;
+    }
 
     placeholder.style.display = 'none';
     if (postCropper) postCropper.destroy();
@@ -214,6 +221,12 @@ form.addEventListener('submit', async function(e) {
         const dataTransfer = new DataTransfer();
         if (isPost) {
             saveCurrentPostCrop();
+            if (postItems.length > MAX_POST_IMAGES) {
+                alert(`포스트 사진은 최대 ${MAX_POST_IMAGES}장까지 첨부할 수 있습니다.`);
+                submitBtn.disabled = false;
+                submitBtn.innerText = "포스트 게시하기";
+                return;
+            }
             for (let i = 0;i < postItems.length;i++) {
                 const canvas = await getCroppedCanvasPromise(postItems[i]);
                 const blob = await getBlobPromise(canvas);
