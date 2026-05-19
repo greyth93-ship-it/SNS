@@ -1,11 +1,11 @@
 function initMutualChatButtons() {
     // 1. 페이지 전체(body)에 클릭 이벤트 위임
     document.body.addEventListener('click', function (e) {
-        // 클릭된 요소나 그 상위 요소 중 <button> 태그가 있는지 확인
-        const btn = e.target.closest('button');
+        // 클릭된 요소나 그 상위 요소 중에 .btn-chat-trigger가 있는지 확인
+        const btn = e.target.closest('.btn-chat-trigger');
         
-        // 버튼이 존재하고, 그 버튼의 텍스트가 '채팅'인지 확인
-        if (btn && btn.classList.contains('btn-chat-trigger')) {
+        // 클릭된 요소가 채팅 트리거라면 처리
+        if (btn) {
             e.preventDefault();
             e.stopPropagation();
             
