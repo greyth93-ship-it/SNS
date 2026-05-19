@@ -23,6 +23,32 @@ function escapeHtml(str) {
         .replace(/'/g, '&#39;');
 }
 
+function getCurrentUserNo(feedData = {}) {
+    const metaCurrentUserNo = document.querySelector('meta[name="current-user-no"]')?.content ?? null;
+    const rawCurrentUserNo = feedData.currentUserNo ?? metaCurrentUserNo ?? document.body?.dataset?.currentUserNo ?? null;
+
+    if (rawCurrentUserNo == null || rawCurrentUserNo === '' || rawCurrentUserNo === 'anonymousUser') {
+        return null;
+    }
+
+    return rawCurrentUserNo;
+}
+
+function getStoryOwnerNo(feedData = {}) {
+    return feedData.memberDTO?.userNo ?? feedData.userNo ?? null;
+}
+
+function isOwnStory(feedData = {}) {
+    const currentUserNo = getCurrentUserNo(feedData);
+    const ownerUserNo = getStoryOwnerNo(feedData);
+
+    if (currentUserNo == null || ownerUserNo == null) {
+        return false;
+    }
+
+    return String(currentUserNo).trim() === String(ownerUserNo).trim();
+}
+
 function getCommentList(feedNo) {
     const listArea = document.getElementById("comment_display_list");
     if (!listArea) return;
@@ -253,12 +279,15 @@ async function loadStoryByUser(userNo, selectedFeedNo, stepDirection = 1) {
             ? `/files/story/${story.list[0].fileName}`
             : '/img/default_user.avif';
 
-        // [수정] 프로필 이미지 경로 생성 로직 개선
         const profileImgPath = story.memberDTO?.profileDTO?.fileName
             ? `/files/member/${story.memberDTO.profileDTO.fileName}`
             : '/img/default_user.avif';
 
         const ownerName = story.memberDTO?.userNickname || story.memberDTO?.userNo || '';
+
+        console.log('currentUserNo:', getCurrentUserNo(story));
+
+        const isMyStory = isOwnStory(story);
 
         return `
             <div class="story-carousel-slide">
@@ -279,7 +308,12 @@ async function loadStoryByUser(userNo, selectedFeedNo, stepDirection = 1) {
                     </div>
                     <img src="${imgPath}" onerror="this.src='/img/default_user.avif'">
                     <div class="story-controls">
-                        <button type="button" class="btn btn-sm btn-icon story-like-btn" onclick="likePost(event, '${story.feedNo}', this, 'story')"><i class="${story.likedByMe ? 'fas' : 'far'} fa-heart"></i></button>
+                        <!-- [수정] 본인이 작성한 스토리가 아닐 경우에만 좋아요 버튼 렌더링 -->
+                        ${!isMyStory ? `
+                        <button type="button" class="btn btn-sm btn-icon story-like-btn" onclick="likePost(event, '${story.feedNo}', this, 'story')">
+                            <i class="${story.likedByMe ? 'fas' : 'far'} fa-heart"></i>
+                        </button>
+                        ` : ''}
                         <button type="button" class="btn btn-sm btn-icon story-share-btn" onclick="sharePost(event, '${story.feedNo}', 'story')"><i class="far fa-paper-plane"></i></button>
                     </div>
                 </div>
@@ -499,7 +533,7 @@ function copyToClipboardFallback(url) {
     alert('공유 링크가 클립보드에 복사되었습니다.');
 }
 
-// [수정] 스토리 렌더링 함수 - 프로필 이미지 노출 로직 개선
+// [수정] 스토리 렌더링 함수 - 프로필 이미지 노출 로직 개선 및 본인 피드 좋아요 제한
 async function renderStory(feedNo, userNo) {
     detailModal.classList.add('story-mode');
     mInfoArea.style.display = 'none';
@@ -527,6 +561,10 @@ async function renderStory(feedNo, userNo) {
             || data.PROFILE_FILE_NAME;
         const profileImgPath = profileFileName ? `/files/member/${profileFileName}` : '/img/default_user.avif';
 
+        console.log('currentUserNo:', getCurrentUserNo(data));
+
+        const isMyStory = isOwnStory(data);
+
         mImageArea.innerHTML = `
             <div class="story-frame">
                 <div class="dropdown-container story-dropdown" style="position:absolute; top:12px; right:12px; z-index:12;">
@@ -545,10 +583,13 @@ async function renderStory(feedNo, userNo) {
                 </div>
                 <img src="${imgPath}" onerror="this.src='/img/default_user.avif'">
                 <div class="story-controls">
+                    <!-- [수정] 본인이 작성한 스토리가 아닐 경우에만 좋아요 버튼 렌더링 -->
+                    ${!isMyStory ? `
                     <button type="button" class="btn btn-sm btn-icon story-like-btn" onclick="likePost(event, '${feedNo}', this, 'story')">
                         <i class="${data.likedByMe ? 'fas' : 'far'} fa-heart"></i>
                         <span class="like-count ms-1 small">${data.feedThumb ?? 0}</span>
                     </button>
+                    ` : ''}
                     <button type="button" class="btn btn-sm btn-icon story-share-btn" onclick="sharePost(event, '${feedNo}', 'story')"><i class="far fa-paper-plane"></i></button>
                 </div>
             </div>
@@ -582,9 +623,9 @@ async function renderPost(feedNo) {
 
         const images = data.list && data.list.length > 0
             ? data.list.map((fileDTO) => `
-			<div class="post-carousel-slide">
-			                    <img src="/files/post/${fileDTO.fileName}" class="post-detail-img" onerror="this.src='/img/default_user.avif'">
-			                </div>
+            <div class="post-carousel-slide">
+                                <img src="/files/post/${fileDTO.fileName}" class="post-detail-img" onerror="this.src='/img/default_user.avif'">
+                            </div>
             `).join('')
             : `<div class="post-carousel-slide"><img src="/img/default_user.avif" class="post-detail-img"></div>`;
 
@@ -761,12 +802,29 @@ async function deletePost(event, feedNo) {
     form.append('feedNo', feedNo);
     try {
         const resp = await fetch('/post/delete', { method: 'POST', credentials: 'same-origin', body: form });
-        if (resp.ok) {
-            if (resp.redirected) { location.href = resp.url; return; }
+        if (!resp.ok) {
+            console.error('deletePost: network error', resp.status, resp.statusText);
+            alert('삭제 중 네트워크 오류가 발생했습니다.');
+            return;
+        }
+        const json = await resp.json();
+        if (json.result === 1) {
             location.reload();
             return;
         }
+        if (json.result === -1) {
+            alert('로그인 후 삭제할 수 있습니다.');
+            location.href = '/member/login';
+            return;
+        }
+        if (json.result === -2) {
+            alert('삭제 권한이 없습니다.');
+            return;
+        }
+        alert('삭제에 실패했습니다.');
     } catch (e) {
+        console.error('deletePost: fetch failed', e);
+        alert('삭제 중 오류가 발생했습니다.');
     }
 }
 

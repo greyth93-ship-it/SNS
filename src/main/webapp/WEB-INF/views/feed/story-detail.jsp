@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core"%>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 
 <!DOCTYPE html>
 <html>
@@ -7,6 +8,9 @@
 <meta charset="UTF-8">
 <title>Story Detail</title>
 <c:import url="/WEB-INF/views/temp/head_css.jsp"></c:import>
+<sec:authorize access="isAuthenticated()">
+	<meta name="current-user-no" content="<sec:authentication property='principal.userNo' />">
+</sec:authorize>
 <link rel="stylesheet" type="text/css" href="/css/feed-detail.css">
 </head>
 
