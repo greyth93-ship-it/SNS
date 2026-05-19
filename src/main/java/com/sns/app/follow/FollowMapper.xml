@@ -176,15 +176,16 @@
 	</select>
 
 	<select id="isMatchedFollow" parameterType="FollowDTO"
-		resultMap="detailResult">
-		SELECT u.*,f.*
-		FROM "FOLLOW" f1
-		INNER JOIN "FOLLOW" f2
-		ON f1."USER_FOLLOWING" = f2."USER_FOLLOWER"
-		AND f1."USER_FOLLOWER" = f2."USER_FOLLOWING"
-		INNER JOIN "USER" u
-		ON u."USER_NO" = f1."USER_FOLLOWING"
-		WHERE f1."USER_FOLLOWER" = #{userNo}
+		resultType="FollowDTO">
+		SELECT 
+        f1."USER_FOLLOWER"  AS "userFollower",   
+        f1."USER_FOLLOWING" AS "userFollowing"   
+    FROM "FOLLOW" f1
+    INNER JOIN "FOLLOW" f2 
+        ON f1."USER_FOLLOWING" = f2."USER_FOLLOWER" 
+       AND f1."USER_FOLLOWER" = f2."USER_FOLLOWING"
+    WHERE f1."USER_FOLLOWER" = #{userFollower}   
+      AND f1."USER_FOLLOWING" = #{userFollowing}
 	</select>
 
 
