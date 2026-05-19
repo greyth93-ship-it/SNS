@@ -60,7 +60,7 @@
 									<div class="user-grid">
 										<c:forEach items="${followerList}" var="u">
 											<div class="user-card">
-												<a href="/feed/goMypage?userNo=${u.memberDTO.userNo}"
+												<a href="/member/mypage?userNo=${u.memberDTO.userNo}"
 													class="user-card-link">
 													<div class="user-avatar-wrapper">
 														<img
