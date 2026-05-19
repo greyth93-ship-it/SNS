@@ -211,7 +211,7 @@ function getNotificationMoveUrl(item) {
     }
 
     if (item.pushType === 'FOLLOW') {
-        return item.senderNo ? '/feed/mypage?userNo=' + item.senderNo : '#';
+        return item.senderNo ? '/member/mypage?userNo=' + item.senderNo : '#';
     }
 
     return item.postNo ? '/post/detail?postNo=' + item.postNo : '#';

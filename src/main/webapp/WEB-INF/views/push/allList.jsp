@@ -110,7 +110,7 @@
 									</c:choose>
 									<c:choose>
 										<c:when test="${p.pushType eq 'FOLLOW'}">
-											<c:set var="moveUrl" value="/feed/mypage?userNo=${p.senderNo}" />
+											<c:set var="moveUrl" value="/member/mypage?userNo=${p.senderNo}" />
 										</c:when>
 										<c:otherwise>
 											<c:set var="moveUrl" value="/post/detail?postNo=${p.postNo}" />
