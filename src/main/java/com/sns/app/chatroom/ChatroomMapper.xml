@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <mapper namespace="com.sns.app.chatroom.ChatroomMapper">
+  
+  <select id="findRoom" resultMap="detailResult">
+
+    SELECT 
+        R."ROOM_NO",
+        R."ROOM_DATE",
+        R."ROOM_TYPE",
+
+        CM."USER_NO",
+        CM."ROLE_NO",
+        CM."JOIN_DATE",
+        CM."READ_DATE",
+        CM."ALARM",
+
+        M."USER_NICKNAME",
+
+        P."FILE_NO",
+        P."FILE_NAME",
+        P."ORI_NAME"
+
+    FROM "CHATROOM" R
+
+    JOIN "CHATROOM_MEMBER" CM
+        ON R."ROOM_NO" = CM."ROOM_NO"
+
+    JOIN "USER" M
+        ON CM."USER_NO" = M."USER_NO"
+
+    LEFT JOIN "USER_IMG" P
+        ON M."USER_NO" = P."USER_NO"
+
+    WHERE
+
+    <choose>
+
+        <when test="roomNo != null">
+            R."ROOM_NO" = #{roomNo}
+        </when>
+
+        <otherwise>
+            R."ROOM_NO" = (
+                SELECT "ROOM_NO"
+                FROM "CHATROOM_MEMBER"
+                WHERE "USER_NO" IN (#{myUserNo}, #{targetUserNo})
+                GROUP BY "ROOM_NO"
+                HAVING COUNT("ROOM_NO") = 2
+            )
+        </otherwise>
+
+    </choose>
+
+</select>
+  
+  <resultMap type="ChatroomDTO" id="detailResult">
+  	<id column="ROOM_NO" property="roomNo"/>
+  	<result column="ROOM_DATE" property="roomDate"/>
+  	<result column="ROOM_TYPE" property="roomType"/>
+  	
+  	<collection property="members" ofType="ChatroomMemberDTO">
+  		<id column="ROOM_NO" property="roomNo"/>
+  		<id column="USER_NO" property="userNo"/>
+  		<result column="ROLE_NO" property="roleNo"/>
+  		<result column="JOIN_DATE" property="joinDate"/>
+  		<result column="READ_DATE" property="readDate"/>
+  		<result column="ALARM" property="alarm"/>
+  		
+  		<association property="memberDTO" javaType="MemberDTO">
+  			<id column="USER_NO" property="userNo"/>
+  			<result column="USER_NICKNAME" property="userNickname"/>
+  		</association>
+  		
+  		<association property="profileDTO" javaType="ProfileDTO">
+	  		<id column="FILE_NO" property="fileNo"/>
+	  		<result column="FILE_NAME" property="fileName"/>
+	  		<result column="ORI_NAME" property="oriName"/>
+  		</association>
+  	</collection>
+  </resultMap>
+  
+  <select id="getMessages"
+        resultType="ChatroomMessageDTO">
+
+    SELECT
+        "MESSAGE_NO",
+        "ROOM_NO",
+        "USER_NO",
+        "MESSAGE_CONTENT",
+        "MESSAGE_TYPE",
+        "MESSAGE_DATE",
+        "READ_COUNT"
+
+    FROM "CHATROOM_MESSAGE"
+
+    WHERE "ROOM_NO" = #{roomNo}
+
+    ORDER BY "MESSAGE_DATE" ASC
+
+    OFFSET #{startNum} ROWS
+    FETCH NEXT #{perPage} ROWS ONLY
+
+</select>
+  
+  <insert id="room" parameterType="ChatroomDTO" useGeneratedKeys="true" keyProperty="roomNo" >
+  	INSERT INTO "CHATROOM"
+  	VALUES (
+  	default,
+  	#{roomType},
+  	now()
+  	)
+  </insert>
+  
+  <insert id="roomMember" parameterType="ChatroomMemberDTO">
+  	INSERT INTO "CHATROOM_MEMBER"
+  	VALUES (
+  	#{userNo},
+  	#{roleNo},
+  	now(),
+  	now(),
+  	#{alarm},
+  	#{roomNo}
+  	)
+  </insert>
+  
+  <insert id="chat" parameterType="ChatroomMessageDTO" useGeneratedKeys="true" keyProperty="messageNo">
+  	INSERT INTO "CHATROOM_MESSAGE"
+  	VALUES (
+  	default,
+  	#{userNo},
+  	#{messageContent},
+  	'1:1',
+  	now(),
+  	0,
+  	#{roomNo}
+  	)
+  </insert>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  </mapper>
