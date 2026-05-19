@@ -7,13 +7,14 @@
 
 	<insert id="follow" parameterType="FollowDTO"
 		useGeneratedKeys="true" keyProperty="followNo">
-		INSERT INTO "FOLLOW"
+		INSERT INTO "FOLLOW" ("FOLLOW_NO", "USER_FOLLOWER", "FOLLOW_DATE", "USER_FOLLOWING")
 		VALUES (
-		default,
+		#{followNo},
 		#{userFollower},
 		now(),
 		#{userFollowing}
 		)
+		ON CONFLICT ("USER_FOLLOWER", "USER_FOLLOWING") DO NOTHING
 	</insert>
 
 	<select id="detail" parameterType="FollowDTO"

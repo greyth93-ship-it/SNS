@@ -38,11 +38,12 @@ public class FollowController {
 	    
 	    followService.follow(followDTO);
 
-		// 알림 발송: 본인에게 팔로우한 경우는 제외
+		// 알림 발송
 		try {
 			PushDTO push = new PushDTO();
 
 			Long receiver = null;
+			
 			if (followDTO.getMemberDTO() != null && followDTO.getMemberDTO().getUserNo() != null) {
 				receiver = followDTO.getMemberDTO().getUserNo();
 			} else if (followDTO.getUserFollowing() != null) {
