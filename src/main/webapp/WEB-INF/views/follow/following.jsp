@@ -47,7 +47,8 @@
 												</a>
 												<div class="user-actions mt-2">
 													<c:if test="${u.mutual}">
-														<a href="/chat/detail?userNo=${u.memberDTO.userNo}&currentUserNo=${currentUserNo}" class="btn btn-sm btn-primary btn-chat-trigger" data-user-no="${u.memberDTO.userNo}">채팅</a>
+														<a class="btn btn-sm btn-primary"
+															href="{pageContext.request.contextPath}/chatroom/create?targetUserNo=${u.memberDTO.userNo}">채팅</a>
 													</c:if>
 												</div>
 											</div>
