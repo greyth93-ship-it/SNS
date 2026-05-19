@@ -105,6 +105,12 @@
     FETCH NEXT #{perPage} ROWS ONLY
 
 </select>
+
+<select id="totalMessages" resultType="long">
+    SELECT COUNT(*)
+    FROM "CHATROOM_MESSAGE"
+    WHERE "ROOM_NO" = #{roomNo}
+</select>
   
   <insert id="room" parameterType="ChatroomDTO" useGeneratedKeys="true" keyProperty="roomNo" >
   	INSERT INTO "CHATROOM"

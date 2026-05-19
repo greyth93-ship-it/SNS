@@ -66,6 +66,9 @@ public class MemberController {
 	    // 현재 로그인한 사람과 페이지 주인의 userNo가 같은지 여부 (JSP에서 버튼 분기 처리용)
 	    boolean isMine = targetUserNo.equals(loginMember.getUserNo());
 	    
+	    MemberDTO targetUser = memberServiceImpl.detail(loginMember);
+	    
+	    model.addAttribute("member",targetUser);
 	    model.addAttribute("myposts", list);
 	    model.addAttribute("pager", pager);
 	    model.addAttribute("isMine", isMine); 
