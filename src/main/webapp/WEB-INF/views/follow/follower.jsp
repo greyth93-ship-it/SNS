@@ -68,7 +68,7 @@
 
 													<c:if test="${u.mutual}">
 														<a class="btn btn-sm btn-primary"
-															href="{pageContext.request.contextPath}/chatroom/create?targetUserNo=${u.memberDTO.userNo}">채팅</a>
+															href="${pageContext.request.contextPath}/chat/create?targetUserNo=${u.memberDTO.userNo}">채팅</a>
 													</c:if>
 												</div>
 											</div>
