@@ -11,7 +11,7 @@
 <link rel="stylesheet" type="text/css" href="/css/feed-search.css">
 </head>
 
-<body class="search-page">
+<body class="search-page" data-current-user-no="${currentUserNo}">
 	<div id="wrapper">
 		<c:import url="/WEB-INF/views/temp/sidebar.jsp"></c:import>
 		<div id="content-wrapper" class="d-flex flex-column">
@@ -33,31 +33,35 @@
 								</form>
 							</div>
 
-							<c:choose>
-								<c:when test="${not empty memberList}">
-									<div class="user-grid">
-										<c:forEach items="${memberList}" var="u">
-											<a href="/member/mypage?userNo=${u.userNo}" class="user-card-link">
-												<div class="user-card">
-													<div class="user-avatar-wrapper">
-														<img src="${not empty u.profileDTO and not empty u.profileDTO.fileName ? '/files/member/'.concat(u.profileDTO.fileName) : '/img/default_user.avif'}" 
-															 onerror="this.src='/img/default_user.avif'" alt="profile">
-													</div>
-													<div class="user-info">
-														<div class="user_nickname">${u.userNickname}</div>
-														<div class="user_no">@${u.userNo}</div>
-													</div>
+							<c:if test="${not empty memberList}">
+								<div class="user-grid">
+									<c:forEach items="${memberList}" var="u">
+										<div class="user-card">
+											<a href="/member/mypage?userNo=${u.userNo}"
+											   class="user-card-link">
+												<div class="user-avatar-wrapper">
+													<img src="${not empty u.profileDTO and not empty u.profileDTO.fileName ? '/files/member/'.concat(u.profileDTO.fileName) : '/img/default_user.avif'}"
+														 onerror="this.src='/img/default_user.avif'" alt="profile">
+												</div>
+												<div class="user-info">
+													<div class="user_nickname">${u.userNickname}</div>
+													<div class="user_no">@${u.userNo}</div>
 												</div>
 											</a>
-										</c:forEach>
-									</div>
-								</c:when>
-								<c:otherwise>
-									<div class="search-empty">
-										검색 결과가 없습니다.
-									</div>
-								</c:otherwise>
-							</c:choose>
+											<div class="user-actions mt-2">
+												<c:if test="${mutualMap[u.userNo]}">
+													<a href="/chat/create?targetUserNo=${u.userNo}" class="btn btn-sm btn-primary btn-chat-trigger">채팅</a>
+												</c:if>
+											</div>
+										</div>
+									</c:forEach>
+								</div>
+							</c:if>
+							<c:if test="${empty memberList and not empty keyword}">
+								<div class="search-empty">
+									검색 결과가 없습니다.
+								</div>
+							</c:if>
 						</div>
 					</div>
 				</div>
@@ -66,5 +70,6 @@
 	</div>
 
 	<c:import url="/WEB-INF/views/temp/footer_script.jsp"></c:import>
+	<script src="/js/mutual.js"></script>
 </body>
 </html>

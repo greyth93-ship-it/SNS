@@ -71,6 +71,15 @@
 		font-size: 9px;
 		color: #fff;
 	}
+
+	.push-follow-btn {
+		white-space: nowrap;
+		flex-shrink: 0;
+	}
+
+	.push-follow-btn.btn-secondary {
+		cursor: default;
+	}
 </style>
 </head>
 
@@ -99,26 +108,42 @@
 											<c:set var="itemClass" value="push-unread" />
 										</c:otherwise>
 									</c:choose>
-									<a href="javascript:void(0);" class="list-group-item list-group-item-action d-flex align-items-center ${itemClass}"
+									<c:choose>
+										<c:when test="${p.pushType eq 'FOLLOW'}">
+											<c:set var="moveUrl" value="/feed/mypage?userNo=${p.senderNo}" />
+										</c:when>
+										<c:otherwise>
+											<c:set var="moveUrl" value="/post/detail?postNo=${p.postNo}" />
+										</c:otherwise>
+									</c:choose>
+									<div class="list-group-item list-group-item-action d-flex align-items-center justify-content-between ${itemClass}"
 										data-push-no="${p.pushNo}"
-										data-move-url="/post/detail?postNo=${p.postNo}"
-										onclick="handleNotificationClick(this.dataset.pushNo, this.dataset.moveUrl)">
-										<div class="mr-3">
-											<div class="push-avatar-wrap">
-												<div class="push-avatar">
-													<img src="${not empty p.senderProfileFileName ? '/files/member/'.concat(p.senderProfileFileName) : '/img/default_user.avif'}"
-														onerror="this.src='/img/default_user.avif'" alt="profile">
+									data-move-url="${moveUrl}">
+										<a href="javascript:void(0);" class="d-flex align-items-center flex-grow-1 text-decoration-none text-reset pr-2"
+											onclick="handleNotificationClick(this.parentElement.dataset.pushNo, this.parentElement.dataset.moveUrl)">
+											<div class="mr-3">
+												<div class="push-avatar-wrap">
+													<div class="push-avatar">
+														<img src="${not empty p.senderProfileFileName ? '/files/member/'.concat(p.senderProfileFileName) : '/img/default_user.avif'}"
+															onerror="this.src='/img/default_user.avif'" alt="profile">
+													</div>
+													<c:if test="${p.pushType eq 'LIKE'}">
+														<span class="push-like-badge"><i class="fas fa-heart"></i></span>
+													</c:if>
 												</div>
-												<c:if test="${p.pushType eq 'LIKE'}">
-													<span class="push-like-badge"><i class="fas fa-heart"></i></span>
-												</c:if>
 											</div>
-										</div>
-										<div>
-											<div class="small push-date">${p.pushDate}</div>
-											<div class="push-message">${p.pushMsg}</div>
-										</div>
-									</a>
+											<div>
+												<div class="small push-date">${p.pushDate}</div>
+												<div class="push-message">${p.pushMsg}</div>
+											</div>
+										</a>
+										<c:if test="${p.pushType eq 'FOLLOW'}">
+											<button type="button" class="btn btn-sm ${p.followedByMe ? 'btn-secondary' : 'btn-outline-primary'} push-follow-btn"
+												data-sender-no="${p.senderNo}"
+												data-follow-state="${p.followedByMe ? 'following' : 'not-following'}"
+												onclick="toggleFollowFromAlarm(event, this.dataset.senderNo, this)">${p.followedByMe ? '팔로잉' : '팔로우'}</button>
+										</c:if>
+									</div>
 								</c:forEach>
 								<c:if test="${empty pushList}">
 									<div class="list-group-item text-center small text-gray-500">새로운 알림이 없습니다.</div>

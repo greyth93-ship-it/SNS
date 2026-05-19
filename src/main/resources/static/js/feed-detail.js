@@ -802,29 +802,12 @@ async function deletePost(event, feedNo) {
     form.append('feedNo', feedNo);
     try {
         const resp = await fetch('/post/delete', { method: 'POST', credentials: 'same-origin', body: form });
-        if (!resp.ok) {
-            console.error('deletePost: network error', resp.status, resp.statusText);
-            alert('삭제 중 네트워크 오류가 발생했습니다.');
-            return;
-        }
-        const json = await resp.json();
-        if (json.result === 1) {
+        if (resp.ok) {
+            if (resp.redirected) { location.href = resp.url; return; }
             location.reload();
             return;
         }
-        if (json.result === -1) {
-            alert('로그인 후 삭제할 수 있습니다.');
-            location.href = '/member/login';
-            return;
-        }
-        if (json.result === -2) {
-            alert('삭제 권한이 없습니다.');
-            return;
-        }
-        alert('삭제에 실패했습니다.');
     } catch (e) {
-        console.error('deletePost: fetch failed', e);
-        alert('삭제 중 오류가 발생했습니다.');
     }
 }
 

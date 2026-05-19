@@ -36,6 +36,187 @@ function getSenderAvatarHtml(item) {
     `;
 }
 
+function followBackFromAlarm(event, senderNo, button) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    if (!senderNo) {
+        return;
+    }
+
+        const body = 'userFollowing=' + encodeURIComponent(senderNo);
+        fetch('/follow/follow', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: body
+        })
+            .then(resp => {
+                if (!resp.ok) throw new Error('서버 오류');
+                if (button) {
+                    setFollowButtonState(button, true, senderNo);
+                }
+
+                if (typeof loadAlarmList === 'function') loadAlarmList();
+                if (typeof loadAlarmItems === 'function') loadAlarmItems();
+
+                if (window.Swal) {
+                    Swal.fire({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1800, timerProgressBar: true, icon: 'success', title: '팔로우했습니다.' });
+                }
+            })
+            .catch(err => {
+                console.error('follow alarm error', err);
+                if (button) {
+                    button.disabled = false;
+                    button.textContent = '팔로우';
+                }
+            });
+
+    fetch('/follow/follow', {
+        method: 'POST',
+        credentials: 'same-origin',
+        body: fd
+    })
+        .then(resp => {
+            if (button) {
+                setFollowButtonState(button, true, senderNo);
+            }
+
+            if (typeof loadAlarmList === 'function') {
+                loadAlarmList();
+            }
+
+            if (typeof loadAlarmItems === 'function') {
+                loadAlarmItems();
+            }
+
+            if (window.Swal) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 1800,
+                    timerProgressBar: true,
+                    icon: 'success',
+                    title: '팔로우했습니다.'
+                });
+            }
+
+            return resp;
+        })
+        .catch(err => {
+            console.error('follow alarm error', err);
+            if (button) {
+                button.disabled = false;
+                button.textContent = '팔로우';
+            }
+        });
+}
+
+function setFollowButtonState(button, isFollowing, senderNo) {
+    if (!button) {
+        return;
+    }
+
+    button.disabled = false;
+    button.textContent = isFollowing ? '팔로잉' : '팔로우';
+    button.classList.toggle('btn-secondary', isFollowing);
+    button.classList.toggle('btn-outline-primary', !isFollowing);
+    button.dataset.followState = isFollowing ? 'following' : 'not-following';
+    button.onclick = function(e) {
+        toggleFollowFromAlarm(e, senderNo, button);
+    };
+}
+
+function unfollowFromAlarm(event, senderNo, button) {
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+    }
+
+    if (!senderNo) {
+        return;
+    }
+
+        const body = 'userFollowing=' + encodeURIComponent(senderNo);
+        fetch('/follow/delete', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: body
+        })
+            .then(resp => {
+                if (!resp.ok) throw new Error('서버 오류');
+                return resp.text();
+            })
+            .then(text => {
+                const num = parseInt(text);
+                if (!isNaN(num) && num > 0) {
+                    if (button) setFollowButtonState(button, false, senderNo);
+                    if (typeof loadAlarmList === 'function') loadAlarmList();
+                    if (typeof loadAlarmItems === 'function') loadAlarmItems();
+                    if (window.Swal) Swal.fire({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1800, timerProgressBar: true, icon: 'success', title: '팔로우를 취소했습니다.' });
+                } else {
+                    throw new Error('삭제 실패');
+                }
+            })
+            .catch(err => {
+                console.error('unfollow alarm error', err);
+            });
+
+    fetch('/follow/delete', {
+        method: 'POST',
+        credentials: 'same-origin',
+        body: fd
+    })
+        .then(resp => {
+            if (button) {
+                setFollowButtonState(button, false, senderNo);
+            }
+
+            if (window.Swal) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 1800,
+                    timerProgressBar: true,
+                    icon: 'success',
+                    title: '팔로우를 취소했습니다.'
+                });
+            }
+
+            return resp;
+        })
+        .catch(err => {
+            console.error('unfollow alarm error', err);
+        });
+}
+
+function toggleFollowFromAlarm(event, senderNo, button) {
+    const state = button && button.dataset ? button.dataset.followState : '';
+    if (state === 'following') {
+        unfollowFromAlarm(event, senderNo, button);
+        return;
+    }
+
+    followBackFromAlarm(event, senderNo, button);
+}
+
+function getNotificationMoveUrl(item) {
+    if (!item) {
+        return '#';
+    }
+
+    if (item.pushType === 'FOLLOW') {
+        return item.senderNo ? '/feed/mypage?userNo=' + item.senderNo : '#';
+    }
+
+    return item.postNo ? '/post/detail?postNo=' + item.postNo : '#';
+}
+
 // 드롭다운이 열릴 때 알림 항목들을 로드하여 보여줍니다.
 function loadAlarmItems() {
     const container = document.getElementById("alarm-items-container");
@@ -58,18 +239,22 @@ function loadAlarmItems() {
                 const itemStyle = unread ? "" : "opacity:0.6;";
                 const dateStyle = unread ? "font-weight:700; color:#5a5c69;" : "font-weight:400; color:#858796;";
                 const messageStyle = unread ? "font-weight:700; color:#212529;" : "font-weight:400; color:#858796;";
+                const moveUrl = getNotificationMoveUrl(item);
+                const followButton = item.pushType === 'FOLLOW'
+                    ? `<button type="button" class="btn btn-sm ${item.followedByMe ? 'btn-secondary' : 'btn-outline-primary'} ml-3 flex-shrink-0" style="white-space:nowrap;" data-follow-state="${item.followedByMe ? 'following' : 'not-following'}" onclick="toggleFollowFromAlarm(event, ${item.senderNo}, this)">${item.followedByMe ? '팔로잉' : '팔로우'}</button>`
+                    : '';
 
                 const alarmHtml = `
-                    <a class="dropdown-item d-flex align-items-center" 
-                       href="javascript:void(0);" 
-                       style="${itemStyle}"
-                       onclick="handleNotificationClick(${item.pushNo}, '/post/detail?postNo=${item.postNo}')">
-                        ${getSenderAvatarHtml(item)}
-                        <div>
-                            <div class="small" style="${dateStyle}">${item.pushDate || ''}</div>
-                            <span style="${messageStyle}">${item.pushMsg || ''}</span>
-                        </div>
-                    </a>
+                    <div class="dropdown-item d-flex align-items-center justify-content-between" style="${itemStyle}">
+                        <a href="javascript:void(0);" class="d-flex align-items-center flex-grow-1 text-decoration-none text-reset pr-2" onclick="handleNotificationClick(${item.pushNo}, '${moveUrl}')">
+                            ${getSenderAvatarHtml(item)}
+                            <div>
+                                <div class="small" style="${dateStyle}">${item.pushDate || ''}</div>
+                                <span style="${messageStyle}">${item.pushMsg || ''}</span>
+                            </div>
+                        </a>
+                        ${followButton}
+                    </div>
                 `;
                 container.insertAdjacentHTML('beforeend', alarmHtml);
             });

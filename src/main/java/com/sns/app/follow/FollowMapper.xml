@@ -14,7 +14,6 @@
 		now(),
 		#{userFollowing}
 		)
-
 	</insert>
 
 	<select id="detail" parameterType="FollowDTO"
@@ -63,7 +62,8 @@
 	<delete id="delete" parameterType="FollowDTO">
 		DELETE FROM "FOLLOW"
 		WHERE
-		FOLLOW_NO = #{followNo}
+		"USER_FOLLOWER" = #{userFollower}
+		AND "USER_FOLLOWING" = #{userFollowing}
 	</delete>
 
 	<select id="followingCount"
@@ -186,6 +186,15 @@
        AND f1."USER_FOLLOWER" = f2."USER_FOLLOWING"
     WHERE f1."USER_FOLLOWER" = #{userFollower}   
       AND f1."USER_FOLLOWING" = #{userFollowing}
+	</select>
+
+	<select id="isFollowing" parameterType="FollowDTO" resultType="boolean">
+		SELECT EXISTS (
+			SELECT 1
+			FROM "FOLLOW"
+			WHERE "USER_FOLLOWER" = #{userFollower}
+			AND "USER_FOLLOWING" = #{userFollowing}
+		)
 	</select>
 
 

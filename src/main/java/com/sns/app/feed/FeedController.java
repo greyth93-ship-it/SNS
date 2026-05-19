@@ -16,6 +16,9 @@ import com.sns.app.feed.post.PostService;
 import com.sns.app.feed.story.StoryService;
 import com.sns.app.member.MemberDTO;
 import com.sns.app.member.MemberService;
+import com.sns.app.follow.FollowService;
+import java.util.HashMap;
+import java.util.Map;
 import com.sns.app.pager.Pager;
 
 @Controller
@@ -30,6 +33,9 @@ public class FeedController {
 
 	@Autowired
 	private MemberService memberService;
+
+	@Autowired
+	private FollowService followService;
 
 	@GetMapping("list")
 	public String list(Pager pager, Model model, @AuthenticationPrincipal MemberDTO memberDTO) throws Exception {
@@ -181,14 +187,33 @@ public class FeedController {
 	}
 
 	@GetMapping("userSearch")
-	public String userSearch(@RequestParam(value = "keyword", required = false) String keyword, Model model)
-			throws Exception {
+	public String userSearch(@RequestParam(value = "keyword", required = false) String keyword, Model model,
+			@AuthenticationPrincipal MemberDTO memberDTO) throws Exception {
 
 		// 회원 검색 서비스 호출
 		List<MemberDTO> memberList = memberService.search(keyword);
 
 		model.addAttribute("memberList", memberList);
 		model.addAttribute("keyword", keyword);
+
+		// 현재 로그인한 사용자가 있는 경우, 각 검색 결과와의 상호 팔로우 여부 계산
+		Map<Long, Boolean> mutualMap = new HashMap<>();
+		if (memberDTO != null) {
+			Long currentUserNo = memberDTO.getUserNo();
+			for (MemberDTO m : memberList) {
+				Long otherNo = m.getUserNo();
+				boolean mutual = false;
+				if (otherNo != null) {
+					boolean aFollowsB = followService.isFollowing(currentUserNo, otherNo);
+					boolean bFollowsA = followService.isFollowing(otherNo, currentUserNo);
+					mutual = aFollowsB && bFollowsA;
+				}
+				mutualMap.put(otherNo, mutual);
+			}
+			model.addAttribute("currentUserNo", memberDTO.getUserNo());
+		}
+
+		model.addAttribute("mutualMap", mutualMap);
 
 		return "feed/userSearch";
 	}

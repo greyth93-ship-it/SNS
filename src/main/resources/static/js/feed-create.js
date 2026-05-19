@@ -3,6 +3,7 @@ const fileInput = document.getElementById('fileInput');
 const preview = document.getElementById('imagePreview');
 const placeholder = document.getElementById('placeholder');
 const form = document.getElementById('uploadForm');
+const replaceImagesBtn = document.getElementById('replaceImagesBtn');
 const feedType = form.dataset.feedType;
 const isPost = feedType === 'post';
 const orderToggleBtn = document.getElementById('orderToggleBtn');
@@ -11,6 +12,7 @@ const orderDropList = document.getElementById('orderDropList');
 const orderModalCancel = document.getElementById('orderModalCancel');
 const orderModalApply = document.getElementById('orderModalApply');
 const orderModalCloseButtons = document.querySelectorAll('[data-order-close]');
+const currentPhotoSection = document.getElementById('currentPhotoSection');
 
 let postItems = [];
 let postCropper = null;
@@ -23,8 +25,47 @@ const MAX_POST_IMAGES = 5;
 function makePostObjectUrl(file) { return URL.createObjectURL(file); }
 
 function revokePostUrls() {
-    postItems.forEach(item => { if (item.objectUrl) URL.revokeObjectURL(item.objectUrl); });
+    postItems.forEach(item => { if (item.objectUrl && item.objectUrl.startsWith('blob:')) URL.revokeObjectURL(item.objectUrl); });
 }
+
+// Open existing images (from server) in the post editor
+function openExistingPostImages(fileNames, startIndex = 0) {
+    if (!Array.isArray(fileNames) || fileNames.length === 0) return;
+    if (isPost && fileNames.length > MAX_POST_IMAGES) fileNames = fileNames.slice(0, MAX_POST_IMAGES);
+
+    if (postCropper) postCropper.destroy();
+    if (cropper) cropper.destroy();
+    placeholder.style.display = 'none';
+    if (currentPhotoSection) currentPhotoSection.style.display = 'none';
+    revokePostUrls();
+
+    postItems = fileNames.map(fn => ({
+        id: Date.now() + Math.random().toString(36).substr(2, 9),
+        file: null,
+        objectUrl: `/files/post/${fn}`,
+        cropData: null
+    }));
+    postCurrentIndex = Math.max(0, startIndex);
+    renderPostPreview();
+}
+
+if (replaceImagesBtn && fileInput) {
+    replaceImagesBtn.addEventListener('click', () => {
+        fileInput.value = '';
+        fileInput.click();
+    });
+}
+
+// Delegate clicks on existing images to open crop UI
+document.addEventListener('click', (e) => {
+    const img = e.target.closest && e.target.closest('.existing-image');
+    if (!img) return;
+    // collect all existing images in the container to preserve order
+    const imgs = Array.from(document.querySelectorAll('.existing-image'));
+    const fileNames = imgs.map(i => i.dataset.filename).filter(Boolean);
+    const idx = fileNames.indexOf(img.dataset.filename);
+    openExistingPostImages(fileNames, idx >= 0 ? idx : 0);
+});
 
 function saveCurrentPostCrop() {
     if (postCropper && postItems[postCurrentIndex]) {
@@ -103,6 +144,7 @@ fileInput.addEventListener('change', function(e) {
     }
 
     placeholder.style.display = 'none';
+    if (currentPhotoSection) currentPhotoSection.style.display = 'none';
     if (postCropper) postCropper.destroy();
     if (cropper) cropper.destroy();
 

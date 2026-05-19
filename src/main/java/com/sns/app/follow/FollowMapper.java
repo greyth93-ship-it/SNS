@@ -27,4 +27,6 @@ public interface FollowMapper {
 
 	public List<FollowDTO> isMatchedFollow(FollowDTO followDTO);
 
+	public Boolean isFollowing(FollowDTO followDTO) throws Exception;
+
 }

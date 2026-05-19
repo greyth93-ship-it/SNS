@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sns.app.member.MemberDTO;
+import com.sns.app.follow.FollowService;
 import com.sns.app.pager.Pager;
 import org.springframework.ui.Model;
 
@@ -24,14 +25,29 @@ public class PushController {
     @Autowired
     private PushService pushService;
 
+    @Autowired
+    private FollowService followService;
+
    
     @GetMapping("/list")
     @ResponseBody
     public List<PushDTO> getPushList(@AuthenticationPrincipal MemberDTO memberDTO) {
         if (memberDTO == null) return null;
         
-        // 현재 로그인한 유저(Receiver)의 알림 목록을 가져옵니다.
-        return pushService.getPushListByReceiver(memberDTO.getUserNo());
+        List<PushDTO> list = pushService.getPushListByReceiver(memberDTO.getUserNo());
+        for (PushDTO push : list) {
+            if ("FOLLOW".equals(push.getPushType()) && push.getSenderNo() != null) {
+                try {
+                    push.setFollowedByMe(followService.isFollowing(memberDTO.getUserNo(), push.getSenderNo()));
+                } catch (Exception e) {
+                    push.setFollowedByMe(false);
+                }
+            } else {
+                push.setFollowedByMe(false);
+            }
+        }
+
+        return list;
     }
 
    
@@ -71,6 +87,19 @@ public class PushController {
         pager.setUserNo(memberDTO.getUserNo());
         int unreadCount = pushService.countUnreadByReceiver(memberDTO.getUserNo());
         List<PushDTO> list = pushService.getAllPushListByReceiver(pager);
+
+        for (PushDTO push : list) {
+            if ("FOLLOW".equals(push.getPushType()) && push.getSenderNo() != null) {
+                try {
+                    push.setFollowedByMe(followService.isFollowing(memberDTO.getUserNo(), push.getSenderNo()));
+                } catch (Exception e) {
+                    push.setFollowedByMe(false);
+                }
+            } else {
+                push.setFollowedByMe(false);
+            }
+        }
+
         model.addAttribute("pager", pager);
         model.addAttribute("unreadCount", unreadCount);
         model.addAttribute("pushList", list);
