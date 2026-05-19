@@ -39,12 +39,25 @@ public class FollowService {
 	}
 
 	public List<FollowDTO> isMatchedFollow(Long userNo, Long currentUserNo) throws Exception {
-		
+
 		FollowDTO followDTO = new FollowDTO();
 		followDTO.setUserFollower(currentUserNo);
 		followDTO.setUserFollowing(userNo);
 
 		return followMapper.isMatchedFollow(followDTO);
+	}
+
+	public boolean isFollowing(Long userFollower, Long userFollowing) throws Exception {
+		FollowDTO followDTO = new FollowDTO();
+		followDTO.setUserFollower(userFollower);
+		followDTO.setUserFollowing(userFollowing);
+		Boolean result = followMapper.isFollowing(followDTO);
+		
+		if (result != null && result) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 }
