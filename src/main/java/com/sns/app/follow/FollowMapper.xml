@@ -7,9 +7,8 @@
 
 	<insert id="follow" parameterType="FollowDTO"
 		useGeneratedKeys="true" keyProperty="followNo">
-		INSERT INTO "FOLLOW" ("FOLLOW_NO", "USER_FOLLOWER", "FOLLOW_DATE", "USER_FOLLOWING")
+		INSERT INTO "FOLLOW" ("USER_FOLLOWER", "FOLLOW_DATE", "USER_FOLLOWING")
 		VALUES (
-		#{followNo},
 		#{userFollower},
 		now(),
 		#{userFollowing}
