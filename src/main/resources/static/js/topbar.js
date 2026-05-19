@@ -206,6 +206,11 @@ function toggleFollowFromAlarm(event, senderNo, button) {
 }
 
 function getNotificationMoveUrl(item) {
+    console.log(item);
+    console.log("pushMsg:", item.pushMsg);
+    console.log("postNo:", item.postNo);
+    console.log("pushType:", item.pushType);
+
     if (!item) {
         return '#';
     }
@@ -214,7 +219,18 @@ function getNotificationMoveUrl(item) {
         return item.senderNo ? '/member/mypage?userNo=' + item.senderNo : '#';
     }
 
-    return item.postNo ? '/post/detail?postNo=' + item.postNo : '#';
+    if (!item.postNo) {
+        return '#';
+    }
+
+    const msg = (item.pushMsg || '').trim();
+    console.log("msg.includes('스토리'):", msg.includes('스토리'));
+
+    if (msg.includes('스토리')) {
+        return '/feed/detail/story/' + item.postNo;
+    }
+
+    return '/feed/detail/post/' + item.postNo;
 }
 
 // 드롭다운이 열릴 때 알림 항목들을 로드하여 보여줍니다.
