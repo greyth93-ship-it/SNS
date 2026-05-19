@@ -22,6 +22,8 @@ public interface PostMapper extends FeedMapper {
 
 	public int deleteThumb(FeedDTO feedDTO) throws Exception;
 
+	public int deleteThumbForPost(FeedDTO feedDTO) throws Exception;
+
 	public int syncThumbCount(FeedDTO feedDTO) throws Exception;
 	
 	public Long getMyCount(Pager pager) throws Exception;

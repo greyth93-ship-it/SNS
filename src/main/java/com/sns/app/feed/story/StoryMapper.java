@@ -14,6 +14,7 @@ public interface StoryMapper extends FeedMapper {
 	public Long countThumbByUser(FeedDTO feedDTO) throws Exception;
 	public int insertThumb(FeedDTO feedDTO) throws Exception;
 	public int deleteThumb(FeedDTO feedDTO) throws Exception;
+	public int deleteThumbForStory(FeedDTO feedDTO) throws Exception;
 	public int syncThumbCount(FeedDTO feedDTO) throws Exception;
 	
 }

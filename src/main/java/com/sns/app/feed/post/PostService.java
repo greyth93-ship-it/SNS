@@ -154,6 +154,10 @@ public class PostService implements FeedService {
 		// HDD 파일 삭제를 위해 상세 정보 조회
 		feedDTO = postMapper.detail(feedDTO);
 
+		if (feedDTO == null) {
+			return 0;
+		}
+
 		if (feedDTO.getList() != null) {
 			for (FileDTO fileDTO : feedDTO.getList()) {
 				fileManager.fileDelete(name, fileDTO);
@@ -162,6 +166,8 @@ public class PostService implements FeedService {
 			// 기존에 이미 있는 매퍼를 사용해서 POST_IMG 먼저 삭제
 			postMapper.fileDeleteFor(feedDTO.getList());
 		}
+
+		postMapper.deleteThumbForPost(feedDTO);
 
 		return postMapper.delete(feedDTO);
 	}

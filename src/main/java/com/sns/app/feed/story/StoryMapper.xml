@@ -243,6 +243,11 @@
 		AND "USER_NO" = #{currentUserNo}
 	</delete>
 
+	<delete id="deleteThumbForStory" parameterType="FeedDTO">
+		DELETE FROM "STORY_LIKE"
+		WHERE "FEED_NO" = #{feedNo}
+	</delete>
+
 	<update id="syncThumbCount" parameterType="FeedDTO">
 		UPDATE "STORY"
 		SET

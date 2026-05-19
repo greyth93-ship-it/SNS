@@ -15,13 +15,14 @@
 	</sql>
 
 	<select id="getCount" resultType="Long" parameterType="Pager">
-		SELECT COUNT("FEED_NO")
+		SELECT
+		COUNT("FEED_NO")
 		FROM "POST" P0
 		WHERE EXISTS (
-			SELECT 1
-			FROM "FOLLOW" F
-			WHERE F."USER_FOLLOWER" = #{currentUserNo}
-			AND F."USER_FOLLOWING" = P0."USER_NO"
+		SELECT 1
+		FROM "FOLLOW" F
+		WHERE F."USER_FOLLOWER" = #{currentUserNo}
+		AND F."USER_FOLLOWING" = P0."USER_NO"
 		)
 	</select>
 
@@ -43,14 +44,16 @@
 		ELSE
 		TRUE
 		END AS "LIKED_BY_ME",
-		CASE WHEN P."USER_NO" = #{currentUserNo} THEN TRUE
+		CASE WHEN P."USER_NO" = #{currentUserNo} THEN
+		TRUE
 		WHEN EXISTS (
-			SELECT 1
-			FROM "FOLLOW" F
-			WHERE F."USER_FOLLOWER" = #{currentUserNo}
-			AND F."USER_FOLLOWING" = P."USER_NO"
+		SELECT 1
+		FROM "FOLLOW" F
+		WHERE F."USER_FOLLOWER" = #{currentUserNo}
+		AND F."USER_FOLLOWING" = P."USER_NO"
 		) THEN TRUE
-		ELSE FALSE END AS "FOLLOWED_BY_ME",
+		ELSE FALSE END AS
+		"FOLLOWED_BY_ME",
 		#{currentUserNo} AS "CURRENT_USER_NO",
 		S."USER_NICKNAME",
 		UR."ROLE_NO",
@@ -103,46 +106,48 @@
 	</select>
 
 	<select id="list" resultMap="detailResult" parameterType="Pager">
-    SELECT
-        P0.*,
-        PI."FILE_NO", PI."FILE_NAME", PI."ORI_NAME",
-        UI."FILE_NO" AS "PROFILE_FILE_NO",
-        UI."FILE_NAME" AS "PROFILE_FILE_NAME",
-        UI."ORI_NAME" AS "PROFILE_ORI_NAME",
-        CASE WHEN PL."USER_NO" IS NULL THEN FALSE ELSE TRUE END AS "LIKED_BY_ME",
+		SELECT
+		P0.*,
+		PI."FILE_NO", PI."FILE_NAME", PI."ORI_NAME",
+		UI."FILE_NO" AS "PROFILE_FILE_NO",
+		UI."FILE_NAME" AS "PROFILE_FILE_NAME",
+		UI."ORI_NAME" AS "PROFILE_ORI_NAME",
+		CASE WHEN PL."USER_NO" IS NULL THEN FALSE ELSE TRUE END AS "LIKED_BY_ME",
 		CASE WHEN P0."USER_NO" = #{currentUserNo} THEN TRUE
 		WHEN EXISTS (
-			SELECT 1
-			FROM "FOLLOW" F
-			WHERE F."USER_FOLLOWER" = #{currentUserNo}
-			AND F."USER_FOLLOWING" = P0."USER_NO"
+		SELECT 1
+		FROM "FOLLOW" F
+		WHERE F."USER_FOLLOWER" = #{currentUserNo}
+		AND F."USER_FOLLOWING" = P0."USER_NO"
 		) THEN TRUE
-		ELSE FALSE END AS "FOLLOWED_BY_ME",
+		ELSE FALSE END AS
+		"FOLLOWED_BY_ME",
 		#{currentUserNo} AS "CURRENT_USER_NO",
-        S."USER_NICKNAME",
-        UR."ROLE_NO",
-        R."ROLE_NAME"
-    FROM (
-        SELECT P_SUB."FEED_NO"
-        FROM "POST" P_SUB
-        WHERE EXISTS (
-            SELECT 1
-            FROM "FOLLOW" F
-            WHERE F."USER_FOLLOWER" = #{currentUserNo}
-            AND F."USER_FOLLOWING" = P_SUB."USER_NO"
-        )
-        ORDER BY P_SUB."FEED_DATE" DESC
-        LIMIT #{perPage} OFFSET #{startNum}
-    ) PAGE
-    JOIN "POST" P0 ON PAGE."FEED_NO" = P0."FEED_NO"
-    LEFT JOIN "POST_IMG" PI ON P0."FEED_NO" = PI."FEED_NO"
-    LEFT JOIN "POST_LIKE" PL ON P0."FEED_NO" = PL."FEED_NO" AND PL."USER_NO" = #{currentUserNo}
-    LEFT JOIN "USER" S ON P0."USER_NO" = S."USER_NO"
-    LEFT JOIN "USER_IMG" UI ON S."USER_NO" = UI."USER_NO"
-    LEFT JOIN "USER_ROLE" UR ON S."USER_NO" = UR."USER_NO"
-    LEFT JOIN "ROLE" R ON UR."ROLE_NO" = R."ROLE_NO"
-    ORDER BY P0."FEED_DATE" DESC, PI."FILE_NO" ASC
-</select>
+		S."USER_NICKNAME",
+		UR."ROLE_NO",
+		R."ROLE_NAME"
+		FROM (
+		SELECT P_SUB."FEED_NO"
+		FROM "POST" P_SUB
+		WHERE EXISTS (
+		SELECT 1
+		FROM "FOLLOW" F
+		WHERE F."USER_FOLLOWER" = #{currentUserNo}
+		AND F."USER_FOLLOWING" = P_SUB."USER_NO"
+		)
+		ORDER BY P_SUB."FEED_DATE" DESC
+		LIMIT #{perPage} OFFSET #{startNum}
+		) PAGE
+		JOIN "POST" P0 ON PAGE."FEED_NO" = P0."FEED_NO"
+		LEFT JOIN "POST_IMG" PI ON P0."FEED_NO" = PI."FEED_NO"
+		LEFT JOIN "POST_LIKE" PL ON P0."FEED_NO" = PL."FEED_NO" AND PL."USER_NO" =
+		#{currentUserNo}
+		LEFT JOIN "USER" S ON P0."USER_NO" = S."USER_NO"
+		LEFT JOIN "USER_IMG" UI ON S."USER_NO" = UI."USER_NO"
+		LEFT JOIN "USER_ROLE" UR ON S."USER_NO" = UR."USER_NO"
+		LEFT JOIN "ROLE" R ON UR."ROLE_NO" = R."ROLE_NO"
+		ORDER BY P0."FEED_DATE" DESC, PI."FILE_NO" ASC
+	</select>
 
 	<select id="detail" parameterType="PostDTO"
 		resultMap="detailResult">
@@ -156,14 +161,16 @@
 		CASE
 		WHEN
 		PL."USER_NO" IS NULL THEN FALSE ELSE TRUE END AS "LIKED_BY_ME",
-		CASE WHEN P0."USER_NO" = #{currentUserNo} THEN TRUE
+		CASE
+		WHEN P0."USER_NO" = #{currentUserNo} THEN TRUE
 		WHEN EXISTS (
-			SELECT 1
-			FROM "FOLLOW" F
-			WHERE F."USER_FOLLOWER" = #{currentUserNo}
-			AND F."USER_FOLLOWING" = P0."USER_NO"
+		SELECT 1
+		FROM "FOLLOW" F
+		WHERE F."USER_FOLLOWER" = #{currentUserNo}
+		AND F."USER_FOLLOWING" = P0."USER_NO"
 		) THEN TRUE
-		ELSE FALSE END AS "FOLLOWED_BY_ME",
+		ELSE FALSE END AS
+		"FOLLOWED_BY_ME",
 		#{currentUserNo} AS "CURRENT_USER_NO",
 		S."USER_NICKNAME",
 		UR."ROLE_NO",
@@ -217,14 +224,16 @@
 		CASE WHEN
 		PL."USER_NO" IS NULL THEN FALSE ELSE
 		TRUE END AS "LIKED_BY_ME",
-		CASE WHEN P."USER_NO" = #{currentUserNo} THEN TRUE
+		CASE
+		WHEN P."USER_NO" = #{currentUserNo} THEN TRUE
 		WHEN EXISTS (
-			SELECT 1
-			FROM "FOLLOW" F
-			WHERE F."USER_FOLLOWER" = #{currentUserNo}
-			AND F."USER_FOLLOWING" = P."USER_NO"
+		SELECT 1
+		FROM "FOLLOW" F
+		WHERE F."USER_FOLLOWER" = #{currentUserNo}
+		AND F."USER_FOLLOWING" = P."USER_NO"
 		) THEN TRUE
-		ELSE FALSE END AS "FOLLOWED_BY_ME",
+		ELSE FALSE END AS
+		"FOLLOWED_BY_ME",
 		#{currentUserNo} AS "CURRENT_USER_NO",
 		S."USER_NICKNAME",
 		UR."ROLE_NO",
@@ -327,6 +336,10 @@
 		WHERE "FEED_NO" = #{feedNo}
 		AND "USER_NO" = #{currentUserNo}
 	</delete>
+	<delete id="deleteThumbForPost" parameterType="FeedDTO">
+		DELETE FROM "POST_LIKE"
+		WHERE "FEED_NO" = #{feedNo}
+	</delete>
 	<update id="syncThumbCount" parameterType="FeedDTO">
 		UPDATE "POST"
 		SET
@@ -339,8 +352,10 @@
 		WHERE "FEED_NO" = #{feedNo}
 	</update>
 	<insert id="createFile" parameterType="FileDTO">
-		INSERT INTO "POST_IMG" ("FEED_NO", "FILE_NAME", "ORI_NAME")
-		VALUES (#{feedNo}, #{fileName}, #{oriName})
+		INSERT INTO "POST_IMG"
+		("FEED_NO", "FILE_NAME", "ORI_NAME")
+		VALUES (#{feedNo}, #{fileName},
+		#{oriName})
 	</insert>
 	<update id="update" parameterType="PostDTO">
 		UPDATE "POST"
@@ -360,13 +375,26 @@
 	</delete>
 
 	<delete id="fileDeleteFor" parameterType="java.util.List">
-		DELETE FROM "POST_IMG"
-		WHERE "FILE_NO" IN
-		<foreach item="item" index="index" collection="list" open="("
-			separator="," close=")">
-			#{item.fileNo}
-		</foreach>
-
+		<if test="list != null and list.size() > 0">
+			DELETE FROM "POST_IMG"
+			WHERE "FILE_NO" IN
+			<foreach item="item" index="index" collection="list" open="("
+				separator="," close=")">
+				<choose>
+					<when
+						test="item != null and item.getClass().getName().contains('DTO') and item.fileNo != null">
+						#{item.fileNo}
+					</when>
+					<when
+						test="item != null and !item.getClass().getName().contains('DTO')">
+						#{item}
+					</when>
+					<otherwise>
+						-1
+					</otherwise>
+				</choose>
+			</foreach>
+		</if>
 	</delete>
 
 	<select id="fileDetail" parameterType="FileDTO"

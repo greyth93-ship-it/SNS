@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.sns.app.feed.FeedDTO;
-import com.sns.app.file.FileDTO;
 import com.sns.app.member.MemberDTO;
 import com.sns.app.pager.Pager;
 
@@ -125,30 +124,9 @@ public class PostController {
 
 	// 피드 삭제 처리
 	@PostMapping("delete")
-	@ResponseBody
-	public Map<String, Object> delete(PostDTO postDTO, @AuthenticationPrincipal MemberDTO memberDTO) throws Exception {
-		Map<String, Object> result = new HashMap<>();
-
-		if (memberDTO == null) {
-			result.put("result", -1); // 로그인 필요
-			return result;
-		}
-
-		// 상세 조회하여 작성자 확인
-		FeedDTO existing = postService.detail(postDTO);
-		if (existing == null) {
-			result.put("result", 0); // 존재하지 않음
-			return result;
-		}
-
-		if (existing.getUserNo() == null || !existing.getUserNo().equals(memberDTO.getUserNo())) {
-			result.put("result", -2); // 권한 없음
-			return result;
-		}
-
-		int r = postService.delete(postDTO);
-		result.put("result", r > 0 ? 1 : 0);
-		return result;
+	public String delete(PostDTO postDTO) throws Exception {
+		postService.delete(postDTO);
+		return "redirect:/feed/list";
 	}
 
 	@GetMapping("getDetail")

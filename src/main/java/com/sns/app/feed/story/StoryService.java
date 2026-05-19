@@ -80,11 +80,18 @@ public class StoryService implements FeedService {
 		// 1. 파일명 및 정보 조회를 위해 상세 정보 가져오기
 		feedDTO = storyMapper.detail(feedDTO);
 
+		if (feedDTO == null) {
+			return 0;
+		}
+
 		if (feedDTO.getList() != null) {
 			for (FileDTO fileDTO : feedDTO.getList()) {
 				fileManager.fileDelete(name, fileDTO);
 				}
 			}
+
+		storyMapper.deleteThumbForStory(feedDTO);
+
 		int result = storyMapper.delete(feedDTO);
 		return result;
 		
