@@ -21,6 +21,8 @@ import com.sns.app.push.PushService;
 @Transactional
 public class PostService implements FeedService {
 
+	private static final int MAX_POST_IMAGES = 5;
+
 	@Autowired
 	private PushService pushService;
 
@@ -117,9 +119,14 @@ public class PostService implements FeedService {
 			return result;
 		}
 
+		int imageCount = 0;
 		for (MultipartFile f : attach) {
 			if (f.isEmpty()) {
 				continue;
+			}
+
+			if (imageCount >= MAX_POST_IMAGES) {
+				break;
 			}
 			
 			String fileName = fileManager.fileSave(name, f);
@@ -130,6 +137,7 @@ public class PostService implements FeedService {
 			fileDTO.setFileName(fileName);
 
 			result = postMapper.createFile(fileDTO);
+			imageCount++;
 		}
 
 		return result;

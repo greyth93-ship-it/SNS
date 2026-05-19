@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sns.app.push.PushMapper">
 
-	<insert id="insertPush" parameterType="com.sns.app.push.PushDTO">
+	<insert id="insertPush" parameterType="PushDTO">
 		INSERT INTO "PUSH" (
 			"RECEIVER_NO",
 			"SENDER_NO",
@@ -21,7 +21,7 @@
 	</insert>
 
 	<select id="selectPushListByReceiver" parameterType="long"
-		resultType="com.sns.app.push.PushDTO">
+		resultType="PushDTO">
 		SELECT
 			"PUSH_NO",
 			"RECEIVER_NO",
@@ -30,10 +30,68 @@
 			"PUSH_MSG",
 			"IS_READ",
 			"PUSH_DATE"
+			, S."USER_NICKNAME" AS "SENDER_NICKNAME"
+			, UI."FILE_NAME" AS "SENDER_PROFILE_FILE_NAME"
+		FROM "PUSH" P
+		LEFT JOIN "USER" S ON P."SENDER_NO" = S."USER_NO"
+		LEFT JOIN "USER_IMG" UI ON S."USER_NO" = UI."USER_NO"
+		WHERE P."RECEIVER_NO" = #{receiverNo}
+		ORDER BY P."PUSH_DATE" DESC
+		LIMIT 5 
+	</select>
+
+	<select id="countUnreadByReceiver" parameterType="long" resultType="int">
+		SELECT
+			COUNT(*)
 		FROM "PUSH"
 		WHERE "RECEIVER_NO" = #{receiverNo}
-		ORDER BY "PUSH_DATE" DESC
-		LIMIT 5 
+		AND "IS_READ" = false
+	</select>
+
+	<select id="selectAllPushListByReceiver" parameterType="long"
+		resultType="PushDTO">
+	SELECT
+		P."PUSH_NO",
+		P."RECEIVER_NO",
+		P."SENDER_NO",
+		P."PUSH_TYPE",
+		P."PUSH_MSG",
+		P."IS_READ",
+		P."PUSH_DATE",
+		S."USER_NICKNAME" AS "SENDER_NICKNAME",
+		UI."FILE_NAME" AS "SENDER_PROFILE_FILE_NAME"
+	FROM "PUSH" P
+	LEFT JOIN "USER" S ON P."SENDER_NO" = S."USER_NO"
+	LEFT JOIN "USER_IMG" UI ON S."USER_NO" = UI."USER_NO"
+	WHERE P."RECEIVER_NO" = #{receiverNo}
+	ORDER BY P."PUSH_DATE" DESC
+	</select>
+
+	<select id="countAllPushByReceiverPager" parameterType="Pager" resultType="long">
+		SELECT COUNT(*)
+		FROM "PUSH"
+		WHERE "RECEIVER_NO" = #{userNo}
+	</select>
+
+	<select id="selectAllPushListByReceiverPager" parameterType="Pager"
+		resultType="PushDTO">
+		SELECT
+			P."PUSH_NO",
+			P."RECEIVER_NO",
+			P."SENDER_NO",
+			P."PUSH_TYPE",
+			P."PUSH_MSG",
+			P."IS_READ",
+			P."PUSH_DATE",
+			S."USER_NICKNAME" AS "SENDER_NICKNAME",
+			UI."FILE_NAME" AS "SENDER_PROFILE_FILE_NAME"
+		FROM "PUSH" P
+		LEFT JOIN "USER" S ON P."SENDER_NO" = S."USER_NO"
+		LEFT JOIN "USER_IMG" UI ON S."USER_NO" = UI."USER_NO"
+		WHERE P."RECEIVER_NO" = #{userNo}
+		ORDER BY P."PUSH_DATE" DESC
+		LIMIT #{perPage}
+		OFFSET #{startNum}
 	</select>
 
 	<update id="updateReadStatus" parameterType="long">
