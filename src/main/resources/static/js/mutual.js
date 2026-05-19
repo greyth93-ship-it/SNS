@@ -18,7 +18,7 @@ function initMutualChatButtons() {
             console.log('상대(userNo):', userNo);
             
             // 2. 주소 조립 및 이동 (변수가 비어있어도 에러 안 나게 처리)
-            let targetUrl = '/chatroom/create';
+            let targetUrl = '/chat/create';
             
             if (userNo && currentUserNo) {
                 targetUrl += '?targetUserNo=' + userNo
