@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core"%>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions"%>
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 
 <!DOCTYPE html>
@@ -112,8 +113,14 @@
 										<c:when test="${p.pushType eq 'FOLLOW'}">
 											<c:set var="moveUrl" value="/member/mypage?userNo=${p.senderNo}" />
 										</c:when>
+										<c:when test="${p.pushType eq 'STORY_LIKE'}">
+										<c:set var="moveUrl" value="/feed/detail/story/${p.feedNo}" />
+									</c:when>
+									<c:when test="${p.pushType eq 'POST_LIKE'}">
+										<c:set var="moveUrl" value="/feed/detail/post/${p.feedNo}" />
+										</c:when>
 										<c:otherwise>
-											<c:set var="moveUrl" value="/post/detail?postNo=${p.postNo}" />
+											<c:set var="moveUrl" value="#" />
 										</c:otherwise>
 									</c:choose>
 									<div class="list-group-item list-group-item-action d-flex align-items-center justify-content-between ${itemClass}"
@@ -127,9 +134,9 @@
 														<img src="${not empty p.senderProfileFileName ? '/files/member/'.concat(p.senderProfileFileName) : '/img/default_user.avif'}"
 															onerror="this.src='/img/default_user.avif'" alt="profile">
 													</div>
-													<c:if test="${p.pushType eq 'LIKE'}">
-														<span class="push-like-badge"><i class="fas fa-heart"></i></span>
-													</c:if>
+												<c:if test="${p.pushType eq 'STORY_LIKE' or p.pushType eq 'POST_LIKE'}">
+													<span class="push-like-badge"><i class="fas fa-heart"></i></span>
+												</c:if>
 												</div>
 											</div>
 											<div>

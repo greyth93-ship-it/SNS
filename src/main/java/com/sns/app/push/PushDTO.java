@@ -16,7 +16,7 @@ public class PushDTO {
     private String pushMsg;
     private boolean isRead;
     private LocalDateTime pushDate;
-    private Long postNo;
+    private Long feedNo;
     
     // 조인을 통해 가져올 데이터 (필요시)
     private String senderNickname;

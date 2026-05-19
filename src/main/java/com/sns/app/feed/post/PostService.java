@@ -89,8 +89,8 @@ public class PostService implements FeedService {
 				push.setSenderNo(memberDTO.getUserNo());
 
 				// 데이터 세팅
-				push.setPushType("LIKE");
-				push.setPostNo(feedDTO.getFeedNo()); // 클릭 시 이동할 게시글 번호
+				push.setPushType("POST_LIKE");
+				push.setFeedNo(feedDTO.getFeedNo()); // 클릭 시 이동할 게시글 번호
 
 				String senderName = memberDTO.getUserNickname();
 				push.setPushMsg(senderName + "님이 회원님의 게시물을 좋아합니다.");

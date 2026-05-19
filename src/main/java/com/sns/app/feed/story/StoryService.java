@@ -119,8 +119,8 @@ public class StoryService implements FeedService {
 				PushDTO push = new PushDTO();
 				push.setReceiverNo(originalStory.getUserNo());
 				push.setSenderNo(memberDTO.getUserNo());
-				push.setPushType("LIKE");
-				push.setPostNo(feedDTO.getFeedNo());
+				push.setPushType("STORY_LIKE");
+				push.setFeedNo(feedDTO.getFeedNo());
 
 				String senderName = memberDTO.getUserNickname();
 				push.setPushMsg(senderName + "님이 회원님의 스토리를 좋아합니다.");

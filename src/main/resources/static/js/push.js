@@ -2,7 +2,8 @@
 
 function getIconColor(type) {
     switch(type) {
-        case 'LIKE': return 'bg-primary';    // 파란색
+        case 'STORY_LIKE':
+        case 'POST_LIKE': return 'bg-primary';    // 파란색
         case 'FOLLOW': return 'bg-warning';  // 노란색
         case 'CHAT': return 'bg-success';    // 초록색
         default: return 'bg-secondary';
@@ -11,7 +12,8 @@ function getIconColor(type) {
 
 function getIconClass(type) {
     switch(type) {
-        case 'LIKE': return 'fas fa-heart';
+        case 'STORY_LIKE':
+        case 'POST_LIKE': return 'fas fa-heart';
         case 'FOLLOW': return 'fas fa-user-plus';
         case 'CHAT': return 'fas fa-comments';
         default: return 'fas fa-bell';
@@ -47,10 +49,16 @@ function loadAlarmList() {
 
 // 타입에 따라 이동할 페이지 결정
 function getMoveUrl(item) {
-    switch(item.pushType) {
-        case 'LIKE': return '/post/detail?postNo=' + item.postNo;
-        case 'FOLLOW': return '/member/profile?userNo=' + item.senderNo;
-        case 'CHAT': return '/chat/room?roomNo=' + item.refNo; // 채팅방 번호 등
-        default: return '#';
+    switch (item.pushType) {
+        case 'STORY_LIKE':
+            return item.feedNo ? '/feed/detail/story/' + item.feedNo : '#';
+        case 'POST_LIKE':
+            return item.feedNo ? '/feed/detail/post/' + item.feedNo : '#';
+        case 'FOLLOW':
+            return item.senderNo ? '/member/mypage?userNo=' + item.senderNo : '#';
+        case 'CHAT':
+            return '/chat/room?roomNo=' + item.refNo; // 채팅방 번호 등
+        default:
+            return '#';
     }
 }
