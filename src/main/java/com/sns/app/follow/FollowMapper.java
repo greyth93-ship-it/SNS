@@ -25,4 +25,6 @@ public interface FollowMapper {
 
 	public List<FollowDTO> followerList(Pager pager) throws Exception;
 
+	public List<FollowDTO> isMatchedFollow(FollowDTO followDTO);
+
 }
