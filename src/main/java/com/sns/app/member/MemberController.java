@@ -98,26 +98,19 @@ public class MemberController {
 	public void myposts(HttpSession session, Model model) throws Exception{}
 	
 	@GetMapping("update")
-	public void update(HttpSession session, Model model) throws Exception{
-		MemberDTO memberDTO = (MemberDTO)session.getAttribute("member");
-		model.addAttribute("memberDTO", memberDTO);
+	public void update(@AuthenticationPrincipal MemberDTO loginUser, Model model) throws Exception {
+	    model.addAttribute("memberDTO", loginUser);
 	}
 	
 	@PostMapping("update")
-	public String update(@Validated(GroupUpdate.class) MemberDTO memberDTO, BindingResult bindingResult, HttpSession session, Model model) throws Exception{
+	public String update(@Validated(GroupUpdate.class) @ModelAttribute("memberDTO") MemberDTO memberDTO, BindingResult bindingResult, @AuthenticationPrincipal MemberDTO loginUser, Model model) throws Exception{
 		
 		if(bindingResult.hasErrors()) {
 			return "member/update";
 		}
 		
-		MemberDTO s = (MemberDTO)session.getAttribute("member");
-		memberDTO.setUserId(s.getUserId());
-		
-		int result = memberServiceImpl.update(memberDTO);
-		if(result>0) {
-			s = memberServiceImpl.detail(s);
-			session.setAttribute("member", s);
-		}
+		memberDTO.setUserId(loginUser.getUserId());
+		memberServiceImpl.update(memberDTO);
 		return "redirect:/member/mypage";
 	}
 	

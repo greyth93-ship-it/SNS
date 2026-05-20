@@ -52,7 +52,7 @@
 	                		<!-- [내 마이페이지 일 때] -->
 			                <div class="d-flex justify-content-between gap-2 mb-2">
 								<button type="button" class="btn btn-outline-primary w-100 py-2 fw-bold"
-									onclick="location.href='/member/profile'">
+									onclick="location.href='/member/update'">
 									프로필 편집
 								</button>
 							</div>
