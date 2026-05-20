@@ -52,7 +52,9 @@
 
 											<!-- 유저 정보 (flex-grow-1을 추가하여 남은 공간을 다 차지하게 함) -->
 											<div class="user-info flex-grow-1">
-												<strong class="d-block">${p.memberDTO.userNickname}</strong>
+												<a href="/member/mypage?userNo=${p.memberDTO.userNo}" class="user-link text-dark text-decoration-none" onclick="event.stopPropagation()">
+													<strong class="d-block">${p.memberDTO.userNickname}</strong>
+												</a>
 												<div class="text-muted small">
 													<i class="fas fa-location-dot"></i> <span>${p.feedLocation}</span>
 												</div>
@@ -97,7 +99,9 @@
 										</div>
 										<div class="px-3 pb-3 pt-0">
 											<div class="post-content">
-												<strong class="post-author">${p.memberDTO.userNickname}</strong>
+												<a href="/member/mypage?userNo=${p.memberDTO.userNo}" class="post-author-link text-dark text-decoration-none" onclick="event.stopPropagation()">
+													<strong class="post-author">${p.memberDTO.userNickname}</strong>
+												</a>
 												<span class="post-text">${p.feedContent}</span>
 												<button type="button" class="btn btn-link p-0 readmore-btn" style="display:none;">더보기</button>
 											</div>

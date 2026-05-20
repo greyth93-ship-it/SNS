@@ -722,7 +722,9 @@ async function renderPost(feedNo) {
                         <img src="${profileImgPath}" onerror="this.src='/img/default_user.avif'">
                     </div>
                     <div>
-                        <strong id="mOwner" class="d-block" style="line-height:1.2;">${ownerName}</strong>
+                        <a href="/member/mypage?userNo=${data.memberDTO?.userNo}" class="d-block text-dark text-decoration-none" onclick="event.stopPropagation()">
+                            <strong id="mOwner" class="d-block" style="line-height:1.2;">${ownerName}</strong>
+                        </a>
                         <small id="mLocation" class="text-muted">
                             <i class="fas fa-location-dot me-1"></i>${data.feedLocation || ''}
                         </small>
@@ -745,7 +747,9 @@ async function renderPost(feedNo) {
                         <img src="${profileImgPath}" onerror="this.src='/img/default_user.avif'">
                     </div>
                     <div>
-                        <strong>${ownerName}</strong>
+                        <a href="/member/mypage?userNo=${data.memberDTO?.userNo}" class="text-dark text-decoration-none" onclick="event.stopPropagation()">
+                            <strong>${ownerName}</strong>
+                        </a>
                         <div class="m-feed-text">${data.feedContent || ''}</div>
                     </div>
                 </div>

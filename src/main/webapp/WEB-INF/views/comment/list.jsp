@@ -22,16 +22,18 @@
                     </div>
                     
                     <div class="flex-grow-1">
-                        <strong style="font-size: 0.9rem; display: block; line-height: 1.2;">
-                            <c:choose>
-                                <c:when test="${not empty c.memberDTO and not empty c.memberDTO.userNickname}">
-                                    ${c.memberDTO.userNickname}
-                                </c:when>
-                                <c:otherwise>
-                                    user_${c.userNo}
-                                </c:otherwise>
-                            </c:choose>
-                        </strong>
+                        <a href="/member/mypage?userNo=${c.userNo}" class="text-dark text-decoration-none" onclick="event.stopPropagation()">
+                            <strong style="font-size: 0.9rem; display: block; line-height: 1.2;">
+                                <c:choose>
+                                    <c:when test="${not empty c.memberDTO and not empty c.memberDTO.userNickname}">
+                                        ${c.memberDTO.userNickname}
+                                    </c:when>
+                                    <c:otherwise>
+                                        user_${c.userNo}
+                                    </c:otherwise>
+                                </c:choose>
+                            </strong>
+                        </a>
                         <span style="font-size: 0.9rem; word-break: break-all;">${c.commentContent}</span>
                     </div>
                 </div>
@@ -65,16 +67,18 @@
                                 </div>
 
                                 <div class="flex-grow-1">
-                                    <strong style="font-size: 0.85rem; display: block; line-height: 1.2;">
-                                        <c:choose>
-                                            <c:when test="${not empty r.memberDTO and not empty r.memberDTO.userNickname}">
-                                                ${r.memberDTO.userNickname}
-                                            </c:when>
-                                            <c:otherwise>
-                                                user_${r.userNo}
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </strong>
+                                    <a href="/member/mypage?userNo=${r.userNo}" class="text-dark text-decoration-none" onclick="event.stopPropagation()">
+                                        <strong style="font-size: 0.85rem; display: block; line-height: 1.2;">
+                                            <c:choose>
+                                                <c:when test="${not empty r.memberDTO and not empty r.memberDTO.userNickname}">
+                                                    ${r.memberDTO.userNickname}
+                                                </c:when>
+                                                <c:otherwise>
+                                                    user_${r.userNo}
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </strong>
+                                    </a>
                                     <span style="font-size: 0.85rem; word-break: break-all;">${r.commentContent}</span>
                                 </div>
                             </div>
