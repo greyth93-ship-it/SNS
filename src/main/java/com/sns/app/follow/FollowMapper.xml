@@ -181,52 +181,50 @@
 		parameterType="com.sns.app.pager.Pager" resultType="long">
 		SELECT COUNT(*)
 		FROM "FOLLOW" f1
-		INNER JOIN "FOLLOW" f2
-		ON f1."USER_FOLLOWING" = f2."USER_FOLLOWER"
-		AND f1."USER_FOLLOWER" = f2."USER_FOLLOWING"
-		WHERE f1."USER_FOLLOWER" =
-		#{currentUserNo}
-		AND f1."USER_FOLLOWING" = #{userNo}
+		WHERE f1."USER_FOLLOWER" = #{currentUserNo}
+		AND EXISTS (
+			SELECT 1
+			FROM "FOLLOW" f2
+			WHERE f2."USER_FOLLOWER" = f1."USER_FOLLOWING"
+			AND f2."USER_FOLLOWING" = f1."USER_FOLLOWER"
+		)
 	</select>
 
-	<select id="isMatchedFollow" parameterType="com.sns.app.pager.Pager"
-		resultMap="detailResult">
+	<select id="isMatchedFollow" resultMap="detailResult">
 		SELECT
-		f1."USER_FOLLOWER" 
-		f1."USER_FOLLOWING" 
+		u.*,f1.*,ui.*,r.*
 		FROM "FOLLOW" f1
-		INNER JOIN "FOLLOW" f2
-		ON f1."USER_FOLLOWING" = f2."USER_FOLLOWER"
-		AND f1."USER_FOLLOWER" = f2."USER_FOLLOWING"
-		INNER JOIN "USER" u ON
-		u."USER_NO" = f1."USER_FOLLOWING"
-		LEFT JOIN "USER_IMG"
-		ui USING
-		("USER_NO")
-		LEFT JOIN "USER_ROLE" USING ("USER_NO")
-		LEFT JOIN
-		"ROLE" r
-		USING ("ROLE_NO")
+		INNER JOIN "USER" u
+		ON u."USER_NO" = f1."USER_FOLLOWING"
+		LEFT JOIN "USER_IMG" ui
+		ON u."USER_NO" = ui."USER_NO"
+		LEFT JOIN "USER_ROLE" ur
+		ON u."USER_NO" = ur."USER_NO"
+		LEFT JOIN "ROLE" r
+		ON ur."ROLE_NO" = r."ROLE_NO"
 		WHERE f1."USER_FOLLOWER" = #{userFollower}
-		AND f1."USER_FOLLOWING" = #{userFollowing}
-		ORDER BY
-		u."USER_NO"
-		LIMIT
-		#{perPage} OFFSET #{startNum}
+		AND EXISTS (
+		SELECT 1
+		FROM "FOLLOW" f2
+		WHERE f2."USER_FOLLOWER" = f1."USER_FOLLOWING"
+		AND f2."USER_FOLLOWING" = f1."USER_FOLLOWER"
+		)
+		ORDER BY u."USER_NO"
+		LIMIT #{pager.perPage} OFFSET #{pager.startNum}
 	</select>
-	
-	
+
 
 	<select id="isFollowing" parameterType="FollowDTO"
 		resultType="boolean">
 		SELECT EXISTS (
 		SELECT 1
 		FROM "FOLLOW"
-		WHERE "USER_FOLLOWER" = #{userFollower}
+		WHERE "USER_FOLLOWER" =
+		#{userFollower}
 		AND "USER_FOLLOWING" = #{userFollowing}
 		)
 	</select>
 
 
-    
+
 </mapper>
