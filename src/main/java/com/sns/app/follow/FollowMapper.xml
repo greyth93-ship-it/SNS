@@ -189,6 +189,16 @@
 		#{perPage} OFFSET #{startNum}
 	</select>
 
+	<select id="isMatchedFollowCount" parameterType="com.sns.app.pager.Pager" resultType="long">
+		SELECT COUNT(*)
+		FROM "FOLLOW" f1
+		INNER JOIN "FOLLOW" f2
+			ON f1."USER_FOLLOWING" = f2."USER_FOLLOWER"
+			AND f1."USER_FOLLOWER" = f2."USER_FOLLOWING"
+		WHERE f1."USER_FOLLOWER" = #{currentUserNo}
+		AND f1."USER_FOLLOWING" = #{userNo}
+	</select>
+
 	<select id="isMatchedFollow" parameterType="FollowDTO"
 		resultType="FollowDTO">
 		SELECT 
@@ -210,6 +220,41 @@
 			AND "USER_FOLLOWING" = #{userFollowing}
 		)
 	</select>
+
+	<!-- 회원 정보를 USER_NO로 조회하여 MemberDTO로 매핑 -->
+	<select id="getMemberByUserNo" parameterType="long" resultMap="memberResult">
+		SELECT u.*, ui."FILE_NO" AS "PROFILE_FILE_NO", ui."FILE_NAME" AS "PROFILE_FILE_NAME", ui."ORI_NAME" AS "PROFILE_ORI_NAME", r.*
+		FROM "USER" u
+		LEFT JOIN "USER_IMG" ui USING ("USER_NO")
+		LEFT JOIN "USER_ROLE" USING ("USER_NO")
+		LEFT JOIN "ROLE" r USING ("ROLE_NO")
+		WHERE u."USER_NO" = #{userNo}
+	</select>
+
+	<resultMap id="memberResult" type="com.sns.app.member.MemberDTO">
+		<id column="USER_NO" property="userNo"/>
+		<result column="USER_ID" property="userId"/>
+		<result column="USER_NICKNAME" property="userNickname"/>
+		<result column="USER_PW" property="userPw"/>
+		<result column="USER_EMAIL" property="userEmail"/>
+		<result column="USER_BIRTH" property="userBirth"/>
+		<result column="USER_AGR" property="userAgr"/>
+		<result column="ENABLED" property="enabled"/>
+		<result column="CREDENTIALS_NON_LOCKED" property="credentialsNonLocked"/>
+		<result column="ACCOUNT_NON_LOCKED" property="accountNonLocked"/>
+		<result column="ACCOUNT_NON_EXPIRED" property="accountNonExpired"/>
+
+		<association property="profileDTO" javaType="com.sns.app.member.ProfileDTO">
+			<id column="PROFILE_FILE_NO" property="fileNo"/>
+			<result column="PROFILE_FILE_NAME" property="fileName"/>
+			<result column="PROFILE_ORI_NAME" property="oriName"/>
+		</association>
+
+		<collection property="roles" javaType="java.util.List" ofType="com.sns.app.member.RoleDTO">
+			<id column="ROLE_NO" property="roleNo"/>
+			<result column="ROLE_NAME" property="roleName"/>
+		</collection>
+	</resultMap>
 
 
 

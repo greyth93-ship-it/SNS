@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 
 import com.sns.app.pager.Pager;
+import com.sns.app.member.MemberDTO;
 
 @Mapper
 public interface FollowMapper {
@@ -25,8 +26,14 @@ public interface FollowMapper {
 
 	public List<FollowDTO> followerList(Pager pager) throws Exception;
 
+	public Boolean isFollowing(FollowDTO followDTO) throws Exception;
+
+	public MemberDTO getMemberByUserNo(Long userNo) throws Exception;
+
 	public List<FollowDTO> isMatchedFollow(FollowDTO followDTO);
 
-	public Boolean isFollowing(FollowDTO followDTO) throws Exception;
+	public Long isMatchedFollowCount(Pager pager) throws Exception;
+
+
 
 }

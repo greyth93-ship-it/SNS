@@ -6,12 +6,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.sns.app.pager.Pager;
+import com.sns.app.member.MemberDTO;
 
 @Service
 public class FollowService {
 
 	@Autowired
 	private FollowMapper followMapper;
+
+	public Long followingCount(Long userNo) throws Exception {
+		Pager pager = new Pager();
+		pager.setUserNo(userNo);
+		return followMapper.followingCount(pager);
+	}
+
+	public Long followerCount(Long userNo) throws Exception {
+		Pager pager = new Pager();
+		pager.setUserNo(userNo);
+		return followMapper.followerCount(pager);
+	}
 
 	public FollowDTO detail(FollowDTO followDTO) throws Exception {
 		return followMapper.detail(followDTO);
@@ -38,8 +51,10 @@ public class FollowService {
 		return followMapper.followerList(pager);
 	}
 
-	public List<FollowDTO> isMatchedFollow(Long userNo, Long currentUserNo) throws Exception {
-
+	public List<FollowDTO> isMatchedFollow(Long userNo, Long currentUserNo, Pager pager) throws Exception {
+		
+		pager.makePageNum(followMapper.isMatchedFollowCount(pager));
+		pager.makeStartNum();
 		FollowDTO followDTO = new FollowDTO();
 		followDTO.setUserFollower(currentUserNo);
 		followDTO.setUserFollowing(userNo);
@@ -58,6 +73,10 @@ public class FollowService {
 		} else {
 			return false;
 		}
+	}
+
+	public MemberDTO getMemberByUserNo(Long userNo) throws Exception {
+		return followMapper.getMemberByUserNo(userNo);
 	}
 
 }
