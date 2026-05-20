@@ -66,6 +66,30 @@ body {
 .avatar-md { width: 32px; height: 32px; }
 .avatar-xs { width: 25px; height: 25px; }
 
+/* 공유 팝업 내 아바타를 스토리 썸네일처럼 보이게(그라데이션 링 + 흰 테두리) */
+#shareChatListModal .user-avatar-wrapper {
+	width: 66px;
+	height: 66px;
+	flex: 0 0 66px;
+	border-radius: 50%;
+	overflow: hidden;
+	padding: 3px; /* 링 두께 */
+	background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+	margin: 0 auto;
+	display: block;
+	box-sizing: border-box;
+}
+
+#shareChatListModal .user-avatar-wrapper img {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	display: block;
+	border-radius: 50%;
+	background: white;
+	border: 2px solid white; /* 내부 흰 테두리 */
+}
+
 .user-info strong {
     display: block;
     margin-bottom: 2px; /* 닉네임과 장소 사이의 세로 간격 */
@@ -728,3 +752,64 @@ body {
 @media (max-width: 480px) {
 	.dropdown-menu-custom { right: -6px; }
 }
+
+/* 공유 목록 모달 내에서 카드들을 스토리 썸네일 형태로 재배치 */
+
+#shareChatListModal .user-grid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 18px;
+	justify-content: center;
+	align-items: flex-start;
+	padding: 6px;
+}
+
+/* 한 줄에 3개가 들어가도록 유연한 너비 계산 (gap 18px 기준) */
+#shareChatListModal .user-card {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	gap: 8px;
+	flex: 0 0 calc((100% - 36px) / 3);
+	max-width: 120px;
+	box-sizing: border-box;
+	padding: 8px 6px;
+	background: transparent;
+	border: none;
+	box-shadow: none;
+	text-align: center;
+}
+
+/* 작은 화면에서는 2열로 동작하도록 조정 */
+@media (max-width: 420px) {
+	#shareChatListModal .user-card {
+		flex: 0 0 calc((100% - 18px) / 2);
+		max-width: none;
+	}
+}
+
+#shareChatListModal .user-card-link {
+	display: block;
+	text-align: center;
+	color: inherit;
+}
+
+/* 닉네임만 보이고 아이디/액션 버튼은 숨김 */
+#shareChatListModal .user-info { width: 100%; }
+#shareChatListModal .user_nickname {
+	font-size: 0.85rem;
+	font-weight: 700;
+	color: #0f172a;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+#shareChatListModal .user_id,
+#shareChatListModal .user_no,
+#shareChatListModal .user-actions {
+	display: none !important;
+}
+
+/* 썸네일과 이름 간 간격 최적화 */
+#shareChatListModal .user-avatar-wrapper { margin-bottom: 6px; }

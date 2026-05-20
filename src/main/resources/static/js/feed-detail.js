@@ -555,40 +555,31 @@ function openShareChatModal(feedNo, type = 'post') {
             const grid = doc.querySelector('.user-grid');
             const empty = doc.querySelector('.search-empty');
             if (grid) {
-                // 각 .user-card에서 프로필 이미지, 닉네임, userNo 추출 후 스토리 썸네일 스타일로 렌더
-                const users = Array.from(grid.querySelectorAll('.user-card'));
-                if (users.length === 0) {
-                    container.innerHTML = '<div class="w-100 text-center p-3 text-muted">맞팔로우한 사용자가 없습니다.</div>';
-                } else {
-                    const items = users.map(card => {
-                        const imgEl = card.querySelector('img');
-                        const imgSrc = imgEl ? imgEl.getAttribute('src') : '/img/default_user.avif';
-                        const nickEl = card.querySelector('.user_nickname');
-                        const nickname = nickEl ? nickEl.textContent.trim() : '';
-                        const btn = card.querySelector('.btn-chat-trigger');
-                        let userNo = null;
-                        if (btn && btn.dataset && btn.dataset.userNo) userNo = btn.dataset.userNo;
-                        if (!userNo) {
-                            const link = card.querySelector('.user-card-link');
-                            if (link) {
-                                const m = (link.getAttribute('href') || '').match(/userNo=(\d+)/);
-                                if (m) userNo = m[1];
-                            }
-                        }
-                        if (!userNo) return '';
+                // 링크를 클릭하면 shareToUser로 연결되도록 각 채팅 버튼의 href를 재설정
+                // 클론된 노드 사용
+                const cloned = grid.cloneNode(true);
+                // 각 .btn-chat-trigger에 클릭 핸들러 추가
+                cloned.querySelectorAll('.btn-chat-trigger').forEach(btn => {
+                    const userNo = btn.getAttribute('data-user-no');
+                    btn.removeAttribute('href');
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        shareToUser(e, userNo, feedNo);
+                    });
+                });
+                // 각 프로필 링크는 마이페이지로 연결되어 있으므로 클릭 시 채팅 공유로 동작하게 변경
+                cloned.querySelectorAll('.user-card-link').forEach(a => {
+                    const href = a.getAttribute('href') || '';
+                    // href에서 userNo 파싱
+                    const m = href.match(/userNo=(\d+)/);
+                    if (m) {
+                        const userNo = m[1];
+                        a.addEventListener('click', (e) => { e.preventDefault(); shareToUser(e, userNo, feedNo); });
+                    }
+                });
 
-                        return `
-                            <div class="story-item" style="cursor:pointer;" onclick="shareToUser(event, '${userNo}', '${feedNo}')">
-                                <div class="story-circle">
-                                    <img src="${imgSrc}" onerror="this.src='/img/default_user.avif'">
-                                </div>
-                                <small>${escapeHtml(nickname)}</small>
-                            </div>
-                        `;
-                    }).filter(Boolean).join('');
-
-                    container.innerHTML = `<div class="story-wrapper" style="padding:10px; justify-content:flex-start;">${items}</div>`;
-                }
+                container.innerHTML = '';
+                container.appendChild(cloned);
             } else if (empty) {
                 container.innerHTML = '<div class="w-100 text-center p-3 text-muted">맞팔로우한 사용자가 없습니다.</div>';
             } else {
@@ -647,7 +638,7 @@ async function renderStory(feedNo, userNo) {
 
         const isMyStory = isOwnStory(data);
 
-        mImageArea.innerHTML = `
+            mImageArea.innerHTML = `
             <div class="story-frame">
                 <div class="dropdown-container story-dropdown" style="position:absolute; top:12px; right:12px; z-index:12;">
                     <button type="button" class="btn btn-sm btn-light dropdown-toggle-dot" onclick="togglePostMenu(event, 'story', '${feedNo}')">⋯</button>

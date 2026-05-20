@@ -188,13 +188,13 @@
 
 		<!-- 채팅 공유용 맞팔 목록 모달 -->
 		<div id="shareChatListModal" class="modal" style="display:none; position: fixed; z-index: 4000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); justify-content: center; align-items: center;">
-			<div class="modal-dialog modal-sm modal-dialog-centered" style="width: 360px; margin: auto;">
+			<div class="modal-dialog modal-dialog-centered" style="width: 320px !important; max-width: 90%; margin: auto;">
 				<div class="modal-content" style="border-radius:12px; overflow:hidden; border:none;">
 					<div class="modal-header border-0 pb-0 justify-content-center pt-3">
 						<h6 class="modal-title fw-bold">공유할 친구 선택</h6>
 					</div>
 					<div class="modal-body p-2" style="max-height:60vh; overflow-y:auto;">
-						<div id="shareChatListContainer" class="d-flex flex-wrap gap-2 justify-content-start"></div>
+					<div id="shareChatListContainer" style="display: flex; flex-wrap: wrap; gap: 15px; justify-content: flex-start; align-items: flex-start; padding: 10px;"></div>
 					</div>
 					<div class="modal-footer border-0 pt-0 pb-3 justify-content-center">
 						<button type="button" class="btn btn-sm btn-light text-muted" onclick="closeShareChatListModal()">취소</button>

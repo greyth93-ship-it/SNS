@@ -45,15 +45,30 @@
 									<div class="user-grid">
 										<c:forEach items="${followingList}" var="u">
 											<div class="user-card">
-												<a href="/member/mypage?userNo=${u.memberDTO.userNo}" class="user-card-link">
-													<div class="user-avatar-wrapper">
-														<img src="${not empty u.memberDTO.profileDTO and not empty u.memberDTO.profileDTO.fileName ? '/files/member/'.concat(u.memberDTO.profileDTO.fileName) : '/img/default_user.avif'}" onerror="this.src='/img/default_user.avif'" alt="profile">
-													</div>
-													<div class="user-info">
-														<div class="user_nickname">${u.memberDTO.userNickname}</div>
-														<div class="user_no">@${u.memberDTO.userNo}</div>
-													</div>
-												</a>
+												<c:choose>
+													<c:when test="${u.mutual}">
+														<a href="/chat/create?targetUserNo=${u.memberDTO.userNo}" class="user-card-link">
+															<div class="user-avatar-wrapper">
+																<img src="${not empty u.memberDTO.profileDTO and not empty u.memberDTO.profileDTO.fileName ? '/files/member/'.concat(u.memberDTO.profileDTO.fileName) : '/img/default_user.avif'}" onerror="this.src='/img/default_user.avif'" alt="profile">
+															</div>
+															<div class="user-info">
+																<div class="user_nickname">${u.memberDTO.userNickname}</div>
+																<div class="user_no">@${u.memberDTO.userNo}</div>
+															</div>
+														</a>
+													</c:when>
+													<c:otherwise>
+														<a href="/member/mypage?userNo=${u.memberDTO.userNo}" class="user-card-link">
+															<div class="user-avatar-wrapper">
+																<img src="${not empty u.memberDTO.profileDTO and not empty u.memberDTO.profileDTO.fileName ? '/files/member/'.concat(u.memberDTO.profileDTO.fileName) : '/img/default_user.avif'}" onerror="this.src='/img/default_user.avif'" alt="profile">
+															</div>
+															<div class="user-info">
+																<div class="user_nickname">${u.memberDTO.userNickname}</div>
+																<div class="user_no">@${u.memberDTO.userNo}</div>
+															</div>
+														</a>
+													</c:otherwise>
+												</c:choose>
 												<div class="user-actions mt-2">
 													<c:if test="${u.mutual}">
 														<a href="/chat/create?targetUserNo=${u.memberDTO.userNo}" class="btn btn-sm btn-primary btn-chat-trigger" data-user-no="${u.memberDTO.userNo}">채팅</a>
