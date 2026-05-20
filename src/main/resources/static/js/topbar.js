@@ -75,7 +75,7 @@ function getSenderProfileSrc(item) {
 
 function getSenderAvatarHtml(item) {
     const senderProfileSrc = getSenderProfileSrc(item);
-    const likeBadge = item.pushType === 'LIKE'
+    const likeBadge = (item.pushType === 'POST_LIKE' || item.pushType === 'STORY_LIKE')
         ? '<span style="position:absolute;right:-2px;bottom:-2px;width:18px;height:18px;border-radius:50%;background:#e74a3b;display:flex;align-items:center;justify-content:center;border:2px solid #fff;"><i class="fas fa-heart" style="font-size:9px;color:#fff;"></i></span>'
         : '';
     return `
