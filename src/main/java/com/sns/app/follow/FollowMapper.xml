@@ -198,8 +198,6 @@
 		INNER JOIN "FOLLOW" f2
 		ON f1."USER_FOLLOWING" = f2."USER_FOLLOWER"
 		AND f1."USER_FOLLOWER" = f2."USER_FOLLOWING"
-		WHERE f1."USER_FOLLOWER" = #{userFollower}
-		AND f1."USER_FOLLOWING" = #{userFollowing}
 		INNER JOIN "USER" u ON
 		u."USER_NO" = f1."USER_FOLLOWING"
 		LEFT JOIN "USER_IMG"
@@ -209,12 +207,15 @@
 		LEFT JOIN
 		"ROLE" r
 		USING ("ROLE_NO")
-		WHERE f1."USER_FOLLOWER" = #{userNo}
+		WHERE f1."USER_FOLLOWER" = #{userFollower}
+		AND f1."USER_FOLLOWING" = #{userFollowing}
 		ORDER BY
 		u."USER_NO"
 		LIMIT
 		#{perPage} OFFSET #{startNum}
 	</select>
+	
+	
 
 	<select id="isFollowing" parameterType="FollowDTO"
 		resultType="boolean">
