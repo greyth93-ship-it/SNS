@@ -20,6 +20,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.sns.app.follow.FollowDTO;
 import com.sns.app.follow.FollowService;
 import com.sns.app.member.MemberDTO;
+import com.sns.app.pager.Pager;
 
 @Controller
 @RequestMapping("/chat/*")
@@ -33,13 +34,13 @@ public class ChatroomController {
 	
 	
 	@GetMapping("create")
-	public String findRoom(@RequestParam(value="targetUserNo", required=false) Long targetUserNo, @AuthenticationPrincipal MemberDTO loginUserNo, @RequestParam(value="roomNo", required=false) Long roomNo,Model model) throws Exception{
+	public String findRoom(@RequestParam(value="targetUserNo", required=false) Long targetUserNo, @AuthenticationPrincipal MemberDTO loginUserNo, @RequestParam(value="roomNo", required=false) Long roomNo,Model model, Pager pager) throws Exception{
 		Long myUserNo = loginUserNo.getUserNo();
 		
 		if (roomNo == null && targetUserNo != null) {
 
 	        List<FollowDTO> followList =
-	                followService.isMatchedFollow(targetUserNo, myUserNo);
+	                followService.isMatchedFollow(targetUserNo, myUserNo, pager);
 
 	        boolean isMatched = !followList.isEmpty();
 
