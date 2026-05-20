@@ -8,6 +8,7 @@
 <meta charset="UTF-8">
 <title>Insert title here</title>
 <c:import url="/WEB-INF/views/temp/head_css.jsp"></c:import>
+<link rel="stylesheet" type="text/css" href="/css/feed-search.css">
 </head>
 
 <body id="page-top">
@@ -34,9 +35,15 @@
 	                		</c:when>
 	                		
 	                	</c:choose>
-						<h6 class="mt-2">게시물 <span class="badge bg-secondary">${pager.totalCount}</span></h6> 
-						<h6>팔로워 <a href="../follow/follower">팔로 </a></h6> 
-						<h6>팔로잉</h6>
+						<h6 class="mt-2">게시물 <span class="badge bg-secondary text-white">${pager.totalCount}</span></h6>
+						<h6>
+							팔로워 <span id="followerCount" class="badge bg-secondary text-white">${followerCount}</span>
+							<a class="ms-2" href="../follow/follower?userNo=${targetUserNo}">보기</a>
+						</h6>
+						<h6>
+							팔로잉 <span class="badge bg-secondary text-white">${followingCount}</span>
+							<a class="ms-2" href="../follow/following?userNo=${targetUserNo}">보기</a>
+						</h6>
 					</div>
 	                   
 	                <!-- 2. 내 페이지인가? 상대방 페이지인가? 에 따른 버튼 분기 처리 -->
@@ -55,6 +62,11 @@
 									onclick="location.href='/post/create'">
 									<i class="fas fa-plus-circle me-2"></i>포스트 만들기
 								</button>
+								<button type="button"
+									class="btn btn-outline-danger w-100 py-2 fw-bold"
+									onclick="location.href='/story/create'">
+									<i class="fas fa-history me-2"></i>스토리 추가
+								</button>
 							</div>
 	                	</c:when>
 	                	<c:otherwise>
@@ -63,11 +75,12 @@
 				                <div class="d-flex justify-content-between gap-2 mb-4">
 	
 									<c:if test="${!isMine}">
-									    <button type="button"
-									            class="btn btn-primary"
-									            onclick="followUser('${targetUserNo}')">
-									        팔로우
-									    </button>
+										<button type="button"
+												class="btn ${isFollowing ? 'btn-secondary' : 'btn-outline-primary'}"
+												data-follow-state="${isFollowing ? 'following' : 'not-following'}"
+												onclick="followUser('${targetUserNo}', this)">
+											${isFollowing ? '팔로잉' : '팔로우'}
+										</button>
 									</c:if>
 									<button type="button" class="btn btn-outline-secondary w-50 py-2 fw-bold" onclick="startChat(${member.userNo})">
 										메시지 보내기
@@ -81,20 +94,24 @@
 					<div>
 						<label class="fw-bold">올린 게시물</label>
 						<!-- 상대방 글 목록 전체보기를 위해 userNo 파라미터 유지 -->
-						<button class="btn btn-sm btn-light ms-2" onclick="location.href='/member/myposts?userNo=${member.userNo}'">모두보기</button>
 						
 						<div class="post-summary-list mt-3">
 							<c:choose>
 								<c:when test="${not empty myposts}">
-									<ul class="list-group">
-										<c:forEach var="post" items="${myposts}">
-											<li class="list-group-item">
-												<a href="/post/detail?feedNo=${post.feedNo}"> <!-- 일반적인 포스트 상세페이지 경로로 수정 추천 -->
-														게시글 번호: ${post.feedNo}
-												</a>
-											</li>
+									<div class="search-gallery">
+										<c:forEach items="${myposts}" var="p">
+											<a class="search-tile" href="/feed/detail/post/${p.feedNo}" title="${p.memberDTO.userNickname}">
+												<c:choose>
+													<c:when test="${not empty p.list}">
+														<img src="/files/post/${p.list[0].fileName}" alt="post image" onerror="this.src='/img/default_post.png'">
+													</c:when>
+													<c:otherwise>
+														<img src="/img/default_post.png" alt="default post image">
+													</c:otherwise>
+												</c:choose>
+											</a>
 										</c:forEach>
-									</ul>
+									</div>
 								</c:when>
 								<c:otherwise>
 									<p class="text-muted">작성한 게시물이 없습니다.</p>

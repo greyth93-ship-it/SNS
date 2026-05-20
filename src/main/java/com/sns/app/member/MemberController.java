@@ -56,24 +56,42 @@ public class MemberController {
 	        targetUserNo = loginMember.getUserNo();
 	    }
 	    
-	    // 2. 페이징 처리에 대상 userNo 설정 (그 사람의 글 목록을 가져옴)
-	    pager.setUserNo(targetUserNo);
-	    pager.setPerPage(5L);
-	    List<FeedDTO> list = postService.list(pager);
-	    
-	   
+
+		pager.setUserNo(targetUserNo);
+		pager.setPerPage(1000L);
+		if (loginMember != null) {
+			pager.setCurrentUserNo(loginMember.getUserNo());
+		}
+		List<FeedDTO> list = postService.myList(pager);
+		
 	    
 	    // 현재 로그인한 사람과 페이지 주인의 userNo가 같은지 여부 (JSP에서 버튼 분기 처리용)
 	    boolean isMine = targetUserNo.equals(loginMember.getUserNo());
 	    
 	    MemberDTO targetUser = memberServiceImpl.detail(loginMember);
-	    
-	    model.addAttribute("member",targetUser);
-	    model.addAttribute("myposts", list);
-	    model.addAttribute("pager", pager);
-	    model.addAttribute("isMine", isMine); 
-	    model.addAttribute("targetUserNo",targetUserNo);
-	    // 만약 타인 정보 조회 로직을 안 넣는다면 임시로 targetUserNo를 가진 DTO나 id를 넘겨서 jsp에서 활용 가능합니다.
+		// 현재 로그인 사용자가 타겟을 팔로우하고 있는지 여부
+		boolean isFollowing = false;
+
+		// 모델에 필요한 값들을 직접 할당 (예외는 컨트롤러 호출자에게 전달)
+		model.addAttribute("member", targetUser);
+		model.addAttribute("myposts", list);
+		model.addAttribute("pager", pager);
+		model.addAttribute("isMine", isMine);
+		model.addAttribute("targetUserNo", targetUserNo);
+
+		Long followerCnt = followService.followerCount(targetUserNo);
+		Long followingCnt = followService.followingCount(targetUserNo);
+		model.addAttribute("followerCount", followerCnt);
+		model.addAttribute("followingCount", followingCnt);
+
+		Long postCnt = postService.myCount(pager);
+		pager.setTotalCount(postCnt);
+
+		if (loginMember != null && !isMine) {
+			isFollowing = followService.isFollowing(loginMember.getUserNo(), targetUserNo);
+		}
+		model.addAttribute("isFollowing", isFollowing);
+
 	}
 	
 	@GetMapping("myposts")
