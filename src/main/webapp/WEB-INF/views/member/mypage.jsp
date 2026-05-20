@@ -20,21 +20,24 @@
 			<div id="content">
 			
 				<c:import url="/WEB-INF/views/temp/topbar.jsp"></c:import>
+				<c:set var="pageMember" value="${not empty myposts ? myposts[0].memberDTO : member}" />
 					
 				<!-- Begin Page Content -->
 				<div class="container-fluid">
 
 	                   <!-- Page Heading -->
-	                   <h1 class="h3 mb-4 text-gray-800">${member.userNickname}의 마이페이지</h1>
+		                   <h1 class="h3 mb-4 text-gray-800">${pageMember.userNickname}의 마이페이지</h1>
 	                
 	                <div class="mb-4">
 	                	<!-- 프로필 이미지가 없을 때를 대비한 기본 이미지 처리 예시 -->
-	                	<c:choose>
-	                		<c:when test="${not empty member.profileDTO.fileName}">
-								<img class="img-profile rounded-circle" src="/files/member/${member.profileDTO.fileName}" style="width: 80px; height: 80px; object-fit: cover;"> 
-	                		</c:when>
-	                		
-	                	</c:choose>
+		                	<c:choose>
+		                		<c:when test="${not empty pageMember.profileDTO and not empty pageMember.profileDTO.fileName}">
+								<img class="img-profile rounded-circle" src="/files/member/${pageMember.profileDTO.fileName}" style="width: 80px; height: 80px; object-fit: cover;"> 
+		                		</c:when>
+		                		<c:otherwise>
+								<img class="img-profile rounded-circle" src="/img/default_user.avif" style="width: 80px; height: 80px; object-fit: cover;"> 
+		                		</c:otherwise>
+		                	</c:choose>
 						<h6 class="mt-2">게시물 <span class="badge bg-secondary text-white">${pager.totalCount}</span></h6>
 						<h6>
 							팔로워 <span id="followerCount" class="badge bg-secondary text-white">${followerCount}</span>
@@ -82,7 +85,7 @@
 											${isFollowing ? '팔로잉' : '팔로우'}
 										</button>
 									</c:if>
-									<button type="button" class="btn btn-outline-secondary w-50 py-2 fw-bold" onclick="startChat(${member.userNo})">
+									<button type="button" class="btn btn-outline-secondary w-50 py-2 fw-bold" onclick="startChat(${pageMember.userNo})">
 										메시지 보내기
 									</button>
 								</div>
