@@ -88,12 +88,12 @@
 
     SELECT
         "MESSAGE_NO",
-        "ROOM_NO",
         "USER_NO",
         "MESSAGE_CONTENT",
         "MESSAGE_TYPE",
         "MESSAGE_DATE",
-        "READ_COUNT"
+        "READ_COUNT",
+        "ROOM_NO"
 
     FROM "CHATROOM_MESSAGE"
 
@@ -134,7 +134,15 @@
   </insert>
   
   <insert id="chat" parameterType="ChatroomMessageDTO" useGeneratedKeys="true" keyProperty="messageNo">
-  	INSERT INTO "CHATROOM_MESSAGE"
+  	INSERT INTO "CHATROOM_MESSAGE"(
+  		"MESSAGE_NO",
+        "USER_NO",
+        "MESSAGE_CONTENT",
+        "MESSAGE_TYPE",
+        "MESSAGE_DATE",
+        "READ_COUNT",
+        "ROOM_NO"
+  	)
   	VALUES (
   	default,
   	#{userNo},

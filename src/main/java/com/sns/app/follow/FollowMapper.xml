@@ -192,8 +192,8 @@
 	<select id="isMatchedFollow" parameterType="com.sns.app.pager.Pager"
 		resultMap="detailResult">
 		SELECT
-		f1."USER_FOLLOWER" AS "userFollower",
-		f1."USER_FOLLOWING" AS "userFollowing"
+		f1."USER_FOLLOWER" 
+		f1."USER_FOLLOWING" 
 		FROM "FOLLOW" f1
 		INNER JOIN "FOLLOW" f2
 		ON f1."USER_FOLLOWING" = f2."USER_FOLLOWER"
