@@ -51,12 +51,16 @@ public class FollowService {
 		return followMapper.followerList(pager);
 	}
 
-	public List<FollowDTO> isMatchedFollow(Pager pager) throws Exception {
+	public List<FollowDTO> isMatchedFollow(Long currentUserNo, Long userNo, Pager pager) throws Exception {
 		
 		pager.makePageNum(followMapper.isMatchedFollowCount(pager));
 		pager.makeStartNum();
+		FollowDTO followDTO = new FollowDTO();
+		followDTO.setUserFollower(currentUserNo);
+		followDTO.setUserFollowing(userNo);
+		
 
-		return followMapper.isMatchedFollow(pager);
+		return followMapper.isMatchedFollow(followDTO, pager);
 	}
 
 	public boolean isFollowing(Long userFollower, Long userFollowing) throws Exception {
