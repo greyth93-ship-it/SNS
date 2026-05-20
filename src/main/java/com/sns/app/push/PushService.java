@@ -27,6 +27,8 @@ public class PushService {
 		Map<String, String> data = new HashMap<>();
 		data.put("message", pushDTO.getPushMsg());
 		data.put("type", pushDTO.getPushType());
+		data.put("feedNo", pushDTO.getFeedNo() == null ? "" : String.valueOf(pushDTO.getFeedNo()));
+		data.put("senderNo", pushDTO.getSenderNo() == null ? "" : String.valueOf(pushDTO.getSenderNo()));
 
 		// 3. 실시간 알림 전송
 		String channelName = "sns-alarm-" + pushDTO.getReceiverNo(); 
