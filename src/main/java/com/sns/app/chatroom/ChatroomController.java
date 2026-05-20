@@ -129,7 +129,7 @@ public class ChatroomController {
 	    // 3. 💡 질문하신 에러 구간 해결! 
 	    // 서비스 메서드 정의에 맞춰 파라미터를 순서대로 전달합니다.
 	    // 여기서 첫 번째 인자인 userNo(상대방번호) 자리에 null을 주어 '전체 맞팔 목록'을 조회함을 명시합니다.
-	    List<FollowDTO> matchedList = followService.isMatchedFollow(null, loginUserNo, pager);
+	    List<FollowDTO> matchedList = followService.isMatchedFollow(loginUserNo, null, pager);
 	    
 	    // 4. JSP 화면으로 데이터 토스
 	    model.addAttribute("matchedList", matchedList);
