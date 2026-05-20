@@ -32,9 +32,7 @@
 	                		<c:when test="${not empty member.profileDTO.fileName}">
 								<img class="img-profile rounded-circle" src="/files/member/${member.profileDTO.fileName}" style="width: 80px; height: 80px; object-fit: cover;"> 
 	                		</c:when>
-	                		<c:otherwise>
-								<img class="img-profile rounded-circle" src="/img/undraw_profile.svg" style="width: 80px; height: 80px;"> 
-	                		</c:otherwise>
+	                		
 	                	</c:choose>
 						<h6 class="mt-2">게시물 <span class="badge bg-secondary">${pager.totalCount}</span></h6> 
 						<h6>팔로워 <a href="../follow/follower">팔로 </a></h6> 

@@ -9,7 +9,6 @@ public interface MemberService {
 	
 	public int join(MemberDTO memberDTO,MultipartFile file) throws Exception;
 	
-	
 	public MemberDTO detail(MemberDTO memberDTO) throws Exception;
 	
 	public int update(MemberDTO memberDTO) throws Exception;
