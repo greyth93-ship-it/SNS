@@ -25,6 +25,11 @@ function followUser(targetUserNo, button) {
         .then(text => {
             if (parseInt(text, 10) > 0) {
                 setFollowButtonState(button, false);
+                const badge = document.getElementById('followerCount');
+                if (badge) {
+                    const val = parseInt(badge.textContent || '0', 10) || 0;
+                    badge.textContent = Math.max(0, val - 1);
+                }
             } else {
                 alert('팔로우 취소 실패');
             }
@@ -43,11 +48,17 @@ function followUser(targetUserNo, button) {
         },
         body: 'targetUserNo=' + encodeURIComponent(targetUserNo)
     })
-    .then(response => response.json())
-    .then(data => {
+        .then(response => response.json())
+        .then(data => {
 
         if (data.success) {
             setFollowButtonState(button, true);
+            // update follower count badge if present
+            const badge = document.getElementById('followerCount');
+            if (badge) {
+                const val = parseInt(badge.textContent || '0', 10) || 0;
+                badge.textContent = val + 1;
+            }
         } else {
             alert(data.message || '실패');
         }
