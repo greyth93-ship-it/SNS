@@ -190,7 +190,7 @@
 	</select>
 
 	<select id="isMatchedFollow" parameterType="FollowDTO"
-		resultType="detailResult">
+		resultMap="detailResult">
 		SELECT
 		f1."USER_FOLLOWER" AS "userFollower",
 		f1."USER_FOLLOWING" AS "userFollowing"
