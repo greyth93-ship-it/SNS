@@ -7,36 +7,17 @@
 
 	<insert id="follow" parameterType="FollowDTO"
 		useGeneratedKeys="true" keyProperty="followNo">
-		INSERT INTO "FOLLOW" ("USER_FOLLOWER", "FOLLOW_DATE", "USER_FOLLOWING")
+		INSERT INTO "FOLLOW"
+		("USER_FOLLOWER", "FOLLOW_DATE", "USER_FOLLOWING")
 		VALUES (
 		#{userFollower},
 		now(),
 		#{userFollowing}
 		)
-		ON CONFLICT ("USER_FOLLOWER", "USER_FOLLOWING") DO NOTHING
+		ON CONFLICT ("USER_FOLLOWER",
+		"USER_FOLLOWING") DO NOTHING
 	</insert>
 
-	<select id="detail" parameterType="FollowDTO"
-		resultMap="detailResult">
-		SELECT u.*,ui.*,r.*,f.*,p."FEED_NO",p."USER_NO" AS
-		"POST_USER_NO"
-		FROM "FOLLOW" f
-		INNER JOIN "USER" u ON
-		u."USER_NO" =
-		f."USER_FOLLOWING"
-		LEFT JOIN "USER_IMG" ui
-		USING
-		("USER_NO")
-		LEFT JOIN
-		"USER_ROLE"
-		USING ("USER_NO")
-		LEFT JOIN "ROLE" r
-		USING ("ROLE_NO")
-		LEFT
-		JOIN "POST" p
-		ON p."USER_NO" = u."USER_NO"
-		WHERE u."USER_ID"=#{username}
-	</select>
 
 	<resultMap id="detailResult" type="FollowDTO">
 		<id column="FOLLOW_NO" property="followNo" />
@@ -63,17 +44,20 @@
 		DELETE FROM "FOLLOW"
 		WHERE
 		"USER_FOLLOWER" = #{userFollower}
-		AND "USER_FOLLOWING" = #{userFollowing}
+		AND "USER_FOLLOWING" =
+		#{userFollowing}
 	</delete>
 
 	<select id="followingCount"
 		parameterType="com.sns.app.pager.Pager" resultType="long">
 		SELECT COUNT(*)
 		FROM "FOLLOW" f
-		INNER JOIN "USER" u ON u."USER_NO" = f."USER_FOLLOWING"
+		INNER JOIN "USER" u ON u."USER_NO" =
+		f."USER_FOLLOWING"
 		WHERE f."USER_FOLLOWER" = #{userNo}
 		<if test="search != null and search != ''">
-			AND upper(u."USER_NICKNAME") LIKE '%' || upper(#{search}) || '%'
+			AND upper(u."USER_NICKNAME") LIKE '%' || upper(#{search})
+			|| '%'
 		</if>
 	</select>
 
@@ -81,10 +65,12 @@
 		parameterType="com.sns.app.pager.Pager" resultType="long">
 		SELECT COUNT(*)
 		FROM "FOLLOW" f
-		INNER JOIN "USER" u ON u."USER_NO" = f."USER_FOLLOWER"
+		INNER JOIN "USER" u ON u."USER_NO" =
+		f."USER_FOLLOWER"
 		WHERE f."USER_FOLLOWING" = #{userNo}
 		<if test="search != null and search != ''">
-			AND upper(u."USER_NICKNAME") LIKE '%' || upper(#{search}) || '%'
+			AND upper(u."USER_NICKNAME") LIKE '%' || upper(#{search})
+			|| '%'
 		</if>
 	</select>
 
@@ -113,7 +99,8 @@
 		"ROLE" r USING ("ROLE_NO")
 		WHERE f."USER_FOLLOWER" = #{userNo}
 		<if test="search != null and search != ''">
-			AND upper(u."USER_NICKNAME") LIKE '%' || upper(#{search}) || '%'
+			AND upper(u."USER_NICKNAME") LIKE '%' || upper(#{search})
+			|| '%'
 		</if>
 		ORDER BY
 		u."USER_NO"
@@ -146,7 +133,8 @@
 		"ROLE" r USING ("ROLE_NO")
 		WHERE f."USER_FOLLOWING" = #{userNo}
 		<if test="search != null and search != ''">
-			AND upper(u."USER_NICKNAME") LIKE '%' || upper(#{search}) || '%'
+			AND upper(u."USER_NICKNAME") LIKE '%' || upper(#{search})
+			|| '%'
 		</if>
 		ORDER BY
 		u."USER_NO"
@@ -189,73 +177,53 @@
 		#{perPage} OFFSET #{startNum}
 	</select>
 
-	<select id="isMatchedFollowCount" parameterType="com.sns.app.pager.Pager" resultType="long">
+	<select id="isMatchedFollowCount"
+		parameterType="com.sns.app.pager.Pager" resultType="long">
 		SELECT COUNT(*)
 		FROM "FOLLOW" f1
 		INNER JOIN "FOLLOW" f2
-			ON f1."USER_FOLLOWING" = f2."USER_FOLLOWER"
-			AND f1."USER_FOLLOWER" = f2."USER_FOLLOWING"
-		WHERE f1."USER_FOLLOWER" = #{currentUserNo}
+		ON f1."USER_FOLLOWING" = f2."USER_FOLLOWER"
+		AND f1."USER_FOLLOWER" = f2."USER_FOLLOWING"
+		WHERE f1."USER_FOLLOWER" =
+		#{currentUserNo}
 		AND f1."USER_FOLLOWING" = #{userNo}
 	</select>
 
 	<select id="isMatchedFollow" parameterType="FollowDTO"
-		resultType="FollowDTO">
-		SELECT 
-        f1."USER_FOLLOWER"  AS "userFollower",   
-        f1."USER_FOLLOWING" AS "userFollowing"   
-    FROM "FOLLOW" f1
-    INNER JOIN "FOLLOW" f2 
-        ON f1."USER_FOLLOWING" = f2."USER_FOLLOWER" 
-       AND f1."USER_FOLLOWER" = f2."USER_FOLLOWING"
-    WHERE f1."USER_FOLLOWER" = #{userFollower}   
-      AND f1."USER_FOLLOWING" = #{userFollowing}
+		resultType="detailResult">
+		SELECT
+		f1."USER_FOLLOWER" AS "userFollower",
+		f1."USER_FOLLOWING" AS "userFollowing"
+		FROM "FOLLOW" f1
+		INNER JOIN "FOLLOW" f2
+		ON f1."USER_FOLLOWING" = f2."USER_FOLLOWER"
+		AND f1."USER_FOLLOWER" = f2."USER_FOLLOWING"
+		WHERE f1."USER_FOLLOWER" = #{userFollower}
+		AND f1."USER_FOLLOWING" = #{userFollowing}
+		INNER JOIN "USER" u ON
+		u."USER_NO" = f."USER_FOLLOWING"
+		LEFT JOIN "USER_IMG"
+		ui USING
+		("USER_NO")
+		LEFT JOIN "USER_ROLE" USING ("USER_NO")
+		LEFT JOIN
+		"ROLE" r
+		USING ("ROLE_NO")
+		WHERE f."USER_FOLLOWER" = #{userNo}
+		ORDER BY
+		u."USER_NO"
+		LIMIT
+		#{perPage} OFFSET #{startNum}
 	</select>
 
-	<select id="isFollowing" parameterType="FollowDTO" resultType="boolean">
+	<select id="isFollowing" parameterType="FollowDTO"
+		resultType="boolean">
 		SELECT EXISTS (
-			SELECT 1
-			FROM "FOLLOW"
-			WHERE "USER_FOLLOWER" = #{userFollower}
-			AND "USER_FOLLOWING" = #{userFollowing}
+		SELECT 1
+		FROM "FOLLOW"
+		WHERE "USER_FOLLOWER" = #{userFollower}
+		AND "USER_FOLLOWING" = #{userFollowing}
 		)
 	</select>
-
-	<!-- 회원 정보를 USER_NO로 조회하여 MemberDTO로 매핑 -->
-	<select id="getMemberByUserNo" parameterType="long" resultMap="memberResult">
-		SELECT u.*, ui."FILE_NO" AS "PROFILE_FILE_NO", ui."FILE_NAME" AS "PROFILE_FILE_NAME", ui."ORI_NAME" AS "PROFILE_ORI_NAME", r.*
-		FROM "USER" u
-		LEFT JOIN "USER_IMG" ui USING ("USER_NO")
-		LEFT JOIN "USER_ROLE" USING ("USER_NO")
-		LEFT JOIN "ROLE" r USING ("ROLE_NO")
-		WHERE u."USER_NO" = #{userNo}
-	</select>
-
-	<resultMap id="memberResult" type="com.sns.app.member.MemberDTO">
-		<id column="USER_NO" property="userNo"/>
-		<result column="USER_ID" property="userId"/>
-		<result column="USER_NICKNAME" property="userNickname"/>
-		<result column="USER_PW" property="userPw"/>
-		<result column="USER_EMAIL" property="userEmail"/>
-		<result column="USER_BIRTH" property="userBirth"/>
-		<result column="USER_AGR" property="userAgr"/>
-		<result column="ENABLED" property="enabled"/>
-		<result column="CREDENTIALS_NON_LOCKED" property="credentialsNonLocked"/>
-		<result column="ACCOUNT_NON_LOCKED" property="accountNonLocked"/>
-		<result column="ACCOUNT_NON_EXPIRED" property="accountNonExpired"/>
-
-		<association property="profileDTO" javaType="com.sns.app.member.ProfileDTO">
-			<id column="PROFILE_FILE_NO" property="fileNo"/>
-			<result column="PROFILE_FILE_NAME" property="fileName"/>
-			<result column="PROFILE_ORI_NAME" property="oriName"/>
-		</association>
-
-		<collection property="roles" javaType="java.util.List" ofType="com.sns.app.member.RoleDTO">
-			<id column="ROLE_NO" property="roleNo"/>
-			<result column="ROLE_NAME" property="roleName"/>
-		</collection>
-	</resultMap>
-
-
 
 </mapper>
