@@ -110,7 +110,7 @@
 									</c:choose>
 									<c:choose>
 										<c:when test="${p.pushType eq 'FOLLOW'}">
-											<c:set var="moveUrl" value="/feed/mypage?userNo=${p.senderNo}" />
+											<c:set var="moveUrl" value="/member/mypage?userNo=${p.senderNo}" />
 										</c:when>
 										<c:when test="${p.pushType eq 'STORY_LIKE'}">
 											<c:set var="moveUrl" value="/feed/detail/story/${p.feedNo}" />
@@ -130,7 +130,7 @@
 														<img src="${not empty p.senderProfileFileName ? '/files/member/'.concat(p.senderProfileFileName) : '/img/default_user.avif'}"
 															onerror="this.src='/img/default_user.avif'" alt="profile">
 													</div>
-													<c:if test="${p.pushType eq 'LIKE'}">
+													<c:if test="${p.pushType eq 'POST_LIKE' or p.pushType eq 'STORY_LIKE'}">
 														<span class="push-like-badge"><i class="fas fa-heart"></i></span>
 													</c:if>
 												</div>
@@ -191,5 +191,29 @@
 
 	<c:import url="/WEB-INF/views/temp/footer_script.jsp"></c:import>
 	<script src="/js/topbar.js"></script>
+	<script>
+		// allList.jsp에서 카드 클릭 처리
+		function handleNotificationClick(pushNo, moveUrl) {
+			fetch('/push/read?pushNo=' + pushNo, {
+				method: 'POST'
+			})
+				.then(response => response.json())
+				.then(data => {
+					try {
+						location.href = moveUrl;
+					} catch (e) {
+						console.error(e);
+					}
+				})
+				.catch(err => {
+					console.error("읽음 처리 중 오류:", err);
+					try {
+						location.href = moveUrl;
+					} catch (e) {
+						console.error(e);
+					}
+				});
+		}
+	</script>
 </body>
 </html>

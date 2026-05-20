@@ -16,6 +16,59 @@ function loadAlarmList() {
         .catch(err => console.error("알림 카운트 로드 중 오류:", err));
 }
 
+// 간단한 푸시 토스트 표시기
+function showPushToast(message, type) {
+    try {
+        let container = document.getElementById('push-toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'push-toast-container';
+            container.style.position = 'fixed';
+            container.style.top = '16px';
+            container.style.right = '16px';
+            container.style.zIndex = 1060;
+            document.body.appendChild(container);
+        }
+
+        const toast = document.createElement('div');
+        toast.className = 'push-toast-item';
+        toast.style.minWidth = '180px';
+        toast.style.marginTop = '8px';
+        toast.style.padding = '10px 14px';
+        toast.style.borderRadius = '6px';
+        toast.style.boxShadow = '0 6px 18px rgba(0,0,0,0.12)';
+        toast.style.color = '#fff';
+        toast.style.fontSize = '13px';
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.18s ease, transform 0.18s ease';
+        toast.style.transform = 'translateY(-6px)';
+        if (type === 'success') {
+            toast.style.background = '#28a745';
+        } else if (type === 'error') {
+            toast.style.background = '#dc3545';
+        } else {
+            toast.style.background = '#343a40';
+        }
+
+        toast.innerText = message;
+        container.appendChild(toast);
+
+        // animate in
+        requestAnimationFrame(() => {
+            toast.style.opacity = '1';
+            toast.style.transform = 'translateY(0)';
+        });
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(-6px)';
+            setTimeout(() => container.removeChild(toast), 220);
+        }, 1800);
+    } catch (e) {
+        console.error('push toast error', e);
+    }
+}
+
 function getSenderProfileSrc(item) {
     return item.senderProfileFileName ? '/files/member/' + item.senderProfileFileName : '/img/default_user.avif';
 }
@@ -62,9 +115,6 @@ function followBackFromAlarm(event, senderNo, button) {
                 if (typeof loadAlarmList === 'function') loadAlarmList();
                 if (typeof loadAlarmItems === 'function') loadAlarmItems();
 
-                if (window.Swal) {
-                    Swal.fire({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1800, timerProgressBar: true, icon: 'success', title: '팔로우했습니다.' });
-                }
             })
             .catch(err => {
                 console.error('follow alarm error', err);
@@ -90,18 +140,6 @@ function followBackFromAlarm(event, senderNo, button) {
 
             if (typeof loadAlarmItems === 'function') {
                 loadAlarmItems();
-            }
-
-            if (window.Swal) {
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 1800,
-                    timerProgressBar: true,
-                    icon: 'success',
-                    title: '팔로우했습니다.'
-                });
             }
 
             return resp;
@@ -172,7 +210,7 @@ function unfollowFromAlarm(event, senderNo, button) {
                     if (button) setFollowButtonState(button, false, senderNo);
                     if (typeof loadAlarmList === 'function') loadAlarmList();
                     if (typeof loadAlarmItems === 'function') loadAlarmItems();
-                    if (window.Swal) Swal.fire({ toast: true, position: 'top-end', showConfirmButton: false, timer: 1800, timerProgressBar: true, icon: 'success', title: '팔로우를 취소했습니다.' });
+
                 } else {
                     throw new Error('삭제 실패');
                 }
@@ -189,18 +227,6 @@ function unfollowFromAlarm(event, senderNo, button) {
         .then(resp => {
             if (button) {
                 setFollowButtonState(button, false, senderNo);
-            }
-
-            if (window.Swal) {
-                Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    showConfirmButton: false,
-                    timer: 1800,
-                    timerProgressBar: true,
-                    icon: 'success',
-                    title: '팔로우를 취소했습니다.'
-                });
             }
 
             return resp;
@@ -226,10 +252,18 @@ function getNotificationMoveUrl(item) {
     }
 
     if (item.pushType === 'FOLLOW') {
-        return item.senderNo ? '/feed/mypage?userNo=' + item.senderNo : '#';
+        return item.senderNo ? '/member/mypage?userNo=' + item.senderNo : '#';
     }
 
-    return item.postNo ? '/post/detail?postNo=' + item.postNo : '#';
+    if (item.pushType === 'POST_LIKE') {
+        return item.feedNo ? '/feed/detail/post/' + item.feedNo : '#';
+    }
+
+    if (item.pushType === 'STORY_LIKE') {
+        return item.feedNo ? '/feed/detail/story/' + item.feedNo : '#';
+    }
+
+    return item.feedNo ? '/feed/detail/post/' + item.feedNo : '#';
 }
 
 // 드롭다운이 열릴 때 알림 항목들을 로드하여 보여줍니다.
@@ -255,6 +289,8 @@ function loadAlarmItems() {
                 const dateStyle = unread ? "font-weight:700; color:#5a5c69;" : "font-weight:400; color:#858796;";
                 const messageStyle = unread ? "font-weight:700; color:#212529;" : "font-weight:400; color:#858796;";
                 const moveUrl = getNotificationMoveUrl(item);
+                console.log('알림 항목:', item); // 디버깅용 로그
+                console.log('moveUrl:', moveUrl); // 디버깅용 로그
                 const followButton = item.pushType === 'FOLLOW'
                     ? `<button type="button" class="btn btn-sm ${item.followedByMe ? 'btn-secondary' : 'btn-outline-primary'} ml-3 flex-shrink-0" style="white-space:nowrap;" data-follow-state="${item.followedByMe ? 'following' : 'not-following'}" onclick="toggleFollowFromAlarm(event, ${item.senderNo}, this)">${item.followedByMe ? '팔로잉' : '팔로우'}</button>`
                     : '';
