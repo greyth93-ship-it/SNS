@@ -30,8 +30,8 @@ public interface FollowMapper {
 
 	public MemberDTO getMemberByUserNo(Long userNo) throws Exception;
 
-	public List<FollowDTO> isMatchedFollow(FollowDTO followDTO);
-
+	public List<FollowDTO> isMatchedFollow(Pager pager) throws Exception;
+	
 	public Long isMatchedFollowCount(Pager pager) throws Exception;
 
 
