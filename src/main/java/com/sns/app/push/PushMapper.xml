@@ -9,16 +9,14 @@
 			"PUSH_TYPE",
 			"PUSH_MSG",
 			"IS_READ",
-			"PUSH_DATE",
-			"FEED_NO"
+			"PUSH_DATE"
 		) VALUES (
 			#{receiverNo},
 			#{senderNo},
 			#{pushType},
 			#{pushMsg},
 			false,
-			NOW(),
-			#{feedNo}
+			NOW()
 		)
 	</insert>
 
@@ -31,8 +29,7 @@
 			"PUSH_TYPE",
 			"PUSH_MSG",
 			"IS_READ",
-			"PUSH_DATE",
-			"FEED_NO"
+			"PUSH_DATE"
 			, S."USER_NICKNAME" AS "SENDER_NICKNAME"
 			, UI."FILE_NAME" AS "SENDER_PROFILE_FILE_NAME"
 		FROM "PUSH" P
@@ -61,7 +58,6 @@
 		P."PUSH_MSG",
 		P."IS_READ",
 		P."PUSH_DATE",
-		P."FEED_NO",
 		S."USER_NICKNAME" AS "SENDER_NICKNAME",
 		UI."FILE_NAME" AS "SENDER_PROFILE_FILE_NAME"
 	FROM "PUSH" P
@@ -87,7 +83,6 @@
 			P."PUSH_MSG",
 			P."IS_READ",
 			P."PUSH_DATE",
-			P."FEED_NO",
 			S."USER_NICKNAME" AS "SENDER_NICKNAME",
 			UI."FILE_NAME" AS "SENDER_PROFILE_FILE_NAME"
 		FROM "PUSH" P

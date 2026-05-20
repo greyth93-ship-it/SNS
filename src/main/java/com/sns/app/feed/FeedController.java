@@ -84,6 +84,7 @@ public class FeedController {
 		}
 
 		pager.setUserNo(userNo);
+		pager.setPerPage(1000L);
 
 		List<FeedDTO> postList = postService.myList(pager);
 
@@ -230,6 +231,7 @@ public class FeedController {
 		if (memberDTO != null) {
 			pager.setCurrentUserNo(memberDTO.getUserNo());
 		}
+		pager.setPerPage(1000L);
 
 		List<FeedDTO> postList = postService.myList(pager);
 		

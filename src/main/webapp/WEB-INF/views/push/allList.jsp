@@ -114,10 +114,24 @@
 											<c:set var="moveUrl" value="/member/mypage?userNo=${p.senderNo}" />
 										</c:when>
 										<c:when test="${p.pushType eq 'STORY_LIKE'}">
-										<c:set var="moveUrl" value="/feed/detail/story/${p.feedNo}" />
-									</c:when>
+											<c:choose>
+												<c:when test="${not empty p.feedNo}">
+													<c:set var="moveUrl" value="/feed/detail/story/${p.feedNo}" />
+												</c:when>
+												<c:otherwise>
+													<c:set var="moveUrl" value="/member/mypage?userNo=${p.senderNo}" />
+												</c:otherwise>
+											</c:choose>
+										</c:when>
 									<c:when test="${p.pushType eq 'POST_LIKE'}">
-										<c:set var="moveUrl" value="/feed/detail/post/${p.feedNo}" />
+											<c:choose>
+												<c:when test="${not empty p.feedNo}">
+													<c:set var="moveUrl" value="/feed/detail/post/${p.feedNo}" />
+												</c:when>
+												<c:otherwise>
+													<c:set var="moveUrl" value="/member/mypage?userNo=${p.senderNo}" />
+												</c:otherwise>
+											</c:choose>
 										</c:when>
 										<c:otherwise>
 											<c:set var="moveUrl" value="#" />

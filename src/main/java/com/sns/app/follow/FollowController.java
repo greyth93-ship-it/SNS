@@ -97,29 +97,45 @@ public class FollowController {
 	}
 
 	@GetMapping("following")
-	public String following(@AuthenticationPrincipal MemberDTO memberDTO, Model model, Pager pager) throws Exception {
-		if(memberDTO == null) {
+	public String following(@RequestParam(value = "userNo", required = false) Long userNo,
+							@AuthenticationPrincipal MemberDTO memberDTO,
+							Model model, Pager pager) throws Exception {
+
+		// 로그인하지 않은 사용자가 접속한 경우, userNo가 없으면 로그인 페이지로 이동
+		if (memberDTO == null && userNo == null) {
 			return "redirect:/member/login";
 		}
 
-		pager.setUserNo(memberDTO.getUserNo());
+		Long targetUserNo = (userNo != null) ? userNo : memberDTO.getUserNo();
+
+		pager.setUserNo(targetUserNo);
 		List<FollowDTO> list = followService.followingList(pager);
- 		model.addAttribute("followingList", list);
- 		model.addAttribute("currentUserNo", memberDTO.getUserNo());
+
+		model.addAttribute("followingList", list);
+		// currentUserNo는 이 페이지에서 보고자 하는 유저의 번호
+		model.addAttribute("currentUserNo", targetUserNo);
+		// loginUserNo는 현재 로그인한 사용자의 번호(없을 수 있음)
+		model.addAttribute("loginUserNo", (memberDTO != null ? memberDTO.getUserNo() : null));
 
 		return "follow/following";
 	}
 
 	@GetMapping("follower")
-	public String follower(@AuthenticationPrincipal MemberDTO memberDTO, Model model, Pager pager) throws Exception {
-        if(memberDTO == null) {
-            return "redirect:/member/login";
-        }
-		
-		pager.setUserNo(memberDTO.getUserNo());
+	public String follower(@RequestParam(value = "userNo", required = false) Long userNo,
+						   @AuthenticationPrincipal MemberDTO memberDTO,
+						   Model model, Pager pager) throws Exception {
+
+		if (memberDTO == null && userNo == null) {
+			return "redirect:/member/login";
+		}
+
+		Long targetUserNo = (userNo != null) ? userNo : memberDTO.getUserNo();
+
+		pager.setUserNo(targetUserNo);
 		List<FollowDTO> list = followService.followerList(pager);
 		model.addAttribute("followerList", list);
-		model.addAttribute("currentUserNo", memberDTO.getUserNo());
+		model.addAttribute("currentUserNo", targetUserNo);
+		model.addAttribute("loginUserNo", (memberDTO != null ? memberDTO.getUserNo() : null));
 		return "follow/follower";
 	}
 

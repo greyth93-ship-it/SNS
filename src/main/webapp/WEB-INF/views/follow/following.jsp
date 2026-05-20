@@ -30,6 +30,7 @@
 								<div class="search-title">팔로잉</div>
 								<div class="search-sub">내가 팔로우한 유저 목록입니다.</div>
 								<form method="get" action="/follow/following" class="mt-3">
+									<input type="hidden" name="userNo" value="${currentUserNo}" />
 									<div class="input-group">
 										<input type="text" name="search" class="form-control" placeholder="유저이름으로 검색" value="${param.search}">
 										<div class="input-group-append">
@@ -71,20 +72,20 @@
 										<ul class="pagination">
 											<li class="page-item ${pager.pre ? '' : 'disabled'}"><a
 											class="page-link"
-											href="/follow/following?page=${pager.pre ? pager.start-1 : pager.start}&search=${pager.search}&kind=${pager.kind}"
+											href="/follow/following?page=${pager.pre ? pager.start-1 : pager.start}&search=${pager.search}&kind=${pager.kind}&userNo=${currentUserNo}"
 											aria-label="Previous"> <span aria-hidden="true">&laquo;</span>
 											</a></li>
 
 											<c:forEach begin="${pager.start}" end="${pager.end}" var="i">
 												<li class="page-item ${pager.page == i ? 'active' : ''}">
 													<a class="page-link"
-													href="/follow/following?page=${i}&search=${pager.search}&kind=${pager.kind}">${i}</a>
+													href="/follow/following?page=${i}&search=${pager.search}&kind=${pager.kind}&userNo=${currentUserNo}">${i}</a>
 												</li>
 											</c:forEach>
 
 											<li class="page-item ${pager.next ? '' : 'disabled'}"><a
 											class="page-link"
-											href="/follow/following?page=${pager.next ? pager.end+1 : pager.end}&search=${pager.search}&kind=${pager.kind}"
+											href="/follow/following?page=${pager.next ? pager.end+1 : pager.end}&search=${pager.search}&kind=${pager.kind}&userNo=${currentUserNo}"
 											aria-label="Next"> <span aria-hidden="true">&raquo;</span>
 											</a></li>
 										</ul>
