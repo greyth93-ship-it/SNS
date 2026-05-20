@@ -192,7 +192,10 @@
 
 	<select id="isMatchedFollow" resultMap="detailResult">
 		SELECT
-		u.*,f1.*,ui.*,r.*
+		u.*,f1.*,ui."FILE_NO" AS "PROFILE_FILE_NO",
+		ui."FILE_NAME" AS
+		"PROFILE_FILE_NAME",
+		ui."ORI_NAME" AS "PROFILE_ORI_NAME",r.*
 		FROM "FOLLOW" f1
 		INNER JOIN "USER" u
 		ON u."USER_NO" = f1."USER_FOLLOWING"

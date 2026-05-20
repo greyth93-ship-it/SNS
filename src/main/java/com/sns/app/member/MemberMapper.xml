@@ -15,12 +15,12 @@
   <update id="update" parameterType="MemberDTO">
   	UPDATE "USER"
   	<set>
-  		<if test="userId != null">"USER_ID"=#{username}</if>
-  		<if test="userNickname != null">"USER_NAME"=#{userNickname}</if>
-  		<if test="userPw != null">"USER_PW"=#{password}</if>
-  		<if test="userEmail != null">"USER_EMAIL"=#{userEmail}</if>
-  		<if test="userBirth != null">"USER_BIRTH"=#{userBirth}</if>
-  		<if test="userAgr != null">"USER_AGR"=#{userAgr}</if>
+		  <if test="userId != null">"USER_ID"=#{username},</if>
+		  	  <if test="userNickname != null">"USER_NICKNAME"=#{userNickname},</if>
+		  <if test="userPw != null">"USER_PW"=#{password},</if>
+		  <if test="userEmail != null">"USER_EMAIL"=#{userEmail},</if>
+		  <if test="userBirth != null">"USER_BIRTH"=#{userBirth},</if>
+		  <if test="userAgr != null">"USER_AGR"=#{userAgr},</if>
   	</set>
   	WHERE "USER_ID"=#{username}
   </update>

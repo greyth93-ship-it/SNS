@@ -32,29 +32,23 @@
 	                  		
 						  <div class="form-group">
 						    <label for="name">이름</label>
-						    <form:input path="name" cssClass="form-control" id="name"/>
-							<form:errors path="name"></form:errors>
+						    <form:input path="userNickname" cssClass="form-control" id="userNickname"/>
+							<form:errors path="userNickname"></form:errors>
 							<!-- <span id="nameError" ></span> -->
 						  </div>
-						  						 
-						<div class="form-group">
-						    <label for="phone">전화번호</label>
-						   	<form:input path="phone" cssClass="form-control" id="phone"/>
-						   	<form:errors path="phone"></form:errors>
-							<!-- <span id="phoneError"></span> -->
-						  </div>
+	
 						  
 						  <div class="form-group">
 						    <label for="email">이메일</label>
-						    <form:input path="email" cssClass="form-control" id="email"/>
-						    <form:errors path="email"></form:errors>
+						    <form:input path="userEmail" cssClass="form-control" id="userEmail"/>
+						    <form:errors path="userEmail"></form:errors>
 						    <!-- <span id="emailError"></span> -->
 						  </div>
 						  
 						  <div class="form-group">
-						    <label for="birth">생일</label>
-						    <input type="date" value="${memberDTO.birth}" name="birth" class="form-control" id="birth">
-						    <form:errors path="birth"></form:errors>
+						    <label for="userBirth">생일</label>
+						    <form:input path="userBirth" type="date" cssClass="form-control" id="userBirth"/>
+						    <form:errors path="userBirth"></form:errors>
 						    <!-- <span id="birthError"></span> -->
 						  </div>
 						  
