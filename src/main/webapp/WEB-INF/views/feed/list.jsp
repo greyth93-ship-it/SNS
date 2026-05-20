@@ -38,17 +38,6 @@
 									</div>
 								</c:forEach>
 							</div>
-							<div class="d-flex justify-content-between gap-2 mb-4">
-								<button type="button" class="btn btn-primary w-100 py-2 fw-bold"
-									onclick="location.href='/post/create'">
-									<i class="fas fa-plus-circle me-2"></i>포스트 만들기
-								</button>
-								<button type="button"
-									class="btn btn-outline-danger w-100 py-2 fw-bold"
-									onclick="location.href='/story/create'">
-									<i class="fas fa-history me-2"></i>스토리 추가
-								</button>
-							</div>
 
 							<div class="post-container">
 								<c:forEach items="${postList}" var="p">
