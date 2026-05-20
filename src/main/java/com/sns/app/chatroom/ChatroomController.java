@@ -20,6 +20,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.sns.app.follow.FollowDTO;
 import com.sns.app.follow.FollowService;
 import com.sns.app.member.MemberDTO;
+import com.sns.app.pager.Pager;
 
 @Controller
 @RequestMapping("/chat/*")
@@ -33,13 +34,13 @@ public class ChatroomController {
 	
 	
 	@GetMapping("create")
-	public String findRoom(@RequestParam(value="targetUserNo", required=false) Long targetUserNo, @AuthenticationPrincipal MemberDTO loginUserNo, @RequestParam(value="roomNo", required=false) Long roomNo,Model model) throws Exception{
+	public String findRoom(@RequestParam(value="targetUserNo", required=false) Long targetUserNo, @AuthenticationPrincipal MemberDTO loginUserNo, @RequestParam(value="roomNo", required=false) Long roomNo,Model model, Pager page) throws Exception{
 		Long myUserNo = loginUserNo.getUserNo();
 		
 		if (roomNo == null && targetUserNo != null) {
 
 	        List<FollowDTO> followList =
-	                followService.isMatchedFollow(targetUserNo, myUserNo);
+	                followService.isMatchedFollow(targetUserNo, myUserNo,page);
 
 	        boolean isMatched = !followList.isEmpty();
 
@@ -64,12 +65,17 @@ public class ChatroomController {
 		        model.addAttribute("myUserNo",myUserNo);
 				
 				String you ="";
+				String targetProfile = null;
 				for(ChatroomMemberDTO m : room.getMembers()) {
 					if(!m.getUserNo().equals(myUserNo)){
 						you = m.getMemberDTO().getUserNickname();
 					}
+					if(m.getProfileDTO() != null && m.getProfileDTO().getFileName() != null) {
+		                targetProfile = m.getProfileDTO().getFileName();
+		            }
 				}
 				model.addAttribute("you",you);
+				model.addAttribute("targetProfile", targetProfile);
 
 		        return "chat/detail";
 		    }
@@ -105,4 +111,11 @@ public class ChatroomController {
 
 	    return chatroomServiceImpl.getMessages(roomNo, page);
 	}
+	
+//	@GetMapping("list")
+//	public String list()throws Exception{
+//		
+//		
+//		
+//	}
 }
