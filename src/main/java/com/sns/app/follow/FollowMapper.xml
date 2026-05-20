@@ -189,7 +189,7 @@
 		AND f1."USER_FOLLOWING" = #{userNo}
 	</select>
 
-	<select id="isMatchedFollow" parameterType="FollowDTO"
+	<select id="isMatchedFollow" parameterType="com.sns.app.pager.Pager"
 		resultMap="detailResult">
 		SELECT
 		f1."USER_FOLLOWER" AS "userFollower",
