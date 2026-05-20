@@ -28,6 +28,8 @@ import com.sns.app.feed.post.PostService;
 import com.sns.app.follow.FollowDTO;
 import com.sns.app.follow.FollowService;
 import com.sns.app.pager.Pager;
+import com.sns.app.push.PushDTO;
+import com.sns.app.push.PushService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -43,6 +45,9 @@ public class MemberController {
 	
 	@Autowired
 	private FollowService followService;
+	
+	@Autowired
+	private PushService pushService;
 	
 	@GetMapping("mypage")
 	public void mypage(
@@ -172,6 +177,20 @@ public class MemberController {
 	    followDTO.setUserFollowing(targetUserNo);
 	    // 서비스 호출
 	    int success = followService.follow(followDTO);
+
+	    // 팔로우 알림 발송
+	    if (success > 0) {
+	        try {
+	            PushDTO push = new PushDTO();
+	            push.setReceiverNo(targetUserNo);
+	            push.setSenderNo(followerUserNo);
+	            push.setPushType("FOLLOW");
+	            push.setPushMsg(loginUser.getUserNickname() + "님이 회원님을 팔로우합니다.");
+	            pushService.sendPush(push);
+	        } catch (Exception e) {
+	            System.err.println("팔로우 알림 발송 실패: " + e.getMessage());
+	        }
+	    }
 
 	    result.put("success", success);
 

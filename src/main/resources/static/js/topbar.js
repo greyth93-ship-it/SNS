@@ -116,10 +116,25 @@ function followBackFromAlarm(event, senderNo, button) {
 }
 
 function setFollowButtonState(button, isFollowing, senderNo) {
-    if (!button) {
+    // If a senderNo is provided, update all buttons for that sender across the DOM
+    if (senderNo) {
+        const selector = `[data-sender-no="${senderNo}"]`;
+        const buttons = document.querySelectorAll(selector);
+        buttons.forEach(btn => {
+            btn.disabled = false;
+            btn.textContent = isFollowing ? '팔로잉' : '팔로우';
+            btn.classList.toggle('btn-secondary', isFollowing);
+            btn.classList.toggle('btn-outline-primary', !isFollowing);
+            btn.dataset.followState = isFollowing ? 'following' : 'not-following';
+            btn.onclick = function(e) {
+                toggleFollowFromAlarm(e, senderNo, btn);
+            };
+        });
         return;
     }
 
+    // Fallback: update only the provided button
+    if (!button) return;
     button.disabled = false;
     button.textContent = isFollowing ? '팔로잉' : '팔로우';
     button.classList.toggle('btn-secondary', isFollowing);
@@ -206,31 +221,15 @@ function toggleFollowFromAlarm(event, senderNo, button) {
 }
 
 function getNotificationMoveUrl(item) {
-    console.log(item);
-    console.log("pushMsg:", item.pushMsg);
-    console.log("postNo:", item.postNo);
-    console.log("pushType:", item.pushType);
-
     if (!item) {
         return '#';
     }
 
     if (item.pushType === 'FOLLOW') {
-        return item.senderNo ? '/member/mypage?userNo=' + item.senderNo : '#';
+        return item.senderNo ? '/feed/mypage?userNo=' + item.senderNo : '#';
     }
 
-    if (!item.postNo) {
-        return '#';
-    }
-
-    const msg = (item.pushMsg || '').trim();
-    console.log("msg.includes('스토리'):", msg.includes('스토리'));
-
-    if (msg.includes('스토리')) {
-        return '/feed/detail/story/' + item.postNo;
-    }
-
-    return '/feed/detail/post/' + item.postNo;
+    return item.postNo ? '/post/detail?postNo=' + item.postNo : '#';
 }
 
 // 드롭다운이 열릴 때 알림 항목들을 로드하여 보여줍니다.

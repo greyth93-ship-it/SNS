@@ -1,7 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core"%>
-<%@ taglib prefix="fn" uri="jakarta.tags.functions"%>
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 
 <!DOCTYPE html>
@@ -111,30 +110,13 @@
 									</c:choose>
 									<c:choose>
 										<c:when test="${p.pushType eq 'FOLLOW'}">
-											<c:set var="moveUrl" value="/member/mypage?userNo=${p.senderNo}" />
+											<c:set var="moveUrl" value="/feed/mypage?userNo=${p.senderNo}" />
 										</c:when>
 										<c:when test="${p.pushType eq 'STORY_LIKE'}">
-											<c:choose>
-												<c:when test="${not empty p.feedNo}">
-													<c:set var="moveUrl" value="/feed/detail/story/${p.feedNo}" />
-												</c:when>
-												<c:otherwise>
-													<c:set var="moveUrl" value="/member/mypage?userNo=${p.senderNo}" />
-												</c:otherwise>
-											</c:choose>
-										</c:when>
-									<c:when test="${p.pushType eq 'POST_LIKE'}">
-											<c:choose>
-												<c:when test="${not empty p.feedNo}">
-													<c:set var="moveUrl" value="/feed/detail/post/${p.feedNo}" />
-												</c:when>
-												<c:otherwise>
-													<c:set var="moveUrl" value="/member/mypage?userNo=${p.senderNo}" />
-												</c:otherwise>
-											</c:choose>
+											<c:set var="moveUrl" value="/feed/detail/story/${p.feedNo}" />
 										</c:when>
 										<c:otherwise>
-											<c:set var="moveUrl" value="#" />
+											<c:set var="moveUrl" value="/feed/detail/post/${p.feedNo}" />
 										</c:otherwise>
 									</c:choose>
 									<div class="list-group-item list-group-item-action d-flex align-items-center justify-content-between ${itemClass}"
@@ -148,9 +130,9 @@
 														<img src="${not empty p.senderProfileFileName ? '/files/member/'.concat(p.senderProfileFileName) : '/img/default_user.avif'}"
 															onerror="this.src='/img/default_user.avif'" alt="profile">
 													</div>
-												<c:if test="${p.pushType eq 'STORY_LIKE' or p.pushType eq 'POST_LIKE'}">
-													<span class="push-like-badge"><i class="fas fa-heart"></i></span>
-												</c:if>
+													<c:if test="${p.pushType eq 'LIKE'}">
+														<span class="push-like-badge"><i class="fas fa-heart"></i></span>
+													</c:if>
 												</div>
 											</div>
 											<div>
