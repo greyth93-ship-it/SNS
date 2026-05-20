@@ -38,9 +38,11 @@
 										<c:forEach items="${matchedList}" var="u">
 											<div class="user-card">
 												<!-- 상대방 마이페이지 링크 -->
-												<a href="/feed/goMypage?userNo=${u.memberDTO.userNo}" class="user-card-link">
+												<a href="/chat/create?targetUserNo=${u.memberDTO.userNo}" class="user-card-link">
 													<div class="user-avatar-wrapper">
-														<img src="${not empty u.memberDTO.profileDTO and not empty u.memberDTO.profileDTO.fileName ? '/files/member/'.concat(u.memberDTO.profileDTO.fileName) : '/img/default_user.avif'}" onerror="this.src='/img/default_user.avif'" alt="profile">
+														<img src="${(not empty u.memberDTO.profileDTO and not empty u.memberDTO.profileDTO.fileName) ? '/files/member/'.concat(u.memberDTO.profileDTO.fileName) : '/img/default_user.avif'}" 
+         onerror="this.src='/img/default_user.avif'" 
+         alt="profile">
 													</div>
 													<div class="user-info">
 														<div class="user_nickname">${u.memberDTO.userNickname}</div>
@@ -48,9 +50,7 @@
 													</div>
 												</a>
 												<!-- 맞팔이 검증된 사용자들이므로 무조건 채팅방 생성 버튼 노출 -->
-												<div class="user-actions mt-2">
-													<a href="/chat/create?targetUserNo=${u.memberDTO.userNo}" class="btn btn-sm btn-primary btn-chat-trigger" data-user-no="${u.memberDTO.userNo}">채팅하기</a>
-												</div>
+												
 											</div>
 										</c:forEach>
 									</div>
