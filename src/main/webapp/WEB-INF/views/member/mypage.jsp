@@ -8,6 +8,9 @@
 <meta charset="UTF-8">
 <title>Insert title here</title>
 <c:import url="/WEB-INF/views/temp/head_css.jsp"></c:import>
+<sec:authorize access="isAuthenticated()">
+	<meta name="current-user-no" content="<sec:authentication property='principal.userNo' />">
+</sec:authorize>
 <link rel="stylesheet" type="text/css" href="/css/feed-search.css">
 <link rel="stylesheet" type="text/css" href="/css/feed-detail.css">
 </head>
