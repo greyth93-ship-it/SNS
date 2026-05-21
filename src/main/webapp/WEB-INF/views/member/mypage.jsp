@@ -35,13 +35,13 @@
 	                <div class="mb-4">
 	                	<!-- 프로필 이미지가 없을 때를 대비한 기본 이미지 처리 예시 -->
 	                         		<c:choose>
-	                         			<c:when test="${not empty pageMember.profileDTO and not empty pageMember.profileDTO.fileName}">
-	                         				<div class="profile-circle" data-user-no="${pageMember.userNo}" style="width:80px; height:80px;">
+                        					<c:when test="${not empty pageMember.profileDTO and not empty pageMember.profileDTO.fileName}">
+                        						<div class="profile-circle mypage-profile" data-user-no="${pageMember.userNo}" style="width:80px; height:80px;">
 	                         					<img src="/files/member/${pageMember.profileDTO.fileName}" style="width:100%; height:100%; object-fit: cover;">
 	                         				</div>
 	                         			</c:when>
 	                         			<c:otherwise>
-	                         				<div class="profile-circle" data-user-no="${pageMember.userNo}" style="width:80px; height:80px;">
+                        						<div class="profile-circle mypage-profile" data-user-no="${pageMember.userNo}" style="width:80px; height:80px;">
 	                         					<img src="/img/default_user.avif" style="width:100%; height:100%; object-fit: cover;">
 	                         				</div>
 	                         			</c:otherwise>

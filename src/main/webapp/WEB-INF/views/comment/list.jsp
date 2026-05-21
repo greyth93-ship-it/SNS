@@ -17,7 +17,7 @@
             <div class="d-flex align-items-start justify-content-between gap-2">
                 <div class="d-flex align-items-start gap-2 flex-grow-1">
                     <!-- 댓글 작성자 프로필 이미지 -->
-                    <div class="profile-circle comment-avatar flex-shrink-0" data-user-no="${c.userNo}" style="border: 1px solid #f0f0f0;">
+                    <div class="profile-circle post-profile comment-avatar flex-shrink-0" data-user-no="${c.userNo}" style="border: 1px solid #f0f0f0;">
                         <img src="${not empty c.memberDTO.profileDTO and not empty c.memberDTO.profileDTO.fileName ? '/files/member/'.concat(c.memberDTO.profileDTO.fileName) : '/img/default_user.avif'}" onerror="this.src='/img/default_user.avif'">
                     </div>
                     
@@ -62,7 +62,7 @@
                         <div class="d-flex align-items-start justify-content-between gap-2 mb-2 ms-2 ps-1 py-1">
                             <div class="d-flex align-items-start gap-2 flex-grow-1">
                                 <!-- 대댓글 작성자 프로필 이미지 (부모보다 작게) -->
-                                <div class="profile-circle reply-avatar flex-shrink-0" data-user-no="${r.userNo}" style="border: 1px solid #f0f0f0;">
+                                <div class="profile-circle post-profile reply-avatar flex-shrink-0" data-user-no="${r.userNo}" style="border: 1px solid #f0f0f0;">
                                     <img src="${not empty r.memberDTO.profileDTO and not empty r.memberDTO.profileDTO.fileName ? '/files/member/'.concat(r.memberDTO.profileDTO.fileName) : '/img/default_user.avif'}" onerror="this.src='/img/default_user.avif'">
                                 </div>
 

@@ -44,7 +44,7 @@
 									<article class="post-card" data-feed-no="${p.feedNo}">
 										<div class="p-3 d-flex align-items-center gap-3">
 											<!-- 프로필 이미지 -->
-											<div class="profile-circle flex-shrink-0" data-user-no="${p.memberDTO.userNo}">
+											<div class="profile-circle post-profile flex-shrink-0" data-user-no="${p.memberDTO.userNo}">
 												<img
 													src="${not empty p.memberDTO.profileDTO and not empty p.memberDTO.profileDTO.fileName ? '/files/member/'.concat(p.memberDTO.profileDTO.fileName) : '/img/default_user.avif'}"
 													onerror="this.src='/img/default_user.avif'">

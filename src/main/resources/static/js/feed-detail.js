@@ -368,7 +368,7 @@ async function loadStoryByUser(userNo, selectedFeedNo, stepDirection = 1) {
                     </div>
                     <div class="story-user-label">
                         <div class="d-flex align-items-center">
-                            <div class="profile-circle avatar-xs me-2">
+                            <div class="profile-circle post-profile avatar-xs me-2">
                                 <img src="${profileImgPath}" onerror="this.src='/img/default_user.avif'">
                             </div>
                             <a href="/member/mypage?userNo=${story.memberDTO?.userNo}" class="text-dark text-decoration-none" onclick="event.stopPropagation()">
@@ -727,7 +727,7 @@ async function renderStory(feedNo, userNo) {
                     </div>
                     <div class="story-user-label">
                         <div class="d-flex align-items-center">
-                            <div class="profile-circle avatar-xs me-2">
+                            <div class="profile-circle post-profile avatar-xs me-2">
                                 <img src="${profileImgPath}" onerror="this.src='/img/default_user.avif'">
                             </div>
                             <a href="/member/mypage?userNo=${data.memberDTO?.userNo}" class="text-dark text-decoration-none" onclick="event.stopPropagation()">
@@ -799,7 +799,7 @@ async function renderPost(feedNo) {
         mInfoArea.innerHTML = `
             <div class="p-3 border-bottom w-100 d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center">
-                    <div class="profile-circle avatar-md me-3" data-user-no="${data.memberDTO?.userNo}">
+                    <div class="profile-circle post-profile avatar-md me-3" data-user-no="${data.memberDTO?.userNo}">
                         <img src="${profileImgPath}" onerror="this.src='/img/default_user.avif'">
                     </div>
                     <div>
@@ -824,7 +824,7 @@ async function renderPost(feedNo) {
             </div>
             <div id="comment_scroll_area" style="flex-grow: 1; overflow-y: auto; width: 100%; padding: 15px;">
                 <div id="mContent" class="mb-3 d-flex gap-2">
-                    <div class="profile-circle avatar-xs flex-shrink-0" data-user-no="${data.memberDTO?.userNo}">
+                    <div class="profile-circle post-profile avatar-xs flex-shrink-0" data-user-no="${data.memberDTO?.userNo}">
                         <img src="${profileImgPath}" onerror="this.src='/img/default_user.avif'">
                     </div>
                     <div>
