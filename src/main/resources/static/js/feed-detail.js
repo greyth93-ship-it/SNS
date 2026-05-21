@@ -133,7 +133,11 @@ function applyThumbState(button, likedByMe, thumbCount) {
     if (!button) return;
 
     const icon = button.querySelector('i');
-    if (icon) {
+    const imgIcon = button.querySelector('img.like-icon');
+    
+    if (imgIcon) {
+        imgIcon.src = likedByMe ? '/icon/like_select.svg' : '/icon/like_default.svg';
+    } else if (icon) {
         icon.classList.toggle('fas', !!likedByMe);
         icon.classList.toggle('far', !likedByMe);
     }
@@ -381,10 +385,12 @@ async function loadStoryByUser(userNo, selectedFeedNo, stepDirection = 1) {
                         <!-- [수정] 본인이 작성한 스토리가 아닐 경우에만 좋아요 버튼 렌더링 -->
                         ${!isMyStory ? `
                         <button type="button" class="btn btn-sm btn-icon story-like-btn" onclick="likePost(event, '${story.feedNo}', this, 'story')">
-                            <i class="${story.likedByMe ? 'fas' : 'far'} fa-heart"></i>
+                            <img src="${story.likedByMe ? '/icon/like_select.svg' : '/icon/like_default.svg'}" class="like-icon" style="width: 20px; height: 20px; filter: drop-shadow(0px 0px 2px rgba(0,0,0,0.5));">
                         </button>
                         ` : ''}
-                        <button type="button" class="btn btn-sm btn-icon story-share-btn" onclick="sharePost(event, '${story.feedNo}', 'story')"><i class="far fa-paper-plane"></i></button>
+                        <button type="button" class="btn btn-sm btn-icon story-share-btn" onclick="sharePost(event, '${story.feedNo}', 'story')">
+                            <img src="/icon/chat_default.svg" style="width: 20px; height: 20px; filter: drop-shadow(0px 0px 2px rgba(0,0,0,0.5));">
+                        </button>
                     </div>
                 </div>
             </div>
@@ -786,6 +792,12 @@ async function renderPost(feedNo) {
         postSlideCount = data.list && data.list.length > 0 ? data.list.length : 1;
         postSlideIndex = 0;
 
+        let currentUserProfileSrc = '/img/default_user.avif';
+        const topbarProfileImg = document.querySelector('#userDropdown .img-profile');
+        if (topbarProfileImg && topbarProfileImg.src) {
+            currentUserProfileSrc = topbarProfileImg.src;
+        }
+
         mImageArea.innerHTML = `
             <div class="post-gallery">
                 <button type="button" class="post-carousel-btn prev" id="postCarouselPrev">‹</button>
@@ -839,17 +851,22 @@ async function renderPost(feedNo) {
             </div>
             <div class="px-3 py-2 border-top d-flex align-items-center" style="gap: 20px;">
                 <div class="action-item" style="cursor: pointer;" onclick="likePost(event, '${feedNo}', this)">
-                    <i class="${data.likedByMe ? 'fas' : 'far'} fa-heart fa-lg"></i>
+                    <img src="${data.likedByMe ? '/icon/like_select.svg' : '/icon/like_default.svg'}" class="like-icon" style="width: 24px; height: 24px;">
                     <span class="like-count ms-1 small">${data.feedThumb ?? 0}</span>
                 </div>
                 <div class="action-item" style="cursor: pointer;" onclick="sharePost(event, '${feedNo}', 'post')">
-                    <i class="far fa-paper-plane fa-lg"></i>
+                    <img src="/icon/chat_default.svg" style="width: 24px; height: 24px;">
                 </div>
             </div>
             <div class="p-3 border-top w-100">
-                <div class="input-group">
-                    <input type="text" id="comment_contents" class="form-control border-0" placeholder="댓글 달기...">
-                    <button class="btn btn-link text-decoration-none" type="button" id="comment_add_btn">게시</button>
+                <div class="d-flex align-items-center">
+                    <div class="profile-circle post-profile avatar-xs flex-shrink-0 me-2" style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden;">
+                        <img src="${currentUserProfileSrc}" onerror="this.src='/img/default_user.avif'" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="comment_contents" class="form-control border-0" placeholder="댓글 달기..." style="background: transparent;">
+                        <button class="btn btn-link text-decoration-none" type="button" id="comment_add_btn">게시</button>
+                    </div>
                 </div>
             </div>
         `;
@@ -998,4 +1015,4 @@ window.onclick = (e) => {
     if (e.target == shareModal) closeShareModal();
 };
 
-document.onkeydown = (e) => { if (e.key === 'Escape') closeModal(); };
+document.onkeydown = (e) => { if (e.key === 'Escape') closeModal(); };onkeydown = (e) => { if (e.key === 'Escape') closeModal(); };

@@ -13,6 +13,188 @@
 	<meta name="current-user-no" content="<sec:authentication property='principal.userNo' />">
 </sec:authorize>
 <link rel="stylesheet" type="text/css" href="/css/feed-detail.css">
+<style>
+	/* 인스타그램 피드 (card_list) 스타일 커스텀 */
+	body {
+		background-color: #fafafa !important;
+	}
+	.container-fluid {
+		max-width: 800px;
+		padding-top: 30px;
+	}
+	
+	/* 스토리 영역 */
+	.story-wrapper {
+		display: flex;
+		gap: 15px;
+		overflow-x: auto;
+		padding: 15px;
+		margin-bottom: 20px;
+		border: 1px solid #dbdbdb;
+		border-radius: 8px;
+		background-color: #fff;
+		scrollbar-width: none; /* 파이어폭스 스크롤바 숨김 */
+	}
+	.story-wrapper::-webkit-scrollbar {
+		display: none; /* 크롬 스크롤바 숨김 */
+	}
+	.story-item {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 6px;
+		cursor: pointer;
+		min-width: 66px;
+	}
+	.story-circle {
+		width: 66px;
+		height: 66px;
+		border-radius: 50%;
+		padding: 2px;
+		background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+	}
+	.story-circle img {
+		width: 100%;
+		height: 100%;
+		border-radius: 50%;
+		border: 2px solid #fff;
+		object-fit: cover;
+	}
+	.story-item small {
+		font-size: 12px;
+		color: #262626;
+		max-width: 66px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	/* 피드 카드 영역 */
+	.post-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+	.post-card {
+		width: 100%;
+		max-width: 600px;
+		background: #fff;
+		border: 1px solid #dbdbdb;
+		border-radius: 8px;
+		padding-bottom: 20px;
+		margin-bottom: 25px;
+	}
+	
+	/* 헤더 */
+	.post-card .p-3.gap-3 {
+		padding: 14px 16px !important;
+		gap: 10px !important;
+	}
+	.profile-circle.post-profile {
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		overflow: hidden;
+	}
+	.profile-circle.post-profile img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+	.user-info strong {
+		font-size: 14px;
+		color: #262626;
+		font-weight: 600;
+	}
+	.user-info .text-muted.small {
+		font-size: 12px;
+	}
+	.dropdown-toggle-dot {
+		background: none !important;
+		border: none !important;
+		color: #262626 !important;
+		font-size: 20px;
+		padding: 0 8px;
+		line-height: 1;
+	}
+	.dropdown-toggle-dot:focus, .dropdown-toggle-dot:hover {
+		box-shadow: none !important;
+	}
+
+	/* 이미지 */
+	.post-img-wrapper {
+		border-radius: 0;
+		border-top: 1px solid #efefef;
+		border-bottom: 1px solid #efefef;
+		overflow: hidden;
+		width: 100%;
+		cursor: pointer;
+	}
+	.post-img-wrapper img.post-img {
+		width: 100%;
+		height: auto;
+		object-fit: cover;
+		display: block;
+	}
+
+	/* 액션 버튼 (좋아요, 댓글, 공유) */
+	.post-card .p-3.pb-0.gap-5 {
+		padding: 14px 16px 8px 16px !important;
+		gap: 16px !important; /* 아이콘 간격 축소 */
+	}
+	.action-item {
+		display: flex;
+		align-items: center;
+	}
+	.action-item i {
+		font-size: 24px;
+		color: #262626;
+	}
+	.action-item i.fa-heart.fas {
+		color: #ed4956;
+	}
+	.action-item .like-count {
+		font-size: 14px;
+		font-weight: 600;
+		color: #262626;
+		margin-left: 8px !important;
+	}
+
+	/* 본문 텍스트 */
+	.post-card .px-3.pb-3.pt-0 {
+		padding: 0 16px !important;
+	}
+	.post-content {
+		font-size: 14px;
+		line-height: 1.5;
+	}
+	.post-author {
+		font-weight: 600;
+		margin-right: 4px;
+	}
+	.post-text {
+		color: #262626;
+	}
+	.readmore-btn {
+		color: #8e8e8e;
+		font-size: 14px;
+		text-decoration: none !important;
+		margin-left: 5px;
+	}
+	
+	/* 팔로우 버튼 */
+	.follow-btn {
+		font-size: 12px !important;
+		padding: 4px 8px !important;
+		border-radius: 6px !important;
+		background-color: #efefef !important;
+		color: #262626 !important;
+		border: none !important;
+	}
+	.follow-btn:hover {
+		background-color: #dbdbdb !important;
+	}
+</style>
 </head>
 
 <body>
@@ -85,16 +267,16 @@
 										<div class="p-3 pb-0 d-flex gap-5">
 											<div class="action-item" style="cursor: pointer;"
 												onclick="likePost(event, '${p.feedNo}', this)">
-												<i class="${p.likedByMe ? 'fas' : 'far'} fa-heart fa-lg"></i>
+												<img src="${p.likedByMe ? '/icon/like_select.svg' : '/icon/like_default.svg'}" class="like-icon" style="width: 24px; height: 24px;">
 												<span class="like-count ms-1 small">${empty p.feedThumb ? 0 : p.feedThumb}</span>
 											</div>
 											<div class="action-item" style="cursor: pointer;"
 												onclick="openDetail('post', '${p.feedNo}')">
-												<i class="far fa-comment fa-lg"></i>
+												<img src="/icon/comment_default.svg" style="width: 24px; height: 24px;">
 											</div>
 											<div class="action-item" style="cursor: pointer;"
 												onclick="sharePost(event, '${p.feedNo}')">
-												<i class="far fa-paper-plane fa-lg"></i>
+												<img src="/icon/chat_default.svg" style="width: 24px; height: 24px;">
 											</div>
 										</div>
 										<div class="px-3 pb-3 pt-0">
