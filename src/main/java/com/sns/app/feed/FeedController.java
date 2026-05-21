@@ -219,33 +219,5 @@ public class FeedController {
 		return "feed/userSearch";
 	}
 
-	@GetMapping("goMypage")
-	public String goMypage(@RequestParam(value = "userNo", required = false) Long userNo,
-			@AuthenticationPrincipal MemberDTO memberDTO, Pager pager, Model model) throws Exception {
-
-		if (userNo == null) {
-			return "redirect:/feed/list";
-		}
-
-		pager.setUserNo(userNo);
-		if (memberDTO != null) {
-			pager.setCurrentUserNo(memberDTO.getUserNo());
-		}
-		pager.setPerPage(1000L);
-
-		List<FeedDTO> postList = postService.myList(pager);
-		
-		MemberDTO m = new MemberDTO();
-		m.setUserNo(userNo);
-
-		// 3. 결과 전달
-		model.addAttribute("postList", postList);
-		// member/mypage 뷰는 MemberController에서 사용하는 `myposts`와 `pager`를 참조하므로 호환을 위해 동일한 속성도 추가
-		model.addAttribute("myposts", postList);
-		model.addAttribute("pager", pager);
-
-
-		return "member/mypage";
-	}
-
+	
 }

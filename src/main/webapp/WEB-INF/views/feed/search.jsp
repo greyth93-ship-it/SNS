@@ -9,6 +9,46 @@
 <title>SNS Search</title>
 <c:import url="/WEB-INF/views/temp/head_css.jsp"></c:import>
 <link rel="stylesheet" type="text/css" href="/css/feed-search.css">
+<style>
+	/* 인스타그램 그리드 (mypage_list) 스타일 커스텀 */
+	.search-gallery {
+		display: grid !important;
+		grid-template-columns: repeat(3, 1fr) !important;
+		gap: 5px !important; /* 이미지 사이의 간격 */
+		width: 100% !important;
+		max-width: 935px !important; /* 인스타그램 최대 너비 */
+		margin: 20px auto 0 auto !important;
+	}
+	.search-tile {
+		position: relative !important;
+		width: 100% !important;
+		padding-bottom: 100% !important; /* 정사각형(1:1) 비율 유지 핵심 */
+		display: block !important;
+		overflow: hidden !important;
+		background-color: #efefef !important;
+		margin: 0 !important;
+		border: none !important;
+	}
+	.search-tile img {
+		position: absolute !important;
+		top: 0 !important;
+		left: 0 !important;
+		width: 100% !important;
+		height: 100% !important;
+		object-fit: cover !important; /* 이미지가 찌그러지지 않고 꽉 차게 잘림 */
+		display: block !important;
+	}
+	
+	/* 사진에 마우스를 올렸을 때 살짝 어두워지는 효과 */
+	.search-tile:hover::after {
+		content: '';
+		position: absolute;
+		top: 0; left: 0; right: 0; bottom: 0;
+		background-color: rgba(0, 0, 0, 0.3);
+		z-index: 1;
+		transition: background-color 0.2s ease;
+	}
+</style>
 </head>
 
 <body class="search-page">

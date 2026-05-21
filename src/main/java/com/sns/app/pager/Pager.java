@@ -48,6 +48,8 @@ public class Pager {
 
 	public void makePageNum(Long totalCount) {
 
+		this.totalCount = totalCount;  // ✅ totalCount 저장
+		
 		Long totalPage = (long) (Math.ceil((double) totalCount / this.getPerPage()));
 
 		if (totalCount == 0) {

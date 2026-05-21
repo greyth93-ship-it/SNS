@@ -23,6 +23,72 @@ function escapeHtml(str) {
         .replace(/'/g, '&#39;');
 }
 
+// ----- Story indicator utilities -----
+function tryInitStoryIndicators() {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initStoryIndicators);
+    } else {
+        initStoryIndicators();
+    }
+}
+
+function initStoryIndicators() {
+    const elems = Array.from(document.querySelectorAll('[data-user-no]'));
+    const userMap = new Map();
+
+    elems.forEach(el => {
+        const userNo = el.getAttribute('data-user-no');
+        if (!userNo) return;
+        if (!userMap.has(userNo)) userMap.set(userNo, []);
+        userMap.get(userNo).push(el);
+    });
+
+    if (userMap.size === 0) return;
+
+    // For each unique userNo, check whether they have stories
+    userMap.forEach((nodes, userNo) => {
+        // Call existing endpoint that returns story list for a user
+        fetch(`/feed/detail/story/user/${userNo}`)
+            .then(r => {
+                if (!r.ok) return null;
+                return r.json();
+            })
+            .then(list => {
+                if (!Array.isArray(list) || list.length === 0) return;
+                // user has story -> mark all nodes
+                nodes.forEach(node => {
+                    node.classList.add('story-available');
+                    // add click handler to open story for this user
+                    node.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        // If this element represents a specific story thumbnail (has data-feed-no),
+                        // prefer opening that feed (preserve original multi-user thumbnail behavior).
+                        const feedAttr = node.getAttribute('data-feed-no');
+                        if (feedAttr) {
+                            // open with specific feedNo and userNo so full carousel across users is preserved
+                            openDetail('story', feedAttr, userNo);
+                            return;
+                        }
+
+                        // Otherwise (e.g., profile image inside a post), open user-scoped story view
+                        if (detailModal) {
+                            openDetail('story', '', userNo);
+                        } else {
+                            // no modal on this page (e.g., mypage) -> navigate to story view page
+                            window.location.href = `/feed/detail/story/user/${userNo}`;
+                        }
+                    });
+                    // make cursor pointer
+                    node.style.cursor = 'pointer';
+                });
+            })
+            .catch(() => { /* ignore errors */ });
+    });
+}
+
+// Initialize on page load for list pages
+tryInitStoryIndicators();
+
 function getCurrentUserNo(feedData = {}) {
     const metaCurrentUserNo = document.querySelector('meta[name="current-user-no"]')?.content ?? null;
     const rawCurrentUserNo = feedData.currentUserNo ?? metaCurrentUserNo ?? document.body?.dataset?.currentUserNo ?? null;
@@ -57,6 +123,8 @@ function getCommentList(feedNo) {
         .then(r => r.text())
         .then(r => {
             listArea.innerHTML = r.trim();
+            // 댓글 HTML이 삽입된 뒤에 새로 추가된 프로필 요소들에 대해 스토리 인디케이터 초기화
+            tryInitStoryIndicators();
         })
         .catch(e => console.error("댓글 로딩 실패:", e));
 }
@@ -65,7 +133,11 @@ function applyThumbState(button, likedByMe, thumbCount) {
     if (!button) return;
 
     const icon = button.querySelector('i');
-    if (icon) {
+    const imgIcon = button.querySelector('img.like-icon');
+    
+    if (imgIcon) {
+        imgIcon.src = likedByMe ? '/icon/like_select.svg' : '/icon/like_default.svg';
+    } else if (icon) {
         icon.classList.toggle('fas', !!likedByMe);
         icon.classList.toggle('far', !likedByMe);
     }
@@ -300,10 +372,12 @@ async function loadStoryByUser(userNo, selectedFeedNo, stepDirection = 1) {
                     </div>
                     <div class="story-user-label">
                         <div class="d-flex align-items-center">
-                            <div class="profile-circle avatar-xs me-2">
+                            <div class="profile-circle post-profile avatar-xs me-2">
                                 <img src="${profileImgPath}" onerror="this.src='/img/default_user.avif'">
                             </div>
-                            <span>${ownerName}</span>
+                            <a href="/member/mypage?userNo=${story.memberDTO?.userNo}" class="text-dark text-decoration-none" onclick="event.stopPropagation()">
+                                <span>${ownerName}</span>
+                            </a>
                         </div>
                     </div>
                     <img src="${imgPath}" onerror="this.src='/img/default_user.avif'">
@@ -311,14 +385,19 @@ async function loadStoryByUser(userNo, selectedFeedNo, stepDirection = 1) {
                         <!-- [수정] 본인이 작성한 스토리가 아닐 경우에만 좋아요 버튼 렌더링 -->
                         ${!isMyStory ? `
                         <button type="button" class="btn btn-sm btn-icon story-like-btn" onclick="likePost(event, '${story.feedNo}', this, 'story')">
-                            <i class="${story.likedByMe ? 'fas' : 'far'} fa-heart"></i>
+                            <img src="${story.likedByMe ? '/icon/like_select.svg' : '/icon/like_default.svg'}" class="like-icon" style="width: 20px; height: 20px; filter: drop-shadow(0px 0px 2px rgba(0,0,0,0.5));">
                         </button>
                         ` : ''}
-                        <button type="button" class="btn btn-sm btn-icon story-share-btn" onclick="sharePost(event, '${story.feedNo}', 'story')"><i class="far fa-paper-plane"></i></button>
+                        <button type="button" class="btn btn-sm btn-icon story-share-btn" onclick="sharePost(event, '${story.feedNo}', 'story')">
+                            <img src="/icon/chat_default.svg" style="width: 20px; height: 20px; filter: drop-shadow(0px 0px 2px rgba(0,0,0,0.5));">
+                        </button>
                     </div>
                 </div>
             </div>
         `;
+
+        // After rendering modal content, initialize story indicators for profile elements inside modal
+        tryInitStoryIndicators();
     }).join('');
 
     mImageArea.innerHTML = `
@@ -555,40 +634,31 @@ function openShareChatModal(feedNo, type = 'post') {
             const grid = doc.querySelector('.user-grid');
             const empty = doc.querySelector('.search-empty');
             if (grid) {
-                // 각 .user-card에서 프로필 이미지, 닉네임, userNo 추출 후 스토리 썸네일 스타일로 렌더
-                const users = Array.from(grid.querySelectorAll('.user-card'));
-                if (users.length === 0) {
-                    container.innerHTML = '<div class="w-100 text-center p-3 text-muted">맞팔로우한 사용자가 없습니다.</div>';
-                } else {
-                    const items = users.map(card => {
-                        const imgEl = card.querySelector('img');
-                        const imgSrc = imgEl ? imgEl.getAttribute('src') : '/img/default_user.avif';
-                        const nickEl = card.querySelector('.user_nickname');
-                        const nickname = nickEl ? nickEl.textContent.trim() : '';
-                        const btn = card.querySelector('.btn-chat-trigger');
-                        let userNo = null;
-                        if (btn && btn.dataset && btn.dataset.userNo) userNo = btn.dataset.userNo;
-                        if (!userNo) {
-                            const link = card.querySelector('.user-card-link');
-                            if (link) {
-                                const m = (link.getAttribute('href') || '').match(/userNo=(\d+)/);
-                                if (m) userNo = m[1];
-                            }
-                        }
-                        if (!userNo) return '';
+                // 링크를 클릭하면 shareToUser로 연결되도록 각 채팅 버튼의 href를 재설정
+                // 클론된 노드 사용
+                const cloned = grid.cloneNode(true);
+                // 각 .btn-chat-trigger에 클릭 핸들러 추가
+                cloned.querySelectorAll('.btn-chat-trigger').forEach(btn => {
+                    const userNo = btn.getAttribute('data-user-no');
+                    btn.removeAttribute('href');
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        shareToUser(e, userNo, feedNo);
+                    });
+                });
+                // 각 프로필 링크는 마이페이지로 연결되어 있으므로 클릭 시 채팅 공유로 동작하게 변경
+                cloned.querySelectorAll('.user-card-link').forEach(a => {
+                    const href = a.getAttribute('href') || '';
+                    // href에서 userNo 파싱
+                    const m = href.match(/userNo=(\d+)/);
+                    if (m) {
+                        const userNo = m[1];
+                        a.addEventListener('click', (e) => { e.preventDefault(); shareToUser(e, userNo, feedNo); });
+                    }
+                });
 
-                        return `
-                            <div class="story-item" style="cursor:pointer;" onclick="shareToUser(event, '${userNo}', '${feedNo}')">
-                                <div class="story-circle">
-                                    <img src="${imgSrc}" onerror="this.src='/img/default_user.avif'">
-                                </div>
-                                <small>${escapeHtml(nickname)}</small>
-                            </div>
-                        `;
-                    }).filter(Boolean).join('');
-
-                    container.innerHTML = `<div class="story-wrapper" style="padding:10px; justify-content:flex-start;">${items}</div>`;
-                }
+                container.innerHTML = '';
+                container.appendChild(cloned);
             } else if (empty) {
                 container.innerHTML = '<div class="w-100 text-center p-3 text-muted">맞팔로우한 사용자가 없습니다.</div>';
             } else {
@@ -623,7 +693,13 @@ async function renderStory(feedNo, userNo) {
 
     try {
         if (userNo) {
-            storyUserOrder = getStoryUserOrder();
+            // If a feedNo was provided (top story thumbnail click), keep global story order.
+            // If no feedNo (profile click inside a post), limit navigation to this single user only.
+            if (feedNo) {
+                storyUserOrder = getStoryUserOrder();
+            } else {
+                storyUserOrder = [String(userNo)];
+            }
             const loaded = await loadStoryByUser(userNo, feedNo, 1);
             if (!loaded) closeModal();
             return;
@@ -647,35 +723,37 @@ async function renderStory(feedNo, userNo) {
 
         const isMyStory = isOwnStory(data);
 
-        mImageArea.innerHTML = `
-            <div class="story-frame">
-                <div class="dropdown-container story-dropdown" style="position:absolute; top:12px; right:12px; z-index:12;">
-                    <button type="button" class="btn btn-sm btn-light dropdown-toggle-dot" onclick="togglePostMenu(event, 'story', '${feedNo}')">⋯</button>
-                    <div class="dropdown-menu-custom story-menu" id="post-menu-story-${feedNo}" style="display:none;">
-                        <button type="button" class="dropdown-item text-danger" onclick="deleteStory(event, '${feedNo}')">삭제</button>
-                    </div>
-                </div>
-                <div class="story-user-label">
-                    <div class="d-flex align-items-center">
-                        <div class="profile-circle avatar-xs me-2">
-                            <img src="${profileImgPath}" onerror="this.src='/img/default_user.avif'">
+            mImageArea.innerHTML = `
+                <div class="story-frame">
+                    <div class="dropdown-container story-dropdown" style="position:absolute; top:12px; right:12px; z-index:12;">
+                        <button type="button" class="btn btn-sm btn-light dropdown-toggle-dot" onclick="togglePostMenu(event, 'story', '${feedNo}')">⋯</button>
+                        <div class="dropdown-menu-custom story-menu" id="post-menu-story-${feedNo}" style="display:none;">
+                            <button type="button" class="dropdown-item text-danger" onclick="deleteStory(event, '${feedNo}')">삭제</button>
                         </div>
-                        <span>${ownerName}</span>
+                    </div>
+                    <div class="story-user-label">
+                        <div class="d-flex align-items-center">
+                            <div class="profile-circle post-profile avatar-xs me-2">
+                                <img src="${profileImgPath}" onerror="this.src='/img/default_user.avif'">
+                            </div>
+                            <a href="/member/mypage?userNo=${data.memberDTO?.userNo}" class="text-dark text-decoration-none" onclick="event.stopPropagation()">
+                                <span>${ownerName}</span>
+                            </a>
+                        </div>
+                    </div>
+                    <img src="${imgPath}" onerror="this.src='/img/default_user.avif'">
+                    <div class="story-controls">
+                        <!-- [수정] 본인이 작성한 스토리가 아닐 경우에만 좋아요 버튼 렌더링 -->
+                        ${!isMyStory ? `
+                        <button type="button" class="btn btn-sm btn-icon story-like-btn" onclick="likePost(event, '${feedNo}', this, 'story')">
+                            <i class="${data.likedByMe ? 'fas' : 'far'} fa-heart"></i>
+                            <span class="like-count ms-1 small">${data.feedThumb ?? 0}</span>
+                        </button>
+                        ` : ''}
+                        <button type="button" class="btn btn-sm btn-icon story-share-btn" onclick="sharePost(event, '${feedNo}', 'story')"><i class="far fa-paper-plane"></i></button>
                     </div>
                 </div>
-                <img src="${imgPath}" onerror="this.src='/img/default_user.avif'">
-                <div class="story-controls">
-                    <!-- [수정] 본인이 작성한 스토리가 아닐 경우에만 좋아요 버튼 렌더링 -->
-                    ${!isMyStory ? `
-                    <button type="button" class="btn btn-sm btn-icon story-like-btn" onclick="likePost(event, '${feedNo}', this, 'story')">
-                        <i class="${data.likedByMe ? 'fas' : 'far'} fa-heart"></i>
-                        <span class="like-count ms-1 small">${data.feedThumb ?? 0}</span>
-                    </button>
-                    ` : ''}
-                    <button type="button" class="btn btn-sm btn-icon story-share-btn" onclick="sharePost(event, '${feedNo}', 'story')"><i class="far fa-paper-plane"></i></button>
-                </div>
-            </div>
-        `;
+            `;
     } catch (e) {
         console.error("스토리 로드 실패:", e);
         closeModal();
@@ -714,6 +792,12 @@ async function renderPost(feedNo) {
         postSlideCount = data.list && data.list.length > 0 ? data.list.length : 1;
         postSlideIndex = 0;
 
+        let currentUserProfileSrc = '/img/default_user.avif';
+        const topbarProfileImg = document.querySelector('#userDropdown .img-profile');
+        if (topbarProfileImg && topbarProfileImg.src) {
+            currentUserProfileSrc = topbarProfileImg.src;
+        }
+
         mImageArea.innerHTML = `
             <div class="post-gallery">
                 <button type="button" class="post-carousel-btn prev" id="postCarouselPrev">‹</button>
@@ -727,11 +811,13 @@ async function renderPost(feedNo) {
         mInfoArea.innerHTML = `
             <div class="p-3 border-bottom w-100 d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center">
-                    <div class="profile-circle avatar-md me-3">
+                    <div class="profile-circle post-profile avatar-md me-3" data-user-no="${data.memberDTO?.userNo}">
                         <img src="${profileImgPath}" onerror="this.src='/img/default_user.avif'">
                     </div>
                     <div>
-                        <strong id="mOwner" class="d-block" style="line-height:1.2;">${ownerName}</strong>
+                        <a href="/member/mypage?userNo=${data.memberDTO?.userNo}" class="d-block text-dark text-decoration-none" onclick="event.stopPropagation()">
+                            <strong id="mOwner" class="d-block" style="line-height:1.2;">${ownerName}</strong>
+                        </a>
                         <small id="mLocation" class="text-muted">
                             <i class="fas fa-location-dot me-1"></i>${data.feedLocation || ''}
                         </small>
@@ -750,11 +836,13 @@ async function renderPost(feedNo) {
             </div>
             <div id="comment_scroll_area" style="flex-grow: 1; overflow-y: auto; width: 100%; padding: 15px;">
                 <div id="mContent" class="mb-3 d-flex gap-2">
-                    <div class="profile-circle avatar-xs flex-shrink-0">
+                    <div class="profile-circle post-profile avatar-xs flex-shrink-0" data-user-no="${data.memberDTO?.userNo}">
                         <img src="${profileImgPath}" onerror="this.src='/img/default_user.avif'">
                     </div>
                     <div>
-                        <strong>${ownerName}</strong>
+                        <a href="/member/mypage?userNo=${data.memberDTO?.userNo}" class="text-dark text-decoration-none" onclick="event.stopPropagation()">
+                            <strong>${ownerName}</strong>
+                        </a>
                         <div class="m-feed-text">${data.feedContent || ''}</div>
                     </div>
                 </div>
@@ -763,17 +851,22 @@ async function renderPost(feedNo) {
             </div>
             <div class="px-3 py-2 border-top d-flex align-items-center" style="gap: 20px;">
                 <div class="action-item" style="cursor: pointer;" onclick="likePost(event, '${feedNo}', this)">
-                    <i class="${data.likedByMe ? 'fas' : 'far'} fa-heart fa-lg"></i>
+                    <img src="${data.likedByMe ? '/icon/like_select.svg' : '/icon/like_default.svg'}" class="like-icon" style="width: 24px; height: 24px;">
                     <span class="like-count ms-1 small">${data.feedThumb ?? 0}</span>
                 </div>
                 <div class="action-item" style="cursor: pointer;" onclick="sharePost(event, '${feedNo}', 'post')">
-                    <i class="far fa-paper-plane fa-lg"></i>
+                    <img src="/icon/chat_default.svg" style="width: 24px; height: 24px;">
                 </div>
             </div>
             <div class="p-3 border-top w-100">
-                <div class="input-group">
-                    <input type="text" id="comment_contents" class="form-control border-0" placeholder="댓글 달기...">
-                    <button class="btn btn-link text-decoration-none" type="button" id="comment_add_btn">게시</button>
+                <div class="d-flex align-items-center">
+                    <div class="profile-circle post-profile avatar-xs flex-shrink-0 me-2" style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden;">
+                        <img src="${currentUserProfileSrc}" onerror="this.src='/img/default_user.avif'" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="comment_contents" class="form-control border-0" placeholder="댓글 달기..." style="background: transparent;">
+                        <button class="btn btn-link text-decoration-none" type="button" id="comment_add_btn">게시</button>
+                    </div>
                 </div>
             </div>
         `;
@@ -922,4 +1015,4 @@ window.onclick = (e) => {
     if (e.target == shareModal) closeShareModal();
 };
 
-document.onkeydown = (e) => { if (e.key === 'Escape') closeModal(); };
+document.onkeydown = (e) => { if (e.key === 'Escape') closeModal(); };onkeydown = (e) => { if (e.key === 'Escape') closeModal(); };

@@ -12,13 +12,19 @@
 <style>
 /* Custom Profile Styling based on mypage.png */
 .profile-wrapper {
-    background-color: #fafafa;
-    color: #262626;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    padding: 0;
-    width: 100%;
-    margin: 0 auto;
-    min-height: 100vh;
+	background-color: #fafafa;
+	color: #262626;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+	padding: 0;
+	width: 100%;
+	margin: 0 auto;
+	min-height: 100vh;
+	box-sizing: border-box;
+	/* 기본: 접힌 사이드바(toggled) 너비(6.5rem)를 고려한 왼쪽 여백 + 우측 여유 */
+	padding-left: 6.5rem;
+	padding-right: 1rem;
+	/* 중앙 정렬 시 너무 넓어지지 않게 최대 너비 제한 */
+	max-width: 1400px;
 }
 .profile-header {
     display: flex;
@@ -168,9 +174,44 @@
     border-bottom: 1px solid #262626;
 }
 .profile-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2px;
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	gap: 2px;
+}
+
+.profile-divider {
+	border: none;
+	height: 1px;
+	background: #000000;
+	margin: 12px 0 32px; /* 아래 여백을 더 늘림 */
+	border-radius: 0;
+	width: 100%;
+	max-width: calc(100% - 32px);
+}
+.profile-divider-container {
+	width: 100%;
+	display: flex;
+	justify-content: center;
+}
+
+/* 사이드바 상태에 따라 컨텐츠의 왼쪽 여백을 조절합니다. */
+.sidebar.toggled ~ #content-wrapper .profile-wrapper {
+	padding-left: 6.5rem; /* 접힌 상태 기본값 */
+}
+.sidebar:not(.toggled) ~ #content-wrapper .profile-wrapper {
+	padding-left: 14rem; /* 확장(펼쳐진) 상태일 때 더 넉넉히 확보 */
+}
+
+/* 작은 화면에서는 사이드바가 오버레이되므로 여백을 제거하여 레이아웃 손상 방지 */
+@media (max-width: 768px) {
+	.sidebar ~ #content-wrapper .profile-wrapper {
+		padding-left: 0 !important;
+		padding-right: 0.5rem !important;
+		max-width: 100%;
+	}
+	.profile-grid {
+		grid-template-columns: repeat(3, 1fr);
+	}
 }
 .profile-grid-item {
     aspect-ratio: 1 / 1;
@@ -189,40 +230,41 @@
 <body id="page-top">
 	<div id="wrapper">
 		<c:import url="/WEB-INF/views/temp/sidebar.jsp"></c:import>
-		
+        
 		<div id="content-wrapper" class="d-flex flex-column">
-		
+        
 			<div id="content">
-			
+            
 				<c:import url="/WEB-INF/views/temp/topbar.jsp"></c:import>
-					
+				<c:set var="pageMember" value="${not empty myposts ? myposts[0].memberDTO : member}" />
+                    
 				<!-- Begin Page Content -->
 				<div class="container-fluid" style="padding: 0; background: #fafafa;">
 					<div class="profile-wrapper">
-						
+
 						<!-- Profile Info & Bio -->
 						<div class="profile-info-section">
 							<div class="profile-avatar-wrapper">
 								<c:choose>
-									<c:when test="${not empty member.profileDTO.fileName}">
-										<img src="/files/member/${member.profileDTO.fileName}" alt="Profile">
+									<c:when test="${not empty pageMember.profileDTO and not empty pageMember.profileDTO.fileName}">
+										<img src="/files/member/${pageMember.profileDTO.fileName}" alt="Profile"> 
 									</c:when>
 									<c:otherwise>
-										<img src="/img/default_user.avif" alt="Profile">
+										<img src="/img/default_user.avif" alt="Profile"> 
 									</c:otherwise>
 								</c:choose>
 							</div>
-							
+
 							<div class="profile-details">
 								<div class="profile-username-row">
-									<span class="username">${member.userNickname}</span>
+									<span class="username">${pageMember.userNickname}</span>
 									<c:if test="${isMine}">
 										<i class="fas fa-cog settings-icon" onclick="location.href='/member/update'"></i>
 									</c:if>
 								</div>
-								
-								<div class="profile-bio-name">${member.userNickname}</div>
-								
+
+								<div class="profile-bio-name">${pageMember.userNickname}</div>
+
 								<div class="profile-stats-inline">
 									<span>게시물 <span class="stat-val">${pager.totalCount}</span></span>
 									<span>
@@ -236,9 +278,9 @@
 										</a>
 									</span>
 								</div>
-								
+
 								<div class="profile-link">
-									<i class="fab fa-threads"></i> @${member.userNickname}
+									<i class="fab fa-threads"></i> @${pageMember.userNickname}
 								</div>
 							</div>
 						</div>
@@ -269,10 +311,10 @@
 												${isFollowing ? '팔로잉' : '팔로우'}
 											</button>
 										</c:if>
-										<button type="button" class="profile-action-btn" onclick="startChat(${member.userNo})">
+										<button type="button" class="profile-action-btn" onclick="startChat(${pageMember.userNo})">
 											메시지 보내기
 										</button>
-										<button type="button" class="profile-action-icon-btn">
+										<button type="button" class="profile-action-btn profile-action-icon-btn">
 											<i class="fas fa-chevron-down"></i>
 										</button>
 									</sec:authorize>
@@ -280,10 +322,8 @@
 							</c:choose>
 						</div>
 
-						<!-- Tabs -->
-						<div class="profile-tabs">
-							<div class="profile-tab active"><i class="fas fa-th"></i></div>
-							<div class="profile-tab"><i class="fas fa-user-tag"></i></div>
+						<div class="profile-divider-container">
+							<hr class="profile-divider" />
 						</div>
 
 						<!-- Grid -->
@@ -311,9 +351,9 @@
 							</c:choose>
 						</div>
 
-					</div>
-                </div>
-                <!-- End Page container-fluid -->
+					</div> <!-- End profile-wrapper -->
+				</div>
+				<!-- End Page container-fluid -->
 			</div>
 			<!-- End page Content -->
 			<c:import url="/WEB-INF/views/temp/footer.jsp"></c:import>
@@ -323,7 +363,5 @@
 	<!-- End wrapper -->
 	<c:import url="/WEB-INF/views/temp/footer_script.jsp"></c:import>
 	<script src="/js/member/follow.js"></script>
-	
-	
 </body>
 </html>

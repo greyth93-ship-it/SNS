@@ -90,6 +90,12 @@ public class StoryController {
 		}
 
 		feedDTO.setCurrentUserNo(memberDTO.getUserNo());
+		FeedDTO originalStory = storyService.detail(feedDTO);
+		
+		if(originalStory != null) {
+		    // FeedDTO의 userNo 필드에 작성자 번호 주입
+		    feedDTO.setUserNo(originalStory.getUserNo()); 
+		}
 
 		try {
 			FeedDTO updated = storyService.toggleThumb(feedDTO, memberDTO);

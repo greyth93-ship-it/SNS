@@ -17,21 +17,23 @@
             <div class="d-flex align-items-start justify-content-between gap-2">
                 <div class="d-flex align-items-start gap-2 flex-grow-1">
                     <!-- 댓글 작성자 프로필 이미지 -->
-                    <div class="profile-circle comment-avatar flex-shrink-0" style="border: 1px solid #f0f0f0;">
+                    <div class="profile-circle post-profile comment-avatar flex-shrink-0" data-user-no="${c.userNo}" style="border: 1px solid #f0f0f0;">
                         <img src="${not empty c.memberDTO.profileDTO and not empty c.memberDTO.profileDTO.fileName ? '/files/member/'.concat(c.memberDTO.profileDTO.fileName) : '/img/default_user.avif'}" onerror="this.src='/img/default_user.avif'">
                     </div>
                     
                     <div class="flex-grow-1">
-                        <strong style="font-size: 0.9rem; display: block; line-height: 1.2;">
-                            <c:choose>
-                                <c:when test="${not empty c.memberDTO and not empty c.memberDTO.userNickname}">
-                                    ${c.memberDTO.userNickname}
-                                </c:when>
-                                <c:otherwise>
-                                    user_${c.userNo}
-                                </c:otherwise>
-                            </c:choose>
-                        </strong>
+                        <a href="/member/mypage?userNo=${c.userNo}" class="text-dark text-decoration-none" onclick="event.stopPropagation()">
+                            <strong style="font-size: 0.9rem; display: block; line-height: 1.2;">
+                                <c:choose>
+                                    <c:when test="${not empty c.memberDTO and not empty c.memberDTO.userNickname}">
+                                        ${c.memberDTO.userNickname}
+                                    </c:when>
+                                    <c:otherwise>
+                                        user_${c.userNo}
+                                    </c:otherwise>
+                                </c:choose>
+                            </strong>
+                        </a>
                         <span style="font-size: 0.9rem; word-break: break-all;">${c.commentContent}</span>
                     </div>
                 </div>
@@ -60,21 +62,23 @@
                         <div class="d-flex align-items-start justify-content-between gap-2 mb-2 ms-2 ps-1 py-1">
                             <div class="d-flex align-items-start gap-2 flex-grow-1">
                                 <!-- 대댓글 작성자 프로필 이미지 (부모보다 작게) -->
-                                <div class="profile-circle reply-avatar flex-shrink-0" style="border: 1px solid #f0f0f0;">
+                                <div class="profile-circle post-profile reply-avatar flex-shrink-0" data-user-no="${r.userNo}" style="border: 1px solid #f0f0f0;">
                                     <img src="${not empty r.memberDTO.profileDTO and not empty r.memberDTO.profileDTO.fileName ? '/files/member/'.concat(r.memberDTO.profileDTO.fileName) : '/img/default_user.avif'}" onerror="this.src='/img/default_user.avif'">
                                 </div>
 
                                 <div class="flex-grow-1">
-                                    <strong style="font-size: 0.85rem; display: block; line-height: 1.2;">
-                                        <c:choose>
-                                            <c:when test="${not empty r.memberDTO and not empty r.memberDTO.userNickname}">
-                                                ${r.memberDTO.userNickname}
-                                            </c:when>
-                                            <c:otherwise>
-                                                user_${r.userNo}
-                                            </c:otherwise>
-                                        </c:choose>
-                                    </strong>
+                                    <a href="/member/mypage?userNo=${r.userNo}" class="text-dark text-decoration-none" onclick="event.stopPropagation()">
+                                        <strong style="font-size: 0.85rem; display: block; line-height: 1.2;">
+                                            <c:choose>
+                                                <c:when test="${not empty r.memberDTO and not empty r.memberDTO.userNickname}">
+                                                    ${r.memberDTO.userNickname}
+                                                </c:when>
+                                                <c:otherwise>
+                                                    user_${r.userNo}
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </strong>
+                                    </a>
                                     <span style="font-size: 0.85rem; word-break: break-all;">${r.commentContent}</span>
                                 </div>
                             </div>
