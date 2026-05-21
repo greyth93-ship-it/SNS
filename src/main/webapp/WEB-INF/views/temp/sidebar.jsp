@@ -1,3 +1,4 @@
+<%--
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core"%>
@@ -308,4 +309,4 @@ document.querySelectorAll('.sidebar a[data-toggle="collapse"]').forEach(function
 		}
 	}, false);
 });
-</script>
+</script>--%>
