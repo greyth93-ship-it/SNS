@@ -252,13 +252,21 @@ body {
 	position: relative;
 }
 .profile-circle.story-available {
-	/* red ring like story thumbnail */
-	box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.95);
+	/* mimic .story-circle: padding creates a visible gradient ring with white inner gap */
+	padding: 3px; /* ring thickness (increased by 1px) */
+	background: linear-gradient(45deg, #ff9a69, #ff5e3a, #ff2d55, #d81b60, #ff9a69);
 	border-radius: 50%;
+	box-sizing: border-box;
+	display: inline-block;
 }
 
 .profile-circle.story-available img {
+	width: 100%;
+	height: 100%;
+	display: block;
 	border-radius: 50%;
+	object-fit: cover;
+	border: 2px solid #fff; /* inner white gap to match story thumbnail */
 }
 .story-user-label {
 	position: absolute;

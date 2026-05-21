@@ -9,6 +9,7 @@
 <title>Insert title here</title>
 <c:import url="/WEB-INF/views/temp/head_css.jsp"></c:import>
 <link rel="stylesheet" type="text/css" href="/css/feed-search.css">
+<link rel="stylesheet" type="text/css" href="/css/feed-detail.css">
 </head>
 
 <body id="page-top">
@@ -30,14 +31,18 @@
 	                
 	                <div class="mb-4">
 	                	<!-- 프로필 이미지가 없을 때를 대비한 기본 이미지 처리 예시 -->
-		                	<c:choose>
-		                		<c:when test="${not empty pageMember.profileDTO and not empty pageMember.profileDTO.fileName}">
-								<img class="img-profile rounded-circle" src="/files/member/${pageMember.profileDTO.fileName}" style="width: 80px; height: 80px; object-fit: cover;"> 
-		                		</c:when>
-		                		<c:otherwise>
-								<img class="img-profile rounded-circle" src="/img/default_user.avif" style="width: 80px; height: 80px; object-fit: cover;"> 
-		                		</c:otherwise>
-		                	</c:choose>
+	                         		<c:choose>
+	                         			<c:when test="${not empty pageMember.profileDTO and not empty pageMember.profileDTO.fileName}">
+	                         				<div class="profile-circle" data-user-no="${pageMember.userNo}" style="width:80px; height:80px;">
+	                         					<img src="/files/member/${pageMember.profileDTO.fileName}" style="width:100%; height:100%; object-fit: cover;">
+	                         				</div>
+	                         			</c:when>
+	                         			<c:otherwise>
+	                         				<div class="profile-circle" data-user-no="${pageMember.userNo}" style="width:80px; height:80px;">
+	                         					<img src="/img/default_user.avif" style="width:100%; height:100%; object-fit: cover;">
+	                         				</div>
+	                         			</c:otherwise>
+	                         		</c:choose>
 						<h6 class="mt-2">게시물 <span class="badge bg-secondary text-white">${pager.totalCount}</span></h6>
 						<h6>
 							팔로워 <span id="followerCount" class="badge bg-secondary text-white">${followerCount}</span>
@@ -132,9 +137,60 @@
 		<!-- End content-wrapper -->
 	</div>
 	<!-- End wrapper -->
-	<c:import url="/WEB-INF/views/temp/footer_script.jsp"></c:import>
-	<script src="/js/chat/start.js"></script>
-	<script src="/js/member/follow.js"></script>
+
+		<div id="detailModal" style="display:none;">
+			<span class="close-btn" onclick="closeModal()">&times;</span>
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+					<div class="modal-body p-0">
+						<div class="row g-0 h-100">
+							<div id="mImage" class="col-md-7"></div>
+							<div id="mInfo" class="col-md-5 info-side">
+								<div class="modal-header-custom">
+									<strong id="mOwner"></strong>
+									<div id="mLocation" class="text-muted small"></div>
+								</div>
+								<div class="modal-body-custom">
+									<div id="mContent"></div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="shareModal" class="modal"
+			style="display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center;">
+			<div class="modal-dialog modal-sm modal-dialog-centered"
+				style="width: 300px; margin: auto;">
+				<div class="modal-content"
+					style="border-radius: 12px; overflow: hidden; border: none;">
+					<div class="modal-header border-0 pb-0 justify-content-center pt-3">
+						<h6 class="modal-title fw-bold">공유하기</h6>
+					</div>
+					<div class="modal-body p-0 pt-2">
+						<div class="list-group list-group-flush text-center">
+							<button type="button" id="shareChatBtn"
+								class="list-group-item list-group-item-action py-3 text-primary fw-bold">
+								<i class="far fa-comment-dots me-2"></i>채팅으로 공유하기
+							</button>
+							<button type="button" id="shareExternalBtn"
+								class="list-group-item list-group-item-action py-3">
+								<i class="far fa-copy me-2"></i>외부로 공유하기 (링크 복사)
+							</button>
+							<button type="button"
+								class="list-group-item list-group-item-action py-3 text-muted small"
+								onclick="closeShareModal()">취소</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<c:import url="/WEB-INF/views/temp/footer_script.jsp"></c:import>
+		<script src="/js/chat/start.js"></script>
+		<script src="/js/member/follow.js"></script>
+		<script src="/js/feed-detail.js"></script>
 	
 	
 </body>

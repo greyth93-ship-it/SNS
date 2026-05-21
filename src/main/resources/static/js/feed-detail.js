@@ -61,7 +61,12 @@ function initStoryIndicators() {
                     // add click handler to open story for this user
                     node.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        openDetail('story', '', userNo);
+                        if (detailModal) {
+                            openDetail('story', '', userNo);
+                        } else {
+                            // no modal on this page (e.g., mypage) -> navigate to story view page
+                            window.location.href = `/feed/detail/story/user/${userNo}`;
+                        }
                     });
                     // make cursor pointer
                     node.style.cursor = 'pointer';
@@ -108,6 +113,8 @@ function getCommentList(feedNo) {
         .then(r => r.text())
         .then(r => {
             listArea.innerHTML = r.trim();
+            // 댓글 HTML이 삽입된 뒤에 새로 추가된 프로필 요소들에 대해 스토리 인디케이터 초기화
+            tryInitStoryIndicators();
         })
         .catch(e => console.error("댓글 로딩 실패:", e));
 }
