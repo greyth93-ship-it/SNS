@@ -31,19 +31,19 @@
 .profile-header i {
     font-size: 1.2rem;
 }
-.profile-stats-container {
+.profile-info-section {
     display: flex;
-    align-items: center;
-    padding: 16px;
-    gap: 20px;
+    align-items: flex-start;
+    padding: 24px 16px;
+    gap: 24px;
 }
 .profile-avatar-wrapper {
     flex-shrink: 0;
-    width: 86px;
-    height: 86px;
+    width: 120px;
+    height: 120px;
     border-radius: 50%;
-    background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
-    padding: 3px;
+    background: transparent;
+    padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -52,45 +52,58 @@
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    border: 3px solid #fafafa;
+    border: 1px solid #dbdbdb;
     object-fit: cover;
 }
-.profile-stats {
+.profile-details {
     flex-grow: 1;
     display: flex;
-    justify-content: space-around;
-    text-align: center;
-}
-.stat-item {
-    display: flex;
     flex-direction: column;
+    gap: 12px;
 }
-.stat-item .stat-num {
-    font-size: 1.1rem;
-    font-weight: 700;
+.profile-username-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.profile-username-row .username {
+    font-size: 1.6rem;
+    font-weight: 800;
     color: #262626;
 }
-.stat-item .stat-label {
-    font-size: 0.85rem;
-    color: #8e8e8e;
-}
-.stat-item a {
-    color: inherit;
+.profile-username-row .settings-icon {
+    font-size: 1.4rem;
+    color: #262626;
+    cursor: pointer;
     text-decoration: none;
-    display: flex;
-    flex-direction: column;
-}
-.stat-item a:hover {
-    color: #000000;
-}
-.profile-bio {
-    padding: 0 16px 16px;
-    font-size: 0.95rem;
-    line-height: 1.4;
 }
 .profile-bio-name {
-    font-weight: 600;
+    font-size: 1.05rem;
     color: #262626;
+}
+.profile-stats-inline {
+    display: flex;
+    gap: 16px;
+    font-size: 0.95rem;
+    color: #262626;
+}
+.profile-stats-inline a {
+    color: inherit;
+    text-decoration: none;
+}
+.profile-stats-inline a:hover {
+    color: #000000;
+}
+.profile-stats-inline .stat-val {
+    font-weight: 700;
+}
+.profile-link {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #262626;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 .profile-actions {
     display: flex;
@@ -187,9 +200,8 @@
 				<div class="container-fluid" style="padding: 0; background: #fafafa;">
 					<div class="profile-wrapper">
 						
-
-						<!-- Profile Info -->
-						<div class="profile-stats-container">
+						<!-- Profile Info & Bio -->
+						<div class="profile-info-section">
 							<div class="profile-avatar-wrapper">
 								<c:choose>
 									<c:when test="${not empty member.profileDTO.fileName}">
@@ -201,29 +213,34 @@
 								</c:choose>
 							</div>
 							
-							<div class="profile-stats">
-								<div class="stat-item">
-									<span class="stat-num">${pager.totalCount}</span>
-									<span class="stat-label">Posts</span>
+							<div class="profile-details">
+								<div class="profile-username-row">
+									<span class="username">${member.userNickname}</span>
+									<c:if test="${isMine}">
+										<i class="fas fa-cog settings-icon" onclick="location.href='/member/update'"></i>
+									</c:if>
 								</div>
-								<div class="stat-item">
-									<a href="../follow/follower?userNo=${targetUserNo}">
-										<span class="stat-num" id="followerCount">${followerCount}</span>
-										<span class="stat-label">Followers</span>
-									</a>
+								
+								<div class="profile-bio-name">${member.userNickname}</div>
+								
+								<div class="profile-stats-inline">
+									<span>게시물 <span class="stat-val">${pager.totalCount}</span></span>
+									<span>
+										<a href="../follow/follower?userNo=${targetUserNo}">
+											팔로워 <span class="stat-val" id="followerCount">${followerCount}</span>
+										</a>
+									</span>
+									<span>
+										<a href="../follow/following?userNo=${targetUserNo}">
+											팔로우 <span class="stat-val">${followingCount}</span>
+										</a>
+									</span>
 								</div>
-								<div class="stat-item">
-									<a href="../follow/following?userNo=${targetUserNo}">
-										<span class="stat-num">${followingCount}</span>
-										<span class="stat-label">Following</span>
-									</a>
+								
+								<div class="profile-link">
+									<i class="fab fa-threads"></i> @${member.userNickname}
 								</div>
 							</div>
-						</div>
-						
-						<!-- Bio -->
-						<div class="profile-bio">
-							<div class="profile-bio-name">${member.userNickname}</div>
 						</div>
 
 						<!-- Action Buttons -->
