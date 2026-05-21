@@ -503,8 +503,9 @@ function sharePost(event, feedNo, type = 'post') {
     const shareChatBtn = document.getElementById('shareChatBtn');
     if (shareChatBtn) {
         shareChatBtn.onclick = () => {
-            alert('채팅 공유 기능 준비 중입니다.');
+            // 모달 닫고 맞팔 목록 모달 열기
             closeShareModal();
+            openShareChatModal(feedNo, type);
         };
     }
 }
@@ -514,6 +515,7 @@ const originalWindowClick = window.onclick;
 window.onclick = (e) => {
     if (originalWindowClick) originalWindowClick(e); // 기존 윈도우 클릭 이벤트 유지
     if (e.target == shareModal) closeShareModal();
+    if (e.target && e.target.id === 'shareChatListModal') closeShareChatListModal();
 };
 
 // ESC 키 입력 시 닫히는 로직 추가
@@ -531,6 +533,86 @@ function copyToClipboardFallback(url) {
     document.execCommand('copy');
     document.body.removeChild(dummy);
     alert('공유 링크가 클립보드에 복사되었습니다.');
+}
+
+// 채팅 공유 목록 모달 관련 함수
+function openShareChatModal(feedNo, type = 'post') {
+    const modal = document.getElementById('shareChatListModal');
+    const container = document.getElementById('shareChatListContainer');
+    if (!modal || !container) return;
+
+    // 로딩 표시
+    container.innerHTML = '<div class="w-100 text-center p-3 text-muted">불러오는 중...</div>';
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    // 기존의 서버 렌더링된 /chat/list 페이지를 불러와서 .user-grid 영역을 추출해 재사용합니다.
+    fetch('/chat/list?page=1')
+        .then(r => r.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const grid = doc.querySelector('.user-grid');
+            const empty = doc.querySelector('.search-empty');
+            if (grid) {
+                // 각 .user-card에서 프로필 이미지, 닉네임, userNo 추출 후 스토리 썸네일 스타일로 렌더
+                const users = Array.from(grid.querySelectorAll('.user-card'));
+                if (users.length === 0) {
+                    container.innerHTML = '<div class="w-100 text-center p-3 text-muted">맞팔로우한 사용자가 없습니다.</div>';
+                } else {
+                    const items = users.map(card => {
+                        const imgEl = card.querySelector('img');
+                        const imgSrc = imgEl ? imgEl.getAttribute('src') : '/img/default_user.avif';
+                        const nickEl = card.querySelector('.user_nickname');
+                        const nickname = nickEl ? nickEl.textContent.trim() : '';
+                        const btn = card.querySelector('.btn-chat-trigger');
+                        let userNo = null;
+                        if (btn && btn.dataset && btn.dataset.userNo) userNo = btn.dataset.userNo;
+                        if (!userNo) {
+                            const link = card.querySelector('.user-card-link');
+                            if (link) {
+                                const m = (link.getAttribute('href') || '').match(/userNo=(\d+)/);
+                                if (m) userNo = m[1];
+                            }
+                        }
+                        if (!userNo) return '';
+
+                        return `
+                            <div class="story-item" style="cursor:pointer;" onclick="shareToUser(event, '${userNo}', '${feedNo}')">
+                                <div class="story-circle">
+                                    <img src="${imgSrc}" onerror="this.src='/img/default_user.avif'">
+                                </div>
+                                <small>${escapeHtml(nickname)}</small>
+                            </div>
+                        `;
+                    }).filter(Boolean).join('');
+
+                    container.innerHTML = `<div class="story-wrapper" style="padding:10px; justify-content:flex-start;">${items}</div>`;
+                }
+            } else if (empty) {
+                container.innerHTML = '<div class="w-100 text-center p-3 text-muted">맞팔로우한 사용자가 없습니다.</div>';
+            } else {
+                container.innerHTML = '<div class="w-100 text-center p-3 text-muted">목록 로드 실패</div>';
+            }
+        })
+        .catch(e => {
+            console.error('맞팔 목록 로드 실패', e);
+            container.innerHTML = '<div class="w-100 text-center p-3 text-muted">목록 로드 실패</div>';
+        });
+}
+
+function closeShareChatListModal() {
+    const modal = document.getElementById('shareChatListModal');
+    if (!modal) return;
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto';
+}
+
+function shareToUser(e, targetUserNo, feedNo) {
+    if (e) e.stopPropagation();
+    // 채팅방 생성 페이지로 이동 (서버에서 방을 찾아서 리다이렉트함)
+    // feedNo는 필요 시 쿼리로 전달하도록 추가
+    window.location.href = `/chat/create?targetUserNo=${targetUserNo}&shareFeedNo=${feedNo}`;
 }
 
 // [수정] 스토리 렌더링 함수 - 프로필 이미지 노출 로직 개선 및 본인 피드 좋아요 제한
