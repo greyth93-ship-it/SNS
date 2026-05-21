@@ -16,30 +16,45 @@
 		background-color: #fafafa !important;
 	}
 	.container-fluid.dm-fluid {
-		padding: 0 !important;
+		padding: 20px !important;
 		display: flex;
 		justify-content: center;
-		height: calc(100vh - 70px);
+		align-items: center;
+		height: calc(100vh - 0px);
+		background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 	}
+	
 	.chat-container {
 		width: 100%;
 		max-width: 600px;
 		background-color: #fff;
-		border-left: 1px solid #dbdbdb;
-		border-right: 1px solid #dbdbdb;
+		border: 1px solid #dbdbdb;
+		border-radius: 8px;
 		display: flex;
 		flex-direction: column;
-		height: 100%;
+		height: calc(100vh - 110px);
+		max-height: 760px;
+		gap: 0;
+		overflow: hidden;
+	}
+	.chat-container:hover {
+		box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 	}
 	
 	/* 헤더 */
 	.chat-header {
 		display: flex;
 		align-items: center;
-		padding: 15px 20px;
-		border-bottom: 1px solid #dbdbdb;
+		padding: 20px;
 		background-color: #fff;
 		z-index: 10;
+		border-radius: 8px 8px 0 0;
+		box-sizing: border-box;
+		width: 100%;
+		border-bottom: 1px solid #dbdbdb;
+	}
+	.chat-header:hover {
+		background-color: #fff;
 	}
 	.chat-header-back {
 		font-size: 20px;
@@ -47,28 +62,43 @@
 		margin-right: 15px;
 		cursor: pointer;
 		text-decoration: none;
+		transition: color 0.2s ease;
+	}
+	.chat-header-back:hover {
+		color: #0095f6;
 	}
 	.chat-header-profile {
 		display: flex;
 		align-items: center;
 		flex-grow: 1;
+		background: transparent;
+		padding: 0;
+		border-radius: 0;
+		margin: 0 15px;
 	}
 	.chat-header-profile img {
-		width: 32px;
-		height: 32px;
+		width: 40px;
+		height: 40px;
 		border-radius: 50%;
 		object-fit: cover;
 		margin-right: 12px;
+		border: 3px solid #fff;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 	}
 	.chat-header-profile .user_nickname {
 		font-weight: 600;
 		font-size: 16px;
 		color: #262626;
+		text-shadow: none;
 	}
 	.chat-header-info {
 		font-size: 22px;
 		color: #262626;
 		cursor: pointer;
+		transition: color 0.2s ease;
+	}
+	.chat-header-info:hover {
+		color: #0095f6;
 	}
 	
 	/* 채팅 메시지 영역 */
@@ -79,12 +109,28 @@
 		display: flex;
 		flex-direction: column;
 		background-color: #fff;
+		width: 100%;
+		min-height: 0;
+		border-radius: 0;
+		box-sizing: border-box;
+		border-bottom: 1px solid #dbdbdb;
 	}
 	.message {
 		display: flex;
 		margin-bottom: 15px;
 		align-items: flex-end;
 		width: 100%;
+		animation: slideIn 0.3s ease-out;
+	}
+	@keyframes slideIn {
+		from {
+			opacity: 0;
+			transform: translateY(10px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
+		}
 	}
 	.other-msg {
 		flex-direction: row;
@@ -123,50 +169,61 @@
 		align-items: flex-start;
 	}
 	.msg-content {
-		padding: 10px 16px;
-		border-radius: 22px;
+		padding: 12px 16px;
+		border-radius: 18px;
 		font-size: 14px;
 		line-height: 1.5;
 		word-break: break-word;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		transition: transform 0.2s ease;
+	}
+	.msg-content:hover {
+		transform: translateY(-2px);
 	}
 	.other-msg .msg-content {
-		background-color: #efefef;
+		background: linear-gradient(135deg, #f0f0f0 0%, #e8e8e8 100%);
 		color: #262626;
 		border-bottom-left-radius: 4px;
 	}
 	.my-msg .msg-content {
-		background-color: #3797f0;
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 		color: #fff;
 		border-bottom-right-radius: 4px;
 	}
 	.msg-info {
 		font-size: 11px;
-		color: #8e8e8e;
-		margin-top: 4px;
+		color: #999;
+		margin-top: 6px;
 		padding: 0 4px;
+		font-weight: 500;
 	}
 	
 	/* 입력 영역 */
-	.chat-input-area {
-		padding: 15px 20px;
-		background-color: #fff;
-	}
-	.chat-input-area form {
-		margin: 0;
-	}
+	
+	
 	.input-group {
 		display: flex;
 		align-items: center;
 		border: 1px solid #dbdbdb;
-		border-radius: 24px;
-		padding: 5px 15px;
+		border-radius: 22px;
+		padding: 8px 14px;
 		background-color: #fff;
+		transition: all 0.3s ease;
+	}
+	.input-group:focus-within {
+		border-color: #c8c8c8;
+		background-color: #fff;
+		box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.04);
 	}
 	.input-icon {
 		font-size: 24px;
-		color: #262626;
+		color: #8e8e8e;
 		margin-right: 12px;
 		cursor: pointer;
+		transition: color 0.2s ease;
+	}
+	.input-icon:hover {
+		color: #262626;
 	}
 	#messageContent {
 		flex-grow: 1;
@@ -175,9 +232,10 @@
 		padding: 8px 0;
 		font-size: 14px;
 		background: transparent;
+		color: #262626;
 	}
 	#messageContent::placeholder {
-		color: #8e8e8e;
+		color: #999;
 	}
 	.input-group button {
 		background: none;
@@ -187,9 +245,14 @@
 		font-size: 14px;
 		cursor: pointer;
 		padding: 0 10px;
+		border-radius: 0;
+		transition: color 0.2s ease;
 	}
 	.input-group button:hover {
 		color: #00376b;
+	}
+	.input-group button:active {
+		transform: none;
 	}
 </style>
 </head>
@@ -221,7 +284,6 @@
 						<div class="chat-messages" id="messageArea"></div>
 
 						<!-- 입력 창 -->
-						<div class="chat-input-area">
 							<form action="/chat/create" method="post" id="chatForm" data-room-no="${room.roomNo}">
 								<div class="input-group">
 									<c:forEach var="m" items="${room.members}">

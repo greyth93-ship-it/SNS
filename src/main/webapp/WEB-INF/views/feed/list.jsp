@@ -10,7 +10,8 @@
 <title>SNS Feed</title>
 <c:import url="/WEB-INF/views/temp/head_css.jsp"></c:import>
 <sec:authorize access="isAuthenticated()">
-	<meta name="current-user-no" content="<sec:authentication property='principal.userNo' />">
+	<sec:authentication property="principal" var="principal" />
+	<meta name="current-user-no" content="${principal.userNo}">
 </sec:authorize>
 <link rel="stylesheet" type="text/css" href="/css/feed-detail.css">
 <style>

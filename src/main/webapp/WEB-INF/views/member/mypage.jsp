@@ -12,13 +12,19 @@
 <style>
 /* Custom Profile Styling based on mypage.png */
 .profile-wrapper {
-    background-color: #fafafa;
-    color: #262626;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    padding: 0;
-    width: 100%;
-    margin: 0 auto;
-    min-height: 100vh;
+	background-color: #fafafa;
+	color: #262626;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+	padding: 0;
+	width: 100%;
+	margin: 0 auto;
+	min-height: 100vh;
+	box-sizing: border-box;
+	/* 기본: 접힌 사이드바(toggled) 너비(6.5rem)를 고려한 왼쪽 여백 + 우측 여유 */
+	padding-left: 6.5rem;
+	padding-right: 1rem;
+	/* 중앙 정렬 시 너무 넓어지지 않게 최대 너비 제한 */
+	max-width: 1400px;
 }
 .profile-header {
     display: flex;
@@ -168,9 +174,44 @@
     border-bottom: 1px solid #262626;
 }
 .profile-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2px;
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+	gap: 2px;
+}
+
+.profile-divider {
+	border: none;
+	height: 1px;
+	background: #000000;
+	margin: 12px 0 32px; /* 아래 여백을 더 늘림 */
+	border-radius: 0;
+	width: 100%;
+	max-width: calc(100% - 32px);
+}
+.profile-divider-container {
+	width: 100%;
+	display: flex;
+	justify-content: center;
+}
+
+/* 사이드바 상태에 따라 컨텐츠의 왼쪽 여백을 조절합니다. */
+.sidebar.toggled ~ #content-wrapper .profile-wrapper {
+	padding-left: 6.5rem; /* 접힌 상태 기본값 */
+}
+.sidebar:not(.toggled) ~ #content-wrapper .profile-wrapper {
+	padding-left: 14rem; /* 확장(펼쳐진) 상태일 때 더 넉넉히 확보 */
+}
+
+/* 작은 화면에서는 사이드바가 오버레이되므로 여백을 제거하여 레이아웃 손상 방지 */
+@media (max-width: 768px) {
+	.sidebar ~ #content-wrapper .profile-wrapper {
+		padding-left: 0 !important;
+		padding-right: 0.5rem !important;
+		max-width: 100%;
+	}
+	.profile-grid {
+		grid-template-columns: repeat(3, 1fr);
+	}
 }
 .profile-grid-item {
     aspect-ratio: 1 / 1;
@@ -198,105 +239,119 @@
 				<c:set var="pageMember" value="${not empty myposts ? myposts[0].memberDTO : member}" />
                     
 				<!-- Begin Page Content -->
-				<div class="container-fluid">
+				<div class="container-fluid" style="padding: 0; background: #fafafa;">
+					<div class="profile-wrapper">
 
-					   <!-- Page Heading -->
-						   <h1 class="h3 mb-4 text-gray-800">${pageMember.userNickname}의 마이페이지</h1>
-                    
-					<div class="mb-4">
-						<!-- 프로필 이미지가 없을 때를 대비한 기본 이미지 처리 예시 -->
-							<c:choose>
-								<c:when test="${not empty pageMember.profileDTO and not empty pageMember.profileDTO.fileName}">
-								<img class="img-profile rounded-circle" src="/files/member/${pageMember.profileDTO.fileName}" style="width: 80px; height: 80px; object-fit: cover;"> 
-								</c:when>
-								<c:otherwise>
-								<img class="img-profile rounded-circle" src="/img/default_user.avif" style="width: 80px; height: 80px; object-fit: cover;"> 
-								</c:otherwise>
-							</c:choose>
-						<h6 class="mt-2">게시물 <span class="badge bg-secondary text-white">${pager.totalCount}</span></h6>
-						<h6>
-							팔로워 <span id="followerCount" class="badge bg-secondary text-white">${followerCount}</span>
-							<a class="ms-2" href="../follow/follower?userNo=${targetUserNo}">보기</a>
-						</h6>
-						<h6>
-							팔로잉 <span class="badge bg-secondary text-white">${followingCount}</span>
-							<a class="ms-2" href="../follow/following?userNo=${targetUserNo}">보기</a>
-						</h6>
-					</div>
-                       
-					<!-- 2. 내 페이지인가? 상대방 페이지인가? 에 따른 버튼 분기 처리 -->
-					<c:choose>
-						<c:when test="${isMine}">
-							<!-- [내 마이페이지 일 때] -->
-							<div class="d-flex justify-content-between gap-2 mb-2">
-								<button type="button" class="btn btn-outline-primary w-100 py-2 fw-bold"
-									onclick="location.href='/member/update'">
-									프로필 편집
-								</button>
+						<!-- Profile Info & Bio -->
+						<div class="profile-info-section">
+							<div class="profile-avatar-wrapper">
+								<c:choose>
+									<c:when test="${not empty pageMember.profileDTO and not empty pageMember.profileDTO.fileName}">
+										<img src="/files/member/${pageMember.profileDTO.fileName}" alt="Profile"> 
+									</c:when>
+									<c:otherwise>
+										<img src="/img/default_user.avif" alt="Profile"> 
+									</c:otherwise>
+								</c:choose>
 							</div>
-                            
-							<div class="d-flex justify-content-between gap-2 mb-4">
-								<button type="button" class="btn btn-primary w-100 py-2 fw-bold"
-									onclick="location.href='/post/create'">
-									<i class="fas fa-plus-circle me-2"></i>포스트 만들기
-								</button>
-								<button type="button"
-									class="btn btn-outline-danger w-100 py-2 fw-bold"
-									onclick="location.href='/story/create'">
-									<i class="fas fa-history me-2"></i>스토리 추가
-								</button>
-							</div>
-						</c:when>
-						<c:otherwise>
-							<!-- [상대방 마이페이지 일 때] 로그인한 상태일 때만 팔로우 가능 -->
-							<sec:authorize access="isAuthenticated()">
-								<div class="d-flex justify-content-between gap-2 mb-4">
 
-									<c:if test="${!isMine}">
-										<button type="button"
-												class="btn ${isFollowing ? 'btn-secondary' : 'btn-outline-primary'}"
-												data-follow-state="${isFollowing ? 'following' : 'not-following'}"
-												onclick="followUser('${targetUserNo}', this)">
-											${isFollowing ? '팔로잉' : '팔로우'}
-										</button>
+							<div class="profile-details">
+								<div class="profile-username-row">
+									<span class="username">${pageMember.userNickname}</span>
+									<c:if test="${isMine}">
+										<i class="fas fa-cog settings-icon" onclick="location.href='/member/update'"></i>
 									</c:if>
-									<button type="button" class="btn btn-outline-secondary w-50 py-2 fw-bold" onclick="startChat(${pageMember.userNo})">
-										메시지 보내기
-									</button>
 								</div>
-							</sec:authorize>
-						</c:otherwise>
-					</c:choose>
-                        
-					<!-- 3. 게시물 리스트 영역 -->
-					<div>
-						<label class="fw-bold">올린 게시물</label>
-						<!-- 상대방 글 목록 전체보기를 위해 userNo 파라미터 유지 -->
-                        
-						<div class="post-summary-list mt-3">
+
+								<div class="profile-bio-name">${pageMember.userNickname}</div>
+
+								<div class="profile-stats-inline">
+									<span>게시물 <span class="stat-val">${pager.totalCount}</span></span>
+									<span>
+										<a href="../follow/follower?userNo=${targetUserNo}">
+											팔로워 <span class="stat-val" id="followerCount">${followerCount}</span>
+										</a>
+									</span>
+									<span>
+										<a href="../follow/following?userNo=${targetUserNo}">
+											팔로우 <span class="stat-val">${followingCount}</span>
+										</a>
+									</span>
+								</div>
+
+								<div class="profile-link">
+									<i class="fab fa-threads"></i> @${pageMember.userNickname}
+								</div>
+							</div>
+						</div>
+
+						<!-- Action Buttons -->
+						<div class="profile-actions">
 							<c:choose>
-								<c:when test="${not empty myposts}">
-									<div class="search-gallery">
-										<c:forEach items="${myposts}" var="p">
-											<a class="search-tile" href="/feed/detail/post/${p.feedNo}" title="${p.memberDTO.userNickname}">
-												<c:choose>
-													<c:when test="${not empty p.list}">
-														<img src="/files/post/${p.list[0].fileName}" alt="post image" onerror="this.src='/img/default_post.png'">
-													</c:when>
-													<c:otherwise>
-														<img src="/img/default_post.png" alt="default post image">
-													</c:otherwise>
-												</c:choose>
-											</a>
-										</c:forEach>
-									</div>
+								<c:when test="${isMine}">
+									<!-- [내 마이페이지 일 때] -->
+									<button type="button" class="profile-action-btn" onclick="location.href='/member/update'">
+										프로필 편집
+									</button>
+									<button type="button" class="profile-action-btn" onclick="location.href='/post/create'">
+										<i class="fas fa-plus-circle me-2"></i>포스트 만들기
+									</button>
+									<button type="button" class="profile-action-btn" onclick="location.href='/story/create'">
+										<i class="fas fa-history me-2"></i>스토리 추가
+									</button>
 								</c:when>
 								<c:otherwise>
-									<p class="text-muted">작성한 게시물이 없습니다.</p>
+									<!-- [상대방 마이페이지 일 때] -->
+									<sec:authorize access="isAuthenticated()">
+										<c:if test="${!isMine}">
+											<button type="button" 
+													class="profile-action-btn ${isFollowing ? '' : 'btn-primary-custom'}" 
+													data-follow-state="${isFollowing ? 'following' : 'not-following'}" 
+													onclick="followUser('${targetUserNo}', this)">
+												${isFollowing ? '팔로잉' : '팔로우'}
+											</button>
+										</c:if>
+										<button type="button" class="profile-action-btn" onclick="startChat(${pageMember.userNo})">
+											메시지 보내기
+										</button>
+										<button type="button" class="profile-action-btn profile-action-icon-btn">
+											<i class="fas fa-chevron-down"></i>
+										</button>
+									</sec:authorize>
 								</c:otherwise>
 							</c:choose>
 						</div>
-					</div>
+
+						<div class="profile-divider-container">
+							<hr class="profile-divider" />
+						</div>
+
+						<!-- Grid -->
+						<div class="profile-grid">
+							<c:choose>
+								<c:when test="${not empty myposts}">
+									<c:forEach items="${myposts}" var="p">
+										<a class="profile-grid-item search-tile" href="/feed/detail/post/${p.feedNo}" title="${p.memberDTO.userNickname}">
+											<c:choose>
+												<c:when test="${not empty p.list}">
+													<img src="/files/post/${p.list[0].fileName}" alt="post image" onerror="this.src='/img/default_post.png'">
+												</c:when>
+												<c:otherwise>
+													<img src="/img/default_post.png" alt="default post image">
+												</c:otherwise>
+											</c:choose>
+										</a>
+									</c:forEach>
+								</c:when>
+								<c:otherwise>
+									<div style="grid-column: 1 / -1; text-align: center; padding: 40px; color: #8e8e8e;">
+										작성한 게시물이 없습니다.
+									</div>
+								</c:otherwise>
+							</c:choose>
+						</div>
+
+					</div> <!-- End profile-wrapper -->
 				</div>
 				<!-- End Page container-fluid -->
 			</div>
@@ -308,7 +363,5 @@
 	<!-- End wrapper -->
 	<c:import url="/WEB-INF/views/temp/footer_script.jsp"></c:import>
 	<script src="/js/member/follow.js"></script>
-    
-    
 </body>
 </html>

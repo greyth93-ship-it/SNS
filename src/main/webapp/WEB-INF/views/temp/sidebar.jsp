@@ -1,4 +1,3 @@
-<%--
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="jakarta.tags.core"%>
@@ -12,6 +11,7 @@
 		border-radius: 8px;
 		display: flex;
 		align-items: center;
+		justify-content: flex-start;
 		transition: background-color 0.2s;
 	}
 	.sidebar-light .nav-item .nav-link:hover {
@@ -20,6 +20,7 @@
 	.sidebar-light .nav-item .nav-link img {
 		width: 26px;
 		height: 26px;
+		flex: 0 0 26px;
 		object-fit: contain;
 	}
 	.sidebar-light .nav-item .nav-link span {
@@ -30,8 +31,8 @@
 	
 	/* 사이드바 접혔을 때 (toggled) */
 	.sidebar.toggled .nav-item .nav-link {
-		justify-content: center;
-		padding: 12px 0;
+		justify-content: flex-start;
+		padding: 12px 10px;
 		margin: 0 10px;
 	}
 	.sidebar.toggled .nav-item .nav-link:hover {
@@ -135,7 +136,7 @@
 
 	.sidebar.toggled:hover .nav-item .nav-link {
 		text-align: left !important;
-		padding: 1rem !important;
+		padding: 12px 10px !important;
 		width: 100% !important;
 	}
 
@@ -309,4 +310,4 @@ document.querySelectorAll('.sidebar a[data-toggle="collapse"]').forEach(function
 		}
 	}, false);
 });
-</script>--%>
+</script>
