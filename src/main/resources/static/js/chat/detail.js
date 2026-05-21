@@ -53,7 +53,7 @@ function loadMessages(page = 1, isScrollLoad = false) {
                 : `
                     <div class="message other-msg">
                         <div class="msg-profile-wrap">
-                            <img class="img-profile rounded-circle" src="/files/member/${TARGET_PROFILE || 'default.png'}" style="width:30px; height:30px;">
+                            <img class="img-profile rounded-circle" src="${TARGET_PROFILE ? ('/files/member/' + TARGET_PROFILE) : '/img/default_user.avif'}" style="width:30px; height:30px;">
                             <span class="msg-nickname">${TARGET_NICKNAME}</span>
                         </div>
                         <div class="msg-box">

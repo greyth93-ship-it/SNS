@@ -23,6 +23,57 @@ function escapeHtml(str) {
         .replace(/'/g, '&#39;');
 }
 
+// ----- Story indicator utilities -----
+function tryInitStoryIndicators() {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initStoryIndicators);
+    } else {
+        initStoryIndicators();
+    }
+}
+
+function initStoryIndicators() {
+    const elems = Array.from(document.querySelectorAll('[data-user-no]'));
+    const userMap = new Map();
+
+    elems.forEach(el => {
+        const userNo = el.getAttribute('data-user-no');
+        if (!userNo) return;
+        if (!userMap.has(userNo)) userMap.set(userNo, []);
+        userMap.get(userNo).push(el);
+    });
+
+    if (userMap.size === 0) return;
+
+    // For each unique userNo, check whether they have stories
+    userMap.forEach((nodes, userNo) => {
+        // Call existing endpoint that returns story list for a user
+        fetch(`/feed/detail/story/user/${userNo}`)
+            .then(r => {
+                if (!r.ok) return null;
+                return r.json();
+            })
+            .then(list => {
+                if (!Array.isArray(list) || list.length === 0) return;
+                // user has story -> mark all nodes
+                nodes.forEach(node => {
+                    node.classList.add('story-available');
+                    // add click handler to open story for this user
+                    node.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        openDetail('story', '', userNo);
+                    });
+                    // make cursor pointer
+                    node.style.cursor = 'pointer';
+                });
+            })
+            .catch(() => { /* ignore errors */ });
+    });
+}
+
+// Initialize on page load for list pages
+tryInitStoryIndicators();
+
 function getCurrentUserNo(feedData = {}) {
     const metaCurrentUserNo = document.querySelector('meta[name="current-user-no"]')?.content ?? null;
     const rawCurrentUserNo = feedData.currentUserNo ?? metaCurrentUserNo ?? document.body?.dataset?.currentUserNo ?? null;
@@ -303,7 +354,9 @@ async function loadStoryByUser(userNo, selectedFeedNo, stepDirection = 1) {
                             <div class="profile-circle avatar-xs me-2">
                                 <img src="${profileImgPath}" onerror="this.src='/img/default_user.avif'">
                             </div>
-                            <span>${ownerName}</span>
+                            <a href="/member/mypage?userNo=${story.memberDTO?.userNo}" class="text-dark text-decoration-none" onclick="event.stopPropagation()">
+                                <span>${ownerName}</span>
+                            </a>
                         </div>
                     </div>
                     <img src="${imgPath}" onerror="this.src='/img/default_user.avif'">
@@ -319,6 +372,9 @@ async function loadStoryByUser(userNo, selectedFeedNo, stepDirection = 1) {
                 </div>
             </div>
         `;
+
+        // After rendering modal content, initialize story indicators for profile elements inside modal
+        tryInitStoryIndicators();
     }).join('');
 
     mImageArea.innerHTML = `
@@ -639,34 +695,36 @@ async function renderStory(feedNo, userNo) {
         const isMyStory = isOwnStory(data);
 
             mImageArea.innerHTML = `
-            <div class="story-frame">
-                <div class="dropdown-container story-dropdown" style="position:absolute; top:12px; right:12px; z-index:12;">
-                    <button type="button" class="btn btn-sm btn-light dropdown-toggle-dot" onclick="togglePostMenu(event, 'story', '${feedNo}')">⋯</button>
-                    <div class="dropdown-menu-custom story-menu" id="post-menu-story-${feedNo}" style="display:none;">
-                        <button type="button" class="dropdown-item text-danger" onclick="deleteStory(event, '${feedNo}')">삭제</button>
-                    </div>
-                </div>
-                <div class="story-user-label">
-                    <div class="d-flex align-items-center">
-                        <div class="profile-circle avatar-xs me-2">
-                            <img src="${profileImgPath}" onerror="this.src='/img/default_user.avif'">
+                <div class="story-frame">
+                    <div class="dropdown-container story-dropdown" style="position:absolute; top:12px; right:12px; z-index:12;">
+                        <button type="button" class="btn btn-sm btn-light dropdown-toggle-dot" onclick="togglePostMenu(event, 'story', '${feedNo}')">⋯</button>
+                        <div class="dropdown-menu-custom story-menu" id="post-menu-story-${feedNo}" style="display:none;">
+                            <button type="button" class="dropdown-item text-danger" onclick="deleteStory(event, '${feedNo}')">삭제</button>
                         </div>
-                        <span>${ownerName}</span>
+                    </div>
+                    <div class="story-user-label">
+                        <div class="d-flex align-items-center">
+                            <div class="profile-circle avatar-xs me-2">
+                                <img src="${profileImgPath}" onerror="this.src='/img/default_user.avif'">
+                            </div>
+                            <a href="/member/mypage?userNo=${data.memberDTO?.userNo}" class="text-dark text-decoration-none" onclick="event.stopPropagation()">
+                                <span>${ownerName}</span>
+                            </a>
+                        </div>
+                    </div>
+                    <img src="${imgPath}" onerror="this.src='/img/default_user.avif'">
+                    <div class="story-controls">
+                        <!-- [수정] 본인이 작성한 스토리가 아닐 경우에만 좋아요 버튼 렌더링 -->
+                        ${!isMyStory ? `
+                        <button type="button" class="btn btn-sm btn-icon story-like-btn" onclick="likePost(event, '${feedNo}', this, 'story')">
+                            <i class="${data.likedByMe ? 'fas' : 'far'} fa-heart"></i>
+                            <span class="like-count ms-1 small">${data.feedThumb ?? 0}</span>
+                        </button>
+                        ` : ''}
+                        <button type="button" class="btn btn-sm btn-icon story-share-btn" onclick="sharePost(event, '${feedNo}', 'story')"><i class="far fa-paper-plane"></i></button>
                     </div>
                 </div>
-                <img src="${imgPath}" onerror="this.src='/img/default_user.avif'">
-                <div class="story-controls">
-                    <!-- [수정] 본인이 작성한 스토리가 아닐 경우에만 좋아요 버튼 렌더링 -->
-                    ${!isMyStory ? `
-                    <button type="button" class="btn btn-sm btn-icon story-like-btn" onclick="likePost(event, '${feedNo}', this, 'story')">
-                        <i class="${data.likedByMe ? 'fas' : 'far'} fa-heart"></i>
-                        <span class="like-count ms-1 small">${data.feedThumb ?? 0}</span>
-                    </button>
-                    ` : ''}
-                    <button type="button" class="btn btn-sm btn-icon story-share-btn" onclick="sharePost(event, '${feedNo}', 'story')"><i class="far fa-paper-plane"></i></button>
-                </div>
-            </div>
-        `;
+            `;
     } catch (e) {
         console.error("스토리 로드 실패:", e);
         closeModal();
@@ -718,7 +776,7 @@ async function renderPost(feedNo) {
         mInfoArea.innerHTML = `
             <div class="p-3 border-bottom w-100 d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center">
-                    <div class="profile-circle avatar-md me-3">
+                    <div class="profile-circle avatar-md me-3" data-user-no="${data.memberDTO?.userNo}">
                         <img src="${profileImgPath}" onerror="this.src='/img/default_user.avif'">
                     </div>
                     <div>
@@ -743,7 +801,7 @@ async function renderPost(feedNo) {
             </div>
             <div id="comment_scroll_area" style="flex-grow: 1; overflow-y: auto; width: 100%; padding: 15px;">
                 <div id="mContent" class="mb-3 d-flex gap-2">
-                    <div class="profile-circle avatar-xs flex-shrink-0">
+                    <div class="profile-circle avatar-xs flex-shrink-0" data-user-no="${data.memberDTO?.userNo}">
                         <img src="${profileImgPath}" onerror="this.src='/img/default_user.avif'">
                     </div>
                     <div>

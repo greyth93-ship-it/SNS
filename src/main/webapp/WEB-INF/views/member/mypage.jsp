@@ -80,6 +80,7 @@
 									<c:if test="${!isMine}">
 										<button type="button"
 												class="btn ${isFollowing ? 'btn-secondary' : 'btn-outline-primary'}"
+											data-user-no="${targetUserNo}"
 												data-follow-state="${isFollowing ? 'following' : 'not-following'}"
 												onclick="followUser('${targetUserNo}', this)">
 											${isFollowing ? '팔로잉' : '팔로우'}
@@ -132,6 +133,7 @@
 	</div>
 	<!-- End wrapper -->
 	<c:import url="/WEB-INF/views/temp/footer_script.jsp"></c:import>
+	<script src="/js/chat/start.js"></script>
 	<script src="/js/member/follow.js"></script>
 	
 	

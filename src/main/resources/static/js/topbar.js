@@ -89,6 +89,19 @@ function getSenderAvatarHtml(item) {
     `;
 }
 
+function emitFollowStateChange(targetUserNo, isFollowing) {
+    if (!targetUserNo || typeof document === 'undefined') {
+        return;
+    }
+
+    document.dispatchEvent(new CustomEvent('sns:follow-state-change', {
+        detail: {
+            targetUserNo: String(targetUserNo),
+            isFollowing: !!isFollowing
+        }
+    }));
+}
+
 function followBackFromAlarm(event, senderNo, button) {
     if (event) {
         event.preventDefault();
@@ -99,40 +112,23 @@ function followBackFromAlarm(event, senderNo, button) {
         return;
     }
 
-        const body = 'userFollowing=' + encodeURIComponent(senderNo);
-        fetch('/follow/follow', {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: body
-        })
-            .then(resp => {
-                if (!resp.ok) throw new Error('서버 오류');
-                if (button) {
-                    setFollowButtonState(button, true, senderNo);
-                }
-
-                if (typeof loadAlarmList === 'function') loadAlarmList();
-                if (typeof loadAlarmItems === 'function') loadAlarmItems();
-
-            })
-            .catch(err => {
-                console.error('follow alarm error', err);
-                if (button) {
-                    button.disabled = false;
-                    button.textContent = '팔로우';
-                }
-            });
-
+    const body = 'userFollowing=' + encodeURIComponent(senderNo);
     fetch('/follow/follow', {
         method: 'POST',
         credentials: 'same-origin',
-        body: fd
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: body
     })
         .then(resp => {
+            if (!resp.ok) {
+                throw new Error('서버 오류');
+            }
+
             if (button) {
                 setFollowButtonState(button, true, senderNo);
             }
+
+            emitFollowStateChange(senderNo, true);
 
             if (typeof loadAlarmList === 'function') {
                 loadAlarmList();
@@ -141,8 +137,6 @@ function followBackFromAlarm(event, senderNo, button) {
             if (typeof loadAlarmItems === 'function') {
                 loadAlarmItems();
             }
-
-            return resp;
         })
         .catch(err => {
             console.error('follow alarm error', err);
@@ -193,48 +187,53 @@ function unfollowFromAlarm(event, senderNo, button) {
         return;
     }
 
-        const body = 'userFollowing=' + encodeURIComponent(senderNo);
-        fetch('/follow/delete', {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: body
-        })
-            .then(resp => {
-                if (!resp.ok) throw new Error('서버 오류');
-                return resp.text();
-            })
-            .then(text => {
-                const num = parseInt(text);
-                if (!isNaN(num) && num > 0) {
-                    if (button) setFollowButtonState(button, false, senderNo);
-                    if (typeof loadAlarmList === 'function') loadAlarmList();
-                    if (typeof loadAlarmItems === 'function') loadAlarmItems();
-
-                } else {
-                    throw new Error('삭제 실패');
-                }
-            })
-            .catch(err => {
-                console.error('unfollow alarm error', err);
-            });
-
+    const body = 'userFollowing=' + encodeURIComponent(senderNo);
     fetch('/follow/delete', {
         method: 'POST',
         credentials: 'same-origin',
-        body: fd
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: body
     })
         .then(resp => {
-            if (button) {
-                setFollowButtonState(button, false, senderNo);
+            if (!resp.ok) {
+                throw new Error('서버 오류');
             }
 
-            return resp;
+            return resp.text();
+        })
+        .then(text => {
+            const num = parseInt(text, 10);
+            if (!isNaN(num) && num > 0) {
+                if (button) {
+                    setFollowButtonState(button, false, senderNo);
+                }
+
+                emitFollowStateChange(senderNo, false);
+
+                if (typeof loadAlarmList === 'function') {
+                    loadAlarmList();
+                }
+
+                if (typeof loadAlarmItems === 'function') {
+                    loadAlarmItems();
+                }
+            } else {
+                throw new Error('삭제 실패');
+            }
         })
         .catch(err => {
             console.error('unfollow alarm error', err);
         });
 }
+
+document.addEventListener('sns:follow-state-change', function(event) {
+    const detail = event && event.detail ? event.detail : null;
+    if (!detail || !detail.targetUserNo) {
+        return;
+    }
+
+    setFollowButtonState(null, !!detail.isFollowing, detail.targetUserNo);
+});
 
 function toggleFollowFromAlarm(event, senderNo, button) {
     const state = button && button.dataset ? button.dataset.followState : '';

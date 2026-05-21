@@ -251,6 +251,15 @@ body {
 .story-frame {
 	position: relative;
 }
+.profile-circle.story-available {
+	/* red ring like story thumbnail */
+	box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.95);
+	border-radius: 50%;
+}
+
+.profile-circle.story-available img {
+	border-radius: 50%;
+}
 .story-user-label {
 	position: absolute;
 	top: 15px;
@@ -259,6 +268,13 @@ body {
 	color: #fff;
 	font-weight: bold;
 	text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* 스토리 모달에서 닉네임을 링크로 감쌌을 때 색상과 데코레이션이 변하지 않도록 강제 */
+#detailModal.story-mode .story-user-label a,
+#detailModal.story-mode .story-user-label a span {
+    color: #fff !important;
+    text-decoration: none !important;
 }
 .story-controls {
 	position: absolute;
