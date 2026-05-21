@@ -61,6 +61,16 @@ function initStoryIndicators() {
                     // add click handler to open story for this user
                     node.addEventListener('click', (e) => {
                         e.stopPropagation();
+                        // If this element represents a specific story thumbnail (has data-feed-no),
+                        // prefer opening that feed (preserve original multi-user thumbnail behavior).
+                        const feedAttr = node.getAttribute('data-feed-no');
+                        if (feedAttr) {
+                            // open with specific feedNo and userNo so full carousel across users is preserved
+                            openDetail('story', feedAttr, userNo);
+                            return;
+                        }
+
+                        // Otherwise (e.g., profile image inside a post), open user-scoped story view
                         if (detailModal) {
                             openDetail('story', '', userNo);
                         } else {
@@ -677,7 +687,13 @@ async function renderStory(feedNo, userNo) {
 
     try {
         if (userNo) {
-            storyUserOrder = getStoryUserOrder();
+            // If a feedNo was provided (top story thumbnail click), keep global story order.
+            // If no feedNo (profile click inside a post), limit navigation to this single user only.
+            if (feedNo) {
+                storyUserOrder = getStoryUserOrder();
+            } else {
+                storyUserOrder = [String(userNo)];
+            }
             const loaded = await loadStoryByUser(userNo, feedNo, 1);
             if (!loaded) closeModal();
             return;
