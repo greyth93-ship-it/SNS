@@ -139,12 +139,22 @@
     background-color: #dbdbdb;
     color: #262626;
 }
-.profile-action-btn.btn-primary-custom {
-    background-color: #0095f6;
-    color: #ffffff;
+.profile-action-btn.btn-outline-primary {
+	background-color: #ffffff;
+	color: #4e73df;
+	border: 1px solid #4e73df;
 }
-.profile-action-btn.btn-primary-custom:hover {
-    background-color: #1877f2;
+.profile-action-btn.btn-outline-primary:hover {
+	background-color: #4e73df;
+	color: #ffffff;
+}
+.profile-action-btn.btn-secondary {
+	background-color: #858796;
+	color: #ffffff;
+}
+.profile-action-btn.btn-secondary:hover {
+	background-color: #717384;
+	color: #ffffff;
 }
 .profile-action-btn i {
     margin-right: 6px;
@@ -309,7 +319,8 @@
 									<sec:authorize access="isAuthenticated()">
 										<c:if test="${!isMine}">
 											<button type="button" 
-													class="profile-action-btn ${isFollowing ? '' : 'btn-primary-custom'}" 
+														class="profile-action-btn ${isFollowing ? 'btn-secondary' : 'btn-outline-primary'}" 
+														data-user-no="${targetUserNo}"
 													data-follow-state="${isFollowing ? 'following' : 'not-following'}" 
 													onclick="followUser('${targetUserNo}', this)">
 												${isFollowing ? '팔로잉' : '팔로우'}
@@ -317,9 +328,6 @@
 										</c:if>
 										<button type="button" class="profile-action-btn" onclick="startChat(${pageMember.userNo})">
 											메시지 보내기
-										</button>
-										<button type="button" class="profile-action-btn profile-action-icon-btn">
-											<i class="fas fa-chevron-down"></i>
 										</button>
 									</sec:authorize>
 								</c:otherwise>

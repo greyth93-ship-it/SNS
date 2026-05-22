@@ -21,6 +21,8 @@ body { background-color: #fafafa !important; }
 .btn-primary { border-radius: 6px; }
 	.profile-upload-card { width: 240px; max-width: 100%; margin: 0; }
 	.profile-upload-card #imagePreview { width: 100%; height: 240px; border-radius: 8px; overflow: hidden; }
+	.profile-upload-card #imagePreview img { width: 100%; height: 100%; object-fit: cover; display: block; }
+	.profile-upload-card #imagePreview { cursor: pointer; }
 	.profile-upload-card .upload-placeholder { display: flex; align-items: center; justify-content: center; height: 100%; }
 	.profile-upload-card .upload-placeholder p { margin-bottom: 0; font-size: 16px; text-align: center; }
 </style>
@@ -73,10 +75,17 @@ body { background-color: #fafafa !important; }
 											  	<label>첨부파일</label>
 											  	<div class="card card-upload shadow-sm theme-post profile-upload-card">
 													<div id="imagePreview">
-														<div class="upload-placeholder" id="uploadPlaceholder" onclick="document.getElementById('attachInput').click()">
-															<i class="fas fa-images"></i>
-															<p>프로필 사진을 선택하세요</p>
-														</div>
+														<c:choose>
+															<c:when test="${not empty memberDTO.profileDTO and not empty memberDTO.profileDTO.fileName}">
+																<img src="/files/member/${memberDTO.profileDTO.fileName}" alt="현재 프로필 사진" onerror="this.src='/img/default_user.avif'">
+															</c:when>
+															<c:otherwise>
+																<div class="upload-placeholder" id="uploadPlaceholder" onclick="document.getElementById('attachInput').click()">
+																	<i class="fas fa-images"></i>
+																	<p>프로필 사진을 선택하세요</p>
+																</div>
+															</c:otherwise>
+														</c:choose>
 													</div>
 													<input type="file" id="attachInput" name="attach" class="d-none" accept="image/*">
 											  	</div>
@@ -104,24 +113,25 @@ body { background-color: #fafafa !important; }
 			const imagePreview = document.getElementById('imagePreview');
 			const uploadPlaceholder = document.getElementById('uploadPlaceholder');
 
-			if (!attachInput || !imagePreview || !uploadPlaceholder) return;
+			if (!attachInput || !imagePreview) return;
+
+			imagePreview.addEventListener('click', function () {
+				attachInput.click();
+			});
 
 			attachInput.addEventListener('change', function () {
 				const file = this.files && this.files[0];
 				if (!file) return;
 
 				const objectUrl = URL.createObjectURL(file);
-				uploadPlaceholder.style.display = 'none';
 				imagePreview.innerHTML = '';
 
 				const img = document.createElement('img');
 				img.src = objectUrl;
 				img.alt = 'preview';
-				img.style.width = '100%';
-				img.style.height = '100%';
-				img.style.objectFit = 'cover';
 				imagePreview.appendChild(img);
 			});
+
 		})();
 	</script>
 </body>
