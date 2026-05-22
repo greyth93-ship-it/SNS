@@ -80,7 +80,7 @@
     .sidebar.toggled .nav-item .nav-link span {
         display: none !important; /* 접혔을 때는 글씨만 깔끔하게 숨김 */
     }
-    .sidebar.toggled .nav-item .nav-link .sidebar-alarm-badge {
+    .sidebar.toggled .nav-item .nav-link .sidebar-alarm-badge:not(:empty) {
         display: block !important;
     }
     .sidebar.toggled .sidebar-brand-text {
