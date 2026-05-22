@@ -876,3 +876,8 @@ body {
 
 /* 썸네일과 이름 간 간격 최적화 */
 #shareChatListModal .user-avatar-wrapper { margin-bottom: 6px; }
+
+/* 페이지 전체 컨텐츠 배경 오버라이드 */
+#content {
+	background-color: #fff !important;
+}

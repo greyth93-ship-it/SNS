@@ -207,19 +207,19 @@
 				<div class="container-fluid">
 					<div class="row justify-content-center">
 						<div class="col-lg-8">
-							<div class="story-wrapper">
-								<c:forEach items="${storyList}" var="s">
-									<div class="story-item" data-user-no="${s.userNo}"
-										data-feed-no="${s.feedNo}"
-										onclick="openDetail('story', '${s.feedNo}', '${s.userNo}')">
-										<div class="story-circle">
-											<img
-												src="${not empty s.memberDTO.profileDTO and not empty s.memberDTO.profileDTO.fileName ? '/files/member/'.concat(s.memberDTO.profileDTO.fileName) : '/img/default_user.avif'}"
-												onerror="this.src='/img/default_user.avif'">
+							<div class="story-pagination-wrapper" style="display:flex; align-items:center; gap:8px; width:100%">
+								<button id="storyPrevBtn" class="btn btn-sm btn-light" style="min-width:36px;">◀</button>
+								<div class="story-wrapper" id="storyWrapper" style="flex:1;">
+									<c:forEach items="${storyList}" var="s">
+										<div class="story-item" data-user-no="${s.userNo}" data-feed-no="${s.feedNo}" onclick="openDetail('story', '${s.feedNo}', '${s.userNo}')">
+											<div class="story-circle">
+												<img src="${not empty s.memberDTO.profileDTO and not empty s.memberDTO.profileDTO.fileName ? '/files/member/'.concat(s.memberDTO.profileDTO.fileName) : '/img/default_user.avif'}" onerror="this.src='/img/default_user.avif'">
+											</div>
+											<small>${s.memberDTO.userNickname}</small>
 										</div>
-										<small>${s.memberDTO.userNickname}</small>
-									</div>
-								</c:forEach>
+									</c:forEach>
+								</div>
+								<button id="storyNextBtn" class="btn btn-sm btn-light" style="min-width:36px;">▶</button>
 							</div>
 
 							<div class="post-container">
@@ -392,5 +392,40 @@
 
 		<c:import url="/WEB-INF/views/temp/footer_script.jsp"></c:import>
 	<script src="/js/feed-detail.js"></script>
+
+	<!-- Client-side pagination for story thumbnails (8 per page) -->
+	<script>
+	(function(){
+		const ITEMS_PER_PAGE = 8;
+		const wrapper = document.getElementById('storyWrapper');
+		const prevBtn = document.getElementById('storyPrevBtn');
+		const nextBtn = document.getElementById('storyNextBtn');
+		if (!wrapper || !prevBtn || !nextBtn) return;
+		const items = Array.from(wrapper.querySelectorAll('.story-item'));
+		let currentPage = 0;
+		const totalPages = Math.max(1, Math.ceil(items.length / ITEMS_PER_PAGE));
+
+		function renderPage(page){
+			currentPage = Math.max(0, Math.min(page, totalPages-1));
+			items.forEach((it, idx) => {
+				if (idx >= currentPage*ITEMS_PER_PAGE && idx < (currentPage+1)*ITEMS_PER_PAGE) {
+					it.style.display = '';
+				} else {
+					it.style.display = 'none';
+				}
+			});
+			prevBtn.disabled = (currentPage === 0);
+			nextBtn.disabled = (currentPage === totalPages-1);
+		}
+
+		prevBtn.addEventListener('click', function(e){ e.preventDefault(); renderPage(currentPage-1); });
+		nextBtn.addEventListener('click', function(e){ e.preventDefault(); renderPage(currentPage+1); });
+
+		// initial render
+		renderPage(0);
+		// prevent horizontal scroll (we control visible items)
+		wrapper.style.overflowX = 'hidden';
+	})();
+	</script>
 </body>
 </html>

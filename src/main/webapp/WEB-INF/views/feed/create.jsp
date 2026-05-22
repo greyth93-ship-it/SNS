@@ -24,7 +24,7 @@
             <div id="content">
                 <c:import url="/WEB-INF/views/temp/topbar.jsp"></c:import>
 
-                <div class="container-fluid">
+
                     <div class="upload-container">
                         
                         <form id="uploadForm" action="/${name}/create" method="post" enctype="multipart/form-data" data-feed-type="${name}">
@@ -34,7 +34,7 @@
                                 <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
                                     <h6 class="m-0 font-weight-bold ${name eq 'story' ? 'text-danger' : 'text-primary'}">
                                         <i class="${name eq 'story' ? 'fas fa-plus-circle' : 'fas fa-camera'}"></i> 
-                                        ${name eq 'story' ? '스토리 추가' : '새 포스트 작성'}
+                                        ${name eq 'story' ? '스토리 추가' : '새 게시물 작성'}
                                     </h6>
                                     <a href="/feed/list" class="text-muted"><i class="fas fa-times"></i></a>
                                 </div>
@@ -43,7 +43,7 @@
                                 <div id="imagePreview">
                                     <div class="upload-placeholder" id="placeholder" onclick="document.getElementById('fileInput').click()">
                                         <i class="fas fa-images"></i>
-                                        <p>${name eq 'story' ? '스토리 사진을 선택하세요' : '포스트 사진을 선택하세요'}</p>
+                                        <p>${name eq 'story' ? '스토리 사진을 선택하세요' : '게시물 사진을 선택하세요'}</p>
                                     </div>
                                     <!-- 이미지가 삽입될 곳 -->
                                 </div>
@@ -90,7 +90,7 @@
                             </div>
                         </form>
                     </div>
-                </div>
+                
             </div>
             <c:import url="/WEB-INF/views/temp/footer.jsp"></c:import>
         </div>

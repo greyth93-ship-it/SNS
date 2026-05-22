@@ -59,7 +59,7 @@
 				<c:import url="/WEB-INF/views/temp/topbar.jsp"></c:import>
 				<div class="container-fluid search-shell">
 					<div class="row justify-content-center">
-						<div class="col-lg-10">
+						<div class="col-lg-8">
 							<div class="search-hero">
 								<div class="search-title">Search Contents</div>
 
