@@ -207,7 +207,7 @@
 				<div class="container-fluid">
 					<div class="row justify-content-center">
 						<div class="col-lg-8">
-							<div class="story-pagination-wrapper" style="display:flex; align-items:center; gap:8px; width:100%">
+							<div class="story-pagination-wrapper" style="display:flex; align-items:center; justify-content:center; gap:8px; width:826px; position:relative; left:50%; transform:translateX(-50%); margin:0 0 20px;">
 								<button id="storyPrevBtn" class="btn btn-sm btn-light" style="min-width:36px;">◀</button>
 								<div class="story-wrapper" id="storyWrapper" style="flex:1;">
 									<c:forEach items="${storyList}" var="s">
