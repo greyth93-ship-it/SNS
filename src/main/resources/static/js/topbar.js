@@ -1,17 +1,23 @@
 function loadAlarmList() {
-    const countBadge = document.getElementById("alarm-count");
-    if (!countBadge) return;
+    const countBadges = [
+        document.getElementById("alarm-count"),
+        document.getElementById("sidebar-alarm-count")
+    ].filter(Boolean);
+
+    if (countBadges.length === 0) return;
 
     fetch('/push/unreadCount')
         .then(res => res.json())
         .then(data => {
             const count = data && data.count ? parseInt(data.count, 10) : 0;
-            if (count > 0) {
-                countBadge.innerText = count;
-                countBadge.style.display = "block";
-            } else {
-                countBadge.style.display = "none";
-            }
+            countBadges.forEach(countBadge => {
+                if (count > 0) {
+                    countBadge.innerText = count;
+                    countBadge.style.display = "block";
+                } else {
+                    countBadge.style.display = "none";
+                }
+            });
         })
         .catch(err => console.error("알림 카운트 로드 중 오류:", err));
 }

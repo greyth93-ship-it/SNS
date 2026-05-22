@@ -1,9 +1,4 @@
 
-/* 1. 전체 화면 구조 설정 (스크롤이 하단 입력창 뒤로 넘어가도록 여백 확보) */
-.container-fluid {
-    padding-bottom: 80px !important; /* 입력창 높이만큼 하단에 여백을 주어 메시지가 가려지지 않게 합니다 */
-}
-
 /* 2. 하단 입력 영역 고정 */
 
 
@@ -44,4 +39,9 @@
     display: flex;
     flex-direction: column;     /* 메시지가 위에서 아래로 쌓이도록 */
     box-sizing: border-box;     /* padding 포함 계산 */
+}
+
+/* 페이지 전체 컨텐츠 배경 오버라이드 */
+#content {
+	background-color: #fff !important;
 }

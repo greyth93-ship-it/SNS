@@ -34,6 +34,38 @@
 
 <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 
+<script>
+    (function() {
+        function resetSidebarSubmenus() {
+            var $sidebar = $('.sidebar');
+            if (!$sidebar.length || !$sidebar.hasClass('toggled')) {
+                return;
+            }
+
+            $sidebar.find('.collapse').each(function() {
+                var $collapse = $(this);
+
+                if ($collapse.hasClass('show')) {
+                    $collapse.collapse('hide');
+                }
+
+                $collapse.removeClass('show').removeAttr('style');
+                $collapse.prev('[data-toggle="collapse"]').attr('aria-expanded', 'false');
+            });
+        }
+
+        $(document).on('click', '#sidebarToggle, #sidebarToggleTop', function() {
+            window.setTimeout(resetSidebarSubmenus, 0);
+        });
+
+        $(document).on('hidden.bs.collapse', '.sidebar .collapse', function() {
+            if ($('.sidebar').hasClass('toggled')) {
+                $(this).removeClass('show').removeAttr('style');
+            }
+        });
+    })();
+</script>
+
 <sec:authorize access="isAuthenticated()">
     <script>
         (function() {

@@ -1,8 +1,5 @@
 .search-page {
-	background:
-		radial-gradient(circle at top left, rgba(255, 182, 193, 0.22), transparent 32%),
-		radial-gradient(circle at top right, rgba(255, 214, 165, 0.18), transparent 28%),
-		linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+	background: #fff;
 	min-height: 100vh;
 }
 
@@ -263,4 +260,9 @@
 	.user-card {
 		padding: 0.7rem 0.75rem;
 	}
+}
+
+/* 페이지 전체 컨텐츠 배경 오버라이드 */
+#content {
+	background-color: #fff !important;
 }

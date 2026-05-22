@@ -7,16 +7,16 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.sns.app.member.MemberDTO;
 import com.sns.app.follow.FollowService;
+import com.sns.app.member.MemberDTO;
 import com.sns.app.pager.Pager;
-import org.springframework.ui.Model;
 
 @Controller
 @RequestMapping("/push")
@@ -83,7 +83,8 @@ public class PushController {
         if (memberDTO == null) {
             return "redirect:/member/login";
         }
-
+        // 한 페이지에 10개씩 표시
+        pager.setPerPage(10L);
         pager.setUserNo(memberDTO.getUserNo());
         int unreadCount = pushService.countUnreadByReceiver(memberDTO.getUserNo());
         List<PushDTO> list = pushService.getAllPushListByReceiver(pager);

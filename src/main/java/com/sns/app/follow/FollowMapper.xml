@@ -25,6 +25,10 @@
 		<result column="FOLLOW_DATE" property="followDate" />
 		<result column="USER_FOLLOWING" property="userFollowing" />
 		<result column="FEED_NO" property="feedNo" />
+		<result column="ROOM_NO" property="roomNo" />
+		<result column="LAST_MESSAGE_CONTENT" property="lastMessageContent" />
+		<result column="LAST_MESSAGE_DATE" property="lastMessageDate" />
+		<result column="LAST_MESSAGE_BY_ME" property="lastMessageByMe" />
 		<result column="MUTUAL" property="mutual" />
 
 		<association property="memberDTO" javaType="MemberDTO">
@@ -195,7 +199,14 @@
 		u.*,f1.*,ui."FILE_NO" AS "PROFILE_FILE_NO",
 		ui."FILE_NAME" AS
 		"PROFILE_FILE_NAME",
-		ui."ORI_NAME" AS "PROFILE_ORI_NAME",r.*
+		ui."ORI_NAME" AS "PROFILE_ORI_NAME",r.*,
+		cr."ROOM_NO" AS "ROOM_NO",
+		lm."MESSAGE_CONTENT" AS "LAST_MESSAGE_CONTENT",
+		lm."MESSAGE_DATE" AS "LAST_MESSAGE_DATE",
+		CASE
+			WHEN lm."LAST_MESSAGE_USER_NO" = #{userFollower} THEN TRUE
+			ELSE FALSE
+		END AS "LAST_MESSAGE_BY_ME"
 		FROM "FOLLOW" f1
 		INNER JOIN "USER" u
 		ON u."USER_NO" = f1."USER_FOLLOWING"
@@ -205,6 +216,21 @@
 		ON u."USER_NO" = ur."USER_NO"
 		LEFT JOIN "ROLE" r
 		ON ur."ROLE_NO" = r."ROLE_NO"
+		LEFT JOIN LATERAL (
+			SELECT cm."ROOM_NO"
+			FROM "CHATROOM_MEMBER" cm
+			WHERE cm."USER_NO" IN (f1."USER_FOLLOWER", f1."USER_FOLLOWING")
+			GROUP BY cm."ROOM_NO"
+			HAVING COUNT(*) = 2
+			LIMIT 1
+		) cr ON TRUE
+		LEFT JOIN LATERAL (
+			SELECT m."MESSAGE_CONTENT", m."MESSAGE_DATE", m."USER_NO" AS "LAST_MESSAGE_USER_NO"
+			FROM "CHATROOM_MESSAGE" m
+			WHERE m."ROOM_NO" = cr."ROOM_NO"
+			ORDER BY m."MESSAGE_DATE" DESC, m."MESSAGE_NO" DESC
+			LIMIT 1
+		) lm ON TRUE
 		WHERE f1."USER_FOLLOWER" = #{userFollower}
 		AND EXISTS (
 		SELECT 1

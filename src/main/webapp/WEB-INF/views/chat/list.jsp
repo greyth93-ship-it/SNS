@@ -9,46 +9,52 @@
 <title>채팅 가능 목록</title>
 <c:import url="/WEB-INF/views/temp/head_css.jsp"></c:import>
 <style>
+		html, body {
+			height: 100%;
+		}
 	body {
-		background-color: #fafafa !important;
+		background: linear-gradient(to top, #fff 70%, rgba(255, 255, 255, 0.92));
 		color: #262626;
 	}
-	.container-fluid.dm-fluid {
-		padding: 0 !important;
-		min-height: calc(100vh - 70px);
-		background: #fafafa;
-	}
-	.dm-shell {
+		.container-fluid.dm-fluid {
+			padding: 0 !important;
+			min-height: calc(100vh - 0px);
+			background: linear-gradient(to top, #fff 70%, rgba(255, 255, 255, 0.92));
+		}
+
+		.dm-shell {
 		width: 100%;
-		min-height: calc(100vh - 70px);
+		height: calc(100vh - 0px);
 		box-sizing: border-box;
-		padding-left: 6.5rem;
+		background: linear-gradient(to top, #fff 70%, rgba(255, 255, 255, 0.92));
+		padding-left: 5.5rem; /* 사이드바 접힘 폭에 맞춰 여백 유지 */
 		padding-right: 1rem;
 		padding-top: 0.75rem;
 		padding-bottom: 0.75rem;
-		max-width: 1400px;
-		margin: 0 auto;
+		max-width: none; /* 전체 화면 너비 사용 */
+		margin: 0; /* 중앙 정렬 제거하여 html 꽉채움 */
 	}
-	.dm-panel {
+		.dm-panel {
 		width: 100%;
 		max-width: 420px;
-		height: calc(100vh - 85px);
-		background: #fff;
-		border: 1px solid #ececec;
-		border-radius: 14px;
-		overflow: hidden;
+		height: 100%;
+		background: linear-gradient(to top, #fff 70%, rgba(255, 255, 255, 0.92));
+		border: none; /* 카드 테두리 제거 */
+		border-right: 1px solid rgba(0, 0, 0, 0.06); /* 왼쪽/오른쪽 구분선 */
+		border-radius: 0; /* 모서리 둥글기 제거 */
+		overflow: visible;
 		display: flex;
 		flex-direction: column;
 	}
 	.dm-header {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		padding: 14px 18px;
-		border-bottom: 1px solid #f0f0f0;
-		position: relative;
-		background: #fff;
-		flex: 0 0 auto;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			padding: 14px 18px;
+			border-bottom: none; /* 헤더 하단 라인 제거 */
+			position: relative;
+			background: transparent; /* 헤더 배경 제거 */
+			flex: 0 0 auto;
 	}
 	.dm-header-title {
 		font-weight: 600;
@@ -63,14 +69,25 @@
 		cursor: pointer;
 		color: #a3a3a3;
 	}
-	.dm-list-wrap {
-		flex: 1 1 auto;
-		overflow-y: auto;
-	}
-	.dm-list {
-		display: flex;
-		flex-direction: column;
-	}
+		.dm-list-wrap {
+			flex: 1 1 auto;
+			overflow-y: auto;
+			min-height: 0; /* flex 컨테이너 내에서 자식이 정확히 채우도록 허용 */
+			background: linear-gradient(to top, #fff 70%, rgba(255, 255, 255, 0.92));
+		}
+		.dm-list {
+			display: flex;
+			flex-direction: column;
+			flex: 1 1 auto; /* 부모 높이를 채우게 함 */
+			min-height: 0; /* 오버플로우 계산에 필요 */
+		}
+
+		.dm-list, .dm-list-wrap {
+			margin-bottom: 0;
+			padding-bottom: 0;
+		}
+
+
 	.dm-item {
 		display: flex;
 		align-items: center;
@@ -102,11 +119,24 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
+		min-width: 0;
 	}
 	.dm-nickname {
 		font-size: 14px;
 		font-weight: 500;
 		color: #2f2f2f;
+	}
+	.dm-last-message {
+		margin-top: 2px;
+		font-size: 12px;
+		color: #8f8f8f;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.dm-last-message-prefix {
+		color: #6f6f6f;
+		font-weight: 600;
 	}
 	.dm-camera {
 		font-size: 18px;
@@ -126,16 +156,19 @@
 		flex: 0 0 auto;
 		position: sticky;
 		bottom: 0;
-		background: linear-gradient(to top, #fff 70%, rgba(255, 255, 255, 0.92));
-		border-top: 1px solid #f0f0f0;
+			background: transparent; /* 리스트와 자연스럽게 붙도록 투명 처리 */
+			border-top: none; /* 상단 선 제거 */
 		padding: 10px 12px 12px;
 	}
+
+		/* 리스트와 페이징 사이 간격 제거 */
+		.dm-list, .dm-list-wrap { padding-bottom: 0 !important; margin-bottom: 0 !important; }
 	.pagination {
 		justify-content: center;
 		margin: 0;
 	}
 	.sidebar.toggled ~ #content-wrapper .dm-shell {
-		padding-left: 6.5rem;
+		padding-left: 5.5rem; /* 사이드바 접힘 너비(5.5rem)에 맞춰 딱 붙도록 조정 */
 	}
 	.sidebar:not(.toggled) ~ #content-wrapper .dm-shell {
 		padding-left: 14rem;
@@ -147,8 +180,9 @@
 		}
 		.dm-panel {
 			max-width: 100%;
-			height: calc(100vh - 70px);
+			height: calc(100vh - 0px);
 			border-radius: 10px;
+			border-right: none; /* 작은 화면에서는 구분선 제거 */
 		}
 	}
 </style>
@@ -184,6 +218,20 @@
 												</div>
 												<div class="dm-info">
 													<div class="dm-nickname">${u.memberDTO.userNickname}</div>
+													<div class="dm-last-message">
+														<c:choose>
+															<c:when test="${not empty u.lastMessageContent}">
+																<span class="dm-last-message-prefix">
+																	<c:choose>
+																		<c:when test="${u.lastMessageByMe}">나:</c:when>
+																		<c:otherwise>상대:</c:otherwise>
+																	</c:choose>
+																</span>
+																${u.lastMessageContent}
+															</c:when>
+															<c:otherwise>대화 내역이 없습니다.</c:otherwise>
+														</c:choose>
+													</div>
 												</div>
 												<i class="fas fa-camera dm-camera"></i>
 											</a>

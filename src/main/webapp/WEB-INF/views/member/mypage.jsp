@@ -12,7 +12,7 @@
 <style>
 /* Custom Profile Styling based on mypage.png */
 .profile-wrapper {
-	background-color: #fafafa;
+	background-color: #fff;
 	color: #262626;
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 	padding: 0;
@@ -42,6 +42,8 @@
     align-items: flex-start;
     padding: 24px 16px;
     gap: 24px;
+	max-width: 980px;
+	margin: 0 auto;
 }
 .profile-avatar-wrapper {
     flex-shrink: 0;
@@ -202,12 +204,12 @@
 	padding-left: 14rem; /* 확장(펼쳐진) 상태일 때 더 넉넉히 확보 */
 }
 
-/* 작은 화면에서는 사이드바가 오버레이되므로 여백을 제거하여 레이아웃 손상 방지 */
+/* 작은 화면에서도 기본 여백을 유지 */
 @media (max-width: 768px) {
 	.sidebar ~ #content-wrapper .profile-wrapper {
-		padding-left: 0 !important;
-		padding-right: 0.5rem !important;
-		max-width: 100%;
+		padding-left: 6.5rem !important;
+		padding-right: 1rem !important;
+		max-width: 1400px;
 	}
 	.profile-grid {
 		grid-template-columns: repeat(3, 1fr);
@@ -224,6 +226,11 @@
     height: 100%;
     object-fit: cover;
 }
+
+/* 페이지 전체 컨텐츠 배경 오버라이드 */
+#content {
+	background-color: #fff !important;
+}
 </style>
 </head>
 
@@ -239,7 +246,7 @@
 				<c:set var="pageMember" value="${not empty myposts ? myposts[0].memberDTO : member}" />
                     
 				<!-- Begin Page Content -->
-				<div class="container-fluid" style="padding: 0; background: #fafafa;">
+				<div class="container-fluid" style="padding: 0; background: #fff;">
 					<div class="profile-wrapper">
 
 						<!-- Profile Info & Bio -->
@@ -290,11 +297,8 @@
 							<c:choose>
 								<c:when test="${isMine}">
 									<!-- [내 마이페이지 일 때] -->
-									<button type="button" class="profile-action-btn" onclick="location.href='/member/update'">
-										프로필 편집
-									</button>
 									<button type="button" class="profile-action-btn" onclick="location.href='/post/create'">
-										<i class="fas fa-plus-circle me-2"></i>포스트 만들기
+										<i class="fas fa-plus-circle me-2"></i>게시물 만들기
 									</button>
 									<button type="button" class="profile-action-btn" onclick="location.href='/story/create'">
 										<i class="fas fa-history me-2"></i>스토리 추가
@@ -363,5 +367,7 @@
 	<!-- End wrapper -->
 	<c:import url="/WEB-INF/views/temp/footer_script.jsp"></c:import>
 	<script src="/js/member/follow.js"></script>
+
+
 </body>
 </html>

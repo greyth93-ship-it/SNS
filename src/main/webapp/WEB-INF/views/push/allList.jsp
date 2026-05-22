@@ -4,7 +4,7 @@
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 
 <!DOCTYPE html>
-<html>
+<html style="background: #fff;">
 <head>
 <meta charset="UTF-8">
 <title>알림 센터</title>
@@ -80,6 +80,25 @@
 	.push-follow-btn.btn-secondary {
 		cursor: default;
 	}
+
+		/* 페이지 전체를 아래로 내리기 위한 상단 여백 */
+		#content {
+			padding-top: 40px;
+			padding-bottom: 100px; /* 하단 고정 페이징을 위한 여유 공간 */
+		}
+
+		/* 하단 고정 페이징 */
+		.pagination-fixed {
+			position: fixed;
+			left: 0;
+			right: 0;
+			bottom: 20px;
+			display: flex;
+			justify-content: center;
+			z-index: 1050;
+		}
+
+		.pagination-fixed .pagination { margin: 0; }
 </style>
 </head>
 
@@ -136,7 +155,7 @@
 												</div>
 											</div>
 											<div>
-												<div class="small push-date">${p.pushDate}</div>
+												<div class="small push-date">${p.pushTime}</div>
 												<div class="push-message">${p.pushMsg}</div>
 											</div>
 										</a>
@@ -153,7 +172,7 @@
 								</c:if>
 							</div>
 							<div class="mt-4">
-								<nav aria-label="알림 페이지 네비게이션">
+								<nav class="pagination-fixed" aria-label="알림 페이지 네비게이션">
 									<ul class="pagination justify-content-center">
 										<li class="page-item ${pager.pre ? '' : 'disabled'}">
 											<a class="page-link"
@@ -180,7 +199,7 @@
 								</nav>
 							</div>
 							<div class="mt-3 text-center">
-								<a href="javascript:history.back();" class="btn btn-secondary">뒤로</a>
+								
 							</div>
 						</div>
 					</div>

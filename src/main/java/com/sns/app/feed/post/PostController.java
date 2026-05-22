@@ -60,7 +60,7 @@ public class PostController {
 			pager.setCurrentUserNo(memberDTO.getUserNo());
 		}
 
-		pager.setPerPage(1000L);
+		pager.setPerPage(100L);
 
 		List<FeedDTO> postList = postService.searchList(pager);
 
